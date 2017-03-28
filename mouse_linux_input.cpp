@@ -29,7 +29,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "bits_linux_input.h"
+#include "bits/linux_input.h"
 
 namespace frt {
 

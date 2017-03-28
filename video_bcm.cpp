@@ -178,7 +178,7 @@ public:
 	}
 };
 
-#include "import_cursor.h"
+#include "import/cursor.h"
 
 static void update_cb(DISPMANX_UPDATE_HANDLE_T u, void *arg) {
 }

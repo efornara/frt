@@ -35,9 +35,9 @@
 #include <string.h>
 #include <assert.h>
 
-#include "bits_linux_input.h"
+#include "bits/linux_input.h"
 
-#include "import_gdkeys.h"
+#include "import/gdkeys.h"
 
 namespace frt {
 
