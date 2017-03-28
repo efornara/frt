@@ -27,7 +27,6 @@
 
 #include "frt.h"
 
-#define FRT_IMPLEMENT_REGISTRY
 #include "bits/frt_registry_impl.h"
 
 using namespace frt;

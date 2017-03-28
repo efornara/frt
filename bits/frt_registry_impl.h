@@ -1,4 +1,4 @@
-// bits_frt.h
+// frt_registry_impl.h
 /*
  * FRT - A Godot platform targeting single board computers
  * Copyright (c) 2017  Emanuele Fornara
@@ -22,8 +22,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-#ifdef FRT_IMPLEMENT_REGISTRY
 
 #include <string.h>
 
@@ -67,5 +65,3 @@ Registry *Registry::instance() {
 }
 
 } // namespace frt
-
-#endif // FRT_IMPLEMENT_REGISTRY

@@ -1,7 +1,8 @@
 # Makefile
 
-CLANG_FORMAT = clang-format-3.5
-CXXFLAGS = -DFRT_TEST -std=c++98 -Wall -ggdb
+VPATH = . ..
+
+CXXFLAGS = -I.. -DFRT_TEST -std=c++98 -Wall -ggdb
 LDFLAGS = -ggdb
 OBJS =
 LIBS =
@@ -13,6 +14,3 @@ test.bin: $(OBJS)
 
 clean:
 	rm -f *.bin *.o
-
-format:
-	$(CLANG_FORMAT) -i *.cpp *.h

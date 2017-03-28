@@ -1,4 +1,4 @@
-// bits_linux_input.h
+// linux_input.h
 /*
  * FRT - A Godot platform targeting single board computers
  * Copyright (c) 2017  Emanuele Fornara
