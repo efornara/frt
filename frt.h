@@ -77,10 +77,6 @@ struct Vec2 {
 };
 
 struct Video : public Module {
-	// Module
-	virtual const char *get_id() const = 0;
-	virtual bool probe() = 0;
-	// Video
 	virtual Vec2 get_screen_size() const = 0;
 	virtual Vec2 get_view_size() const = 0;
 	virtual Vec2 move_pointer(const Vec2 &screen) = 0;
@@ -89,10 +85,6 @@ struct Video : public Module {
 };
 
 struct Keyboard : public Module {
-	// Module
-	virtual const char *get_id() const = 0;
-	virtual bool probe() = 0;
-	// Keyboard
 	struct Handler {
 		virtual void handle_keyboard_key(int gd_code, bool pressed) = 0;
 	};
@@ -102,10 +94,6 @@ struct Keyboard : public Module {
 };
 
 struct Mouse : public Module {
-	// Module
-	virtual const char *get_id() const = 0;
-	virtual bool probe() = 0;
-	// Mouse
 	enum Button {
 		Left,
 		Middle,
@@ -130,10 +118,6 @@ struct Environment {
 };
 
 struct Runnable : public Module {
-	// Module
-	virtual const char *get_id() const = 0;
-	virtual bool probe() = 0;
-	// Runnable
 	virtual void setup_env(Environment *env) = 0;
 	virtual void run_() = 0;
 	virtual int get_exit_code_() = 0;
