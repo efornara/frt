@@ -71,10 +71,10 @@ public:
 			}
 			if (h)
 				h->handle_mouse_motion(pos);
-		} else if (ev.type == EV_KEY && (ev.value >= 0 || ev.value <= 2)) {
-			const KeyValue value = (KeyValue)ev.value;
-			if (value == KV_Repeated)
+		} else {
+			if (ev.type != EV_KEY || (ev.value != KV_Pressed && ev.value != KV_Released))
 				return false;
+			bool pressed = (ev.value == KV_Pressed);
 			Button button;
 			switch (ev.code) {
 				case BTN_LEFT:
@@ -90,7 +90,7 @@ public:
 					return false;
 			}
 			if (h)
-				h->handle_mouse_button(button, value == KV_Pressed);
+				h->handle_mouse_button(button, pressed);
 		}
 		return false;
 	}

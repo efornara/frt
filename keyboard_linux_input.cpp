@@ -181,22 +181,19 @@ public:
 	void cleanup() { close(); }
 	// LinuxInput
 	bool handle(const input_event &ev) {
-		if (ev.type != EV_KEY || ev.value < 0 || ev.value > 2)
+		if (ev.type != EV_KEY || (ev.value != KV_Pressed && ev.value != KV_Released))
 			return false;
-		const KeyValue value = (KeyValue)ev.value;
-		if (value != KV_Repeated) {
-			bool pressed = (value == KV_Pressed);
-			update_modifier(ev.code, KEY_LEFTSHIFT, KEY_RIGHTSHIFT, pressed, left_right_mask.shift, st.shift);
-			update_modifier(ev.code, KEY_LEFTALT, KEY_RIGHTALT, pressed, left_right_mask.alt, st.alt);
-			update_modifier(ev.code, KEY_LEFTCTRL, KEY_RIGHTCTRL, pressed, left_right_mask.control, st.control);
-			update_modifier(ev.code, KEY_LEFTMETA, KEY_RIGHTMETA, pressed, left_right_mask.meta, st.meta);
-		}
+		bool pressed = (ev.value == KV_Pressed);
+		update_modifier(ev.code, KEY_LEFTSHIFT, KEY_RIGHTSHIFT, pressed, left_right_mask.shift, st.shift);
+		update_modifier(ev.code, KEY_LEFTALT, KEY_RIGHTALT, pressed, left_right_mask.alt, st.alt);
+		update_modifier(ev.code, KEY_LEFTCTRL, KEY_RIGHTCTRL, pressed, left_right_mask.control, st.control);
+		update_modifier(ev.code, KEY_LEFTMETA, KEY_RIGHTMETA, pressed, left_right_mask.meta, st.meta);
 		if (st.meta && ev.code == KEY_Q)
 			return true;
 		for (int i = 0; keymap[i].kernel_code; i++) {
 			if (keymap[i].kernel_code == ev.code) {
 				if (h)
-					h->handle_keyboard_key(keymap[i].gd_code, value);
+					h->handle_keyboard_key(keymap[i].gd_code, pressed);
 				return false;
 			}
 		}
