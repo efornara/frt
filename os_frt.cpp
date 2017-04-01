@@ -30,30 +30,44 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include "version.h"
 #include "os/os.h"
 #include "os/input.h"
 #include "drivers/unix/os_unix.h"
 #include "drivers/gl_context/context_gl.h"
 #include "servers/visual_server.h"
-#include "servers/visual/visual_server_wrap_mt.h"
 #include "servers/visual/rasterizer.h"
 #include "servers/physics_server.h"
-#include "servers/audio/audio_server_sw.h"
-#include "servers/audio/sample_manager_sw.h"
 #include "servers/audio/audio_driver_dummy.h"
-#include "servers/spatial_sound/spatial_sound_server_sw.h"
-#include "servers/spatial_sound_2d/spatial_sound_2d_server_sw.h"
 #include "servers/physics/physics_server_sw.h"
 #include "servers/physics_2d/physics_2d_server_sw.h"
 #include "servers/physics_2d/physics_2d_server_wrap_mt.h"
 #include "servers/visual/visual_server_raster.h"
 #include "drivers/alsa/audio_driver_alsa.h"
-#include "drivers/gles2/rasterizer_gles2.h"
 #include "drivers/pulseaudio/audio_driver_pulseaudio.h"
 #include "drivers/rtaudio/audio_driver_rtaudio.h"
 #include "main/main.h"
 #include "main/input_default.h"
 #include "print_string.h"
+
+#if VERSION_MAJOR == 2
+
+#include "servers/visual/visual_server_wrap_mt.h"
+#include "servers/audio/audio_server_sw.h"
+#include "servers/audio/sample_manager_sw.h"
+#include "servers/spatial_sound/spatial_sound_server_sw.h"
+#include "servers/spatial_sound_2d/spatial_sound_2d_server_sw.h"
+#include "drivers/gles2/rasterizer_gles2.h"
+
+#elif VERSION_MAJOR == 3
+
+#include "drivers/gles3/rasterizer_gles3.h"
+typedef AudioDriverManager AudioDriverManagerSW;
+typedef AudioDriver AudioDriverSW;
+
+#else
+#error "unhandled godot version"
+#endif
 
 #include "frt.h"
 #include "bits/mouse_virtual.h"
@@ -65,7 +79,6 @@ private:
 	Environment *env;
 	Vec2 screen_size;
 	ContextGL *context_gl;
-	Rasterizer *rasterizer;
 	VisualServer *visual_server;
 	VideoMode current_videomode;
 	List<String> args;
@@ -81,10 +94,13 @@ private:
 	bool grab;
 	PhysicsServer *physics_server;
 	Physics2DServer *physics_2d_server;
+#if VERSION_MAJOR == 2
+	Rasterizer *rasterizer;
 	AudioServerSW *audio_server;
 	SampleManagerMallocSW *sample_manager;
 	SpatialSoundServerSW *spatial_sound_server;
 	SpatialSound2DServerSW *spatial_sound_2d_server;
+#endif
 	int event_id;
 	InputDefault *input;
 	bool quit;
@@ -111,11 +127,15 @@ public:
 		Vec2 view(current_videomode.width, current_videomode.height);
 		context_gl = env->video->create_the_gl_context(view);
 		context_gl->initialize();
+#if VERSION_MAJOR == 2
 		rasterizer = memnew(RasterizerGLES2);
 		visual_server = memnew(VisualServerRaster(rasterizer));
 		if (get_render_thread_mode() != RENDER_THREAD_UNSAFE)
 			visual_server = memnew(VisualServerWrapMT(
 					visual_server, get_render_thread_mode() == RENDER_SEPARATE_THREAD));
+#else
+		visual_server = memnew(VisualServerRaster);
+#endif
 		// TODO: Audio Module
 		AudioDriverManagerSW::get_driver(audio_driver)->set_singleton();
 		audio_driver_index = audio_driver;
@@ -131,6 +151,7 @@ public:
 				}
 			}
 		}
+#if VERSION_MAJOR == 2
 		sample_manager = memnew(SampleManagerMallocSW);
 		audio_server = memnew(AudioServerSW(sample_manager));
 		audio_server->init();
@@ -138,6 +159,7 @@ public:
 		spatial_sound_server->init();
 		spatial_sound_2d_server = memnew(SpatialSound2DServerSW);
 		spatial_sound_2d_server->init();
+#endif
 		ERR_FAIL_COND(!visual_server);
 		visual_server->init();
 		physics_server = memnew(PhysicsServerSW);
@@ -151,6 +173,7 @@ public:
 		if (main_loop)
 			memdelete(main_loop);
 		main_loop = NULL;
+#if VERSION_MAJOR == 2
 		spatial_sound_server->finish();
 		memdelete(spatial_sound_server);
 		spatial_sound_2d_server->finish();
@@ -159,8 +182,11 @@ public:
 		audio_server->finish();
 		memdelete(audio_server);
 		visual_server->finish();
+#endif
 		memdelete(visual_server);
+#if VERSION_MAJOR == 2
 		memdelete(rasterizer);
+#endif
 		physics_server->finish();
 		memdelete(physics_server);
 		physics_2d_server->finish();
@@ -238,8 +264,13 @@ public:
 		input->set_mouse_pos(mouse_pos);
 		motion_event.mouse_motion.global_x = mouse_pos.x;
 		motion_event.mouse_motion.global_y = mouse_pos.y;
+#if VERSION_MAJOR == 2
 		motion_event.mouse_motion.speed_x = input->get_mouse_speed().x;
 		motion_event.mouse_motion.speed_y = input->get_mouse_speed().y;
+#else // VERSION_MAJOR == 3
+		motion_event.mouse_motion.speed_x = input->get_last_mouse_speed().x;
+		motion_event.mouse_motion.speed_y = input->get_last_mouse_speed().y;
+#endif
 		motion_event.mouse_motion.relative_x = 0;
 		motion_event.mouse_motion.relative_y = 0;
 		input->parse_input_event(motion_event);
