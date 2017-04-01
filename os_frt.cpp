@@ -86,6 +86,7 @@ private:
 	SpatialSound2DServerSW *spatial_sound_2d_server;
 	int event_id;
 	InputDefault *input;
+	bool quit;
 
 public:
 	int get_video_driver_count() const { return 1; }
@@ -263,7 +264,12 @@ public:
 	}
 	struct KeyboardHandler : Keyboard::Handler {
 		OS_FRT *instance;
+		Keyboard *keyboard;
 		void handle_keyboard_key(int gd_code, bool pressed) {
+			InputModifierState st;
+			keyboard->get_modifier_state(st);
+			if (st.meta && instance->handle_meta(gd_code, pressed))
+				return;
 			instance->process_keyboard_event(gd_code, pressed);
 		}
 	} keyboard_handler;
@@ -298,6 +304,9 @@ public:
 			instance->process_mouse_motion(view.x, view.y);
 		}
 	} mouse_handler;
+	bool dispatch_handle_meta(int gd_code, bool pressed) {
+		return false;
+	}
 	void run() {
 		if (!main_loop)
 			return;
@@ -310,10 +319,12 @@ public:
 			env->video->move_pointer(pos);
 			env->mouse->set_handler(&mouse_handler);
 		}
-		if (env->keyboard)
+		if (env->keyboard) {
+			keyboard_handler.keyboard = env->keyboard;
 			env->keyboard->set_handler(&keyboard_handler);
+		}
 		main_loop->init();
-		while (1) {
+		while (!quit) {
 			if (env->mouse && env->mouse->poll())
 				break;
 			if (env->keyboard && env->keyboard->poll())
@@ -324,7 +335,7 @@ public:
 		main_loop->finish();
 	}
 	OS_FRT()
-		: event_id(0) {
+		: event_id(0), quit(false) {
 #ifdef ALSA_ENABLED
 		AudioDriverManagerSW::add_driver(&driver_alsa);
 #endif
@@ -338,6 +349,16 @@ public:
 	const char *get_id() const { return "frt_os_unix"; }
 	bool probe() { return true; }
 	void cleanup() {}
+	bool handle_meta(int gd_code, bool pressed) {
+		switch (gd_code) {
+		case 'Q':
+			quit = true;
+			break;
+		default:
+			return dispatch_handle_meta(gd_code, pressed);
+		}
+		return true;
+	}
 	// Runnable
 	void setup_env(Environment *env) {
 		this->env = env;

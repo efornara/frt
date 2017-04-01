@@ -53,7 +53,7 @@ public:
 	bool probe() { return open("event-mouse"); }
 	void cleanup() { close(); }
 	// LinuxInput
-	bool handle(const input_event &ev) {
+	void handle(const input_event &ev) {
 		if (ev.type == EV_REL) {
 			if (ev.code == ABS_X) {
 				pos.x += ev.value;
@@ -67,13 +67,13 @@ public:
 					h->handle_mouse_button(button, true);
 					h->handle_mouse_button(button, false); // TODO: needed?
 				}
-				return false;
+				return;
 			}
 			if (h)
 				h->handle_mouse_motion(pos);
 		} else {
 			if (ev.type != EV_KEY || (ev.value != KV_Pressed && ev.value != KV_Released))
-				return false;
+				return;
 			bool pressed = (ev.value == KV_Pressed);
 			Button button;
 			switch (ev.code) {
@@ -87,12 +87,11 @@ public:
 					button = Middle;
 					break;
 				default:
-					return false;
+					return;
 			}
 			if (h)
 				h->handle_mouse_button(button, pressed);
 		}
-		return false;
 	}
 	// Mouse
 	Vec2 get_pos() const { return pos; }

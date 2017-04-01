@@ -35,6 +35,7 @@ struct Module {
 	virtual const char *get_id() const = 0;
 	virtual bool probe() = 0;
 	virtual void cleanup() = 0;
+	virtual bool handle_meta(int gd_code, bool pressed) { return false; }
 };
 
 class Registry {

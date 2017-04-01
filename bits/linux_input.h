@@ -101,12 +101,11 @@ protected:
 				return false;
 			int n = bytes / sizeof(input_event);
 			for (int i = 0; i < n; i++)
-				if (handle(events[i]))
-					return true;
+				handle(events[i]);
 		}
 	}
 	// LinuxInput
-	virtual bool handle(const input_event &ev) = 0;
+	virtual void handle(const input_event &ev) = 0;
 };
 
 } // namespace frt

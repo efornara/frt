@@ -27,6 +27,7 @@
 #include "frt.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <assert.h>
 
@@ -48,6 +49,8 @@ static struct KeyboardHandler : public Keyboard::Handler {
 			   st.meta ? 'M' : '-',
 			   gd_code < 128 && isprint(gd_code) ? gd_code : '.', gd_code,
 			   gd_code, pressed ? "pressed" : "released");
+		if (st.meta && gd_code == 'Q')
+			exit(0);
 	}
 } handler;
 
