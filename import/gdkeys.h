@@ -1,6 +1,9 @@
 // imported from godot (core/os/keyboard.h), adding prefixes to avoid
 // clashes with the linux input api
 
+#ifndef IMPORT_GDKEYS_H
+#define IMPORT_GDKEYS_H
+
 enum { GD_SPKEY = (1 << 24) };
 
 enum GdKeyList {
@@ -115,3 +118,5 @@ enum GdKeyList {
 
 	GD_KEY_UNKNOWN = GD_SPKEY | 0xFFFFFF,
 };
+
+#endif // IMPORT_GDKEYS_H

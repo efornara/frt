@@ -56,6 +56,7 @@
 #include "print_string.h"
 
 #include "frt.h"
+#include "bits/mouse_virtual.h"
 
 using namespace frt;
 
@@ -87,6 +88,7 @@ private:
 	int event_id;
 	InputDefault *input;
 	bool quit;
+	MouseVirtual mouse_virtual;
 
 public:
 	int get_video_driver_count() const { return 1; }
@@ -305,22 +307,30 @@ public:
 		}
 	} mouse_handler;
 	bool dispatch_handle_meta(int gd_code, bool pressed) {
+		// keep it simple: hard-coded order should be fine
+		if (env->mouse && env->mouse->handle_meta(gd_code, pressed))
+			return true;
 		return false;
 	}
 	void run() {
 		if (!main_loop)
 			return;
 		keyboard_handler.instance = this;
+		keyboard_handler.keyboard = env->keyboard;
 		mouse_handler.instance = this;
 		mouse_handler.video = env->video;
+		if (env->keyboard && !env->mouse)
+			env->mouse = &mouse_virtual;
 		if (env->mouse) {
 			env->mouse->set_size(screen_size);
 			Vec2 pos = env->mouse->get_pos();
 			env->video->move_pointer(pos);
+		}
+		// mouse set_handler first to increase the chances of RETURN release
+		if (env->mouse) {
 			env->mouse->set_handler(&mouse_handler);
 		}
 		if (env->keyboard) {
-			keyboard_handler.keyboard = env->keyboard;
 			env->keyboard->set_handler(&keyboard_handler);
 		}
 		main_loop->init();
