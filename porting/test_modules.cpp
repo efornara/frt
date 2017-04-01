@@ -29,11 +29,6 @@
 #include "frt.h"
 
 struct Type1 : public frt::Module {
-	// Module
-	virtual const char *get_id() const = 0;
-	virtual bool probe() = 0;
-	virtual void cleanup() = 0;
-	// Type1
 	virtual void hello() = 0;
 };
 

@@ -13,4 +13,4 @@ test.bin: $(OBJS)
 	$(CXX) $(LDFLAGS) -o test.bin $(OBJS) $(LIBS)
 
 clean:
-	rm -f *.bin *.o
+	rm -f a.out *.bin *.o
