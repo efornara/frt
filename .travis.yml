@@ -1,0 +1,17 @@
+dist: trusty
+sudo: false
+language: cpp
+os:
+  - linux
+addons:
+  apt:
+    packages:
+      - build-essential
+      - pkg-config
+      - scons
+      - libasound2-dev
+      - libgles2-mesa-dev
+script:
+  - make ci
+notifications:
+  email: false
