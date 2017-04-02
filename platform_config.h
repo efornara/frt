@@ -26,4 +26,12 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+#ifdef __linux__
 #include <alloca.h>
+#endif
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
+#include <stdlib.h>
+#define PTHREAD_BSD_SET_NAME
+#endif
+
+#define GLES3_INCLUDE_H "glad/glad.h"
