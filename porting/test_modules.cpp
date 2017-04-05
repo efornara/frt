@@ -24,6 +24,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include "frt.h"
@@ -53,6 +54,13 @@ int main(int argc, char *argv[]) {
 		"not_probed",
 		0
 	};
+	void **ctx;
+	ctx = frt->get_context("type1");
+	assert(ctx);
+	*ctx = malloc(10);
+	ctx = frt->get_context("type1");
+	free(*ctx);
+	*ctx = 0;
 	frt::Module *module = frt->probe(type1_modules);
 	assert(module);
 	assert(!strcmp(module->get_id(), "type1_impl1"));

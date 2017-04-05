@@ -40,9 +40,10 @@ struct Module {
 
 class Registry {
 public:
-	static const int max_entries = 30;
+	static const int max_modules = 30;
+	static const int max_contexts = 10;
 	void register_(Module *module);
-	int size() const { return n; }
+	int size() const { return nm; }
 	Module *get(int i) const { return m[i]; }
 	Module *get(const char *id) const;
 	Module *probe(const char *ids[]);
@@ -51,13 +52,18 @@ public:
 		const char *ids[] = { id, 0 };
 		return probe(ids);
 	}
+	void **get_context(const char *key);
 	static Registry *instance();
 
 private:
 	Registry()
-		: n(0) {}
-	Module *m[max_entries];
-	int n;
+		: nm(0), nc(0) {}
+	Module *m[max_modules];
+	struct {
+		const char *key;
+		void *value;
+	} c[max_contexts];
+	int nm, nc;
 };
 
 struct RegisterModule {

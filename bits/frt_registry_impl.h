@@ -28,13 +28,13 @@
 namespace frt {
 
 void Registry::register_(Module *module) {
-	if (n >= max_entries)
+	if (nm >= max_modules)
 		return;
-	m[n++] = module;
+	m[nm++] = module;
 }
 
 Module *Registry::get(const char *id) const {
-	for (int i = 0; i < n; i++)
+	for (int i = 0; i < nm; i++)
 		if (!strcmp(id, m[i]->get_id()))
 			return m[i];
 	return 0;
@@ -50,11 +50,22 @@ Module *Registry::probe(const char *ids[]) {
 }
 
 Module *Registry::probe_single() {
-	if (n != 1)
+	if (nm != 1)
 		return 0;
 	if (!m[0]->probe())
 		return 0;
 	return m[0];
+}
+
+void **Registry::get_context(const char *key) {
+	for (int i = 0; i < nc; i++)
+		if (!strcmp(key, c[i].key))
+			return &c[i].value;
+	if (nc >= max_contexts)
+		return 0;
+	c[nc].key = key;
+	c[nc].value = 0;
+	return &c[nc++].value;
 }
 
 Registry *Registry::instance() {
