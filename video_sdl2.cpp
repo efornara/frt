@@ -37,7 +37,7 @@ namespace frt {
 
 class VideoSDL2 : public Video, public ContextGL {
 private:
-	SDL2Context *sdl2;
+	SDL2User *sdl2;
 	SDL_Window *window;
 	Vec2 screen_size;
 	Vec2 view_size;
@@ -53,7 +53,7 @@ public:
 	const char *get_id() const { return "video_sdl2"; }
 	bool probe() {
 		if (!sdl2)
-			sdl2 = SDL2Context::acquire(true);
+			sdl2 = SDL2Context::acquire(0, true);
 		return true;
 	}
 	void cleanup() {
@@ -88,7 +88,7 @@ public:
 		SDL_GL_MakeCurrent(window, gl);
 	}
 	void swap_buffers() {
-		sdl2->poll();
+		sdl2->poll(0);
 		SDL_GL_SwapWindow(window);
 	}
 	int get_window_width() { return view_size.x; }

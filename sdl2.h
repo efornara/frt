@@ -36,13 +36,30 @@
 
 namespace frt {
 
+class SDL2Context;
+
+struct SDL2User {
+private:
+	friend SDL2Context;
+	SDL2Context *ctx;
+	const SDL_EventType *types;
+	bool valid;
+	SDL2User() : valid(false) {}
+public:
+	inline bool poll(SDL_Event *ev);
+	inline void release();
+};
+
 class SDL2Context {
 private:
-	int users;
+	friend SDL2User;
+	static const int max_users = 10;
+	SDL2User users[max_users];
+	int n_users;
 	bool create_window;
 	SDL_Window *window;
 	SDL_Renderer *renderer;
-	SDL2Context() : users(0), create_window(true), window(0), renderer(0) {
+	SDL2Context() : n_users(0), create_window(true), window(0), renderer(0) {
 		SDL_Init(SDL_INIT_VIDEO);
 	}
 	~SDL2Context() {
@@ -52,9 +69,7 @@ private:
 			SDL_DestroyWindow(window);
 		SDL_Quit();
 	}
-
-public:
-	void poll() {
+	void poll(SDL_Event *event) {
 		if (create_window && !window)
 			SDL_CreateWindowAndRenderer(100, 100, 0, &window, &renderer);
 		SDL_Event ev;
@@ -66,28 +81,52 @@ public:
 			SDL_RenderPresent(renderer);
 		}
 	}
-	/*
-		Unfortunately, no RAII since users are driven by probe/cleanup.
-		Be careful: no safeguards here!
-	 */
-	static SDL2Context *acquire(bool window_owner = false) {
-		Registry *registry = Registry::instance();
-		SDL2Context **ctx = (SDL2Context **)registry->get_context("sdl2");
-		if (!*ctx)
-			*ctx = new SDL2Context();
-		(*ctx)->users++;
-		if (window_owner)
-			(*ctx)->create_window = false;
-		return *ctx;
+	SDL2User *acquire_(SDL_EventType *types, bool window_owner) {
+		for (int i = 0; i < max_users; i++) {
+			if (users[i].valid)
+				continue;
+			n_users++;
+			users[i].valid = true;
+			users[i].ctx = this;
+			users[i].types = types;
+			if (window_owner)
+				create_window = false;
+			return &users[i];
+		}
+		return 0;
 	}
-	void release() {
-		if (--users == 0) {
+	void release(SDL2User *u) {
+		u->valid = false;
+		if (--n_users == 0) {
 			delete this;
 			Registry *registry = Registry::instance();
 			SDL2Context **ctx = (SDL2Context **)registry->get_context("sdl2");
 			*ctx = 0;
 		}
 	}
+
+	/*
+		Unfortunately, no RAII since users are driven by probe/cleanup.
+		Be careful: no safeguards here!
+	 */
+public:
+	static SDL2User *acquire(SDL_EventType *types, bool window_owner = false) {
+		Registry *registry = Registry::instance();
+		SDL2Context **ctx = (SDL2Context **)registry->get_context("sdl2");
+		if (!*ctx)
+			*ctx = new SDL2Context();
+		return (*ctx)->acquire_(types, window_owner);
+	}
 };
+
+inline bool SDL2User::poll(SDL_Event *ev) {
+	ctx->poll(ev);
+	return false;
+}
+
+inline void SDL2User::release() {
+	if (valid)
+		ctx->release(this);
+}
 
 } // namespace frt

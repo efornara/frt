@@ -38,7 +38,7 @@ namespace frt {
 
 class KeyboardSDL2 : public Keyboard {
 private:
-	SDL2Context *sdl2;
+	SDL2User *sdl2;
 	Handler *h;
 	InputModifierState st;
 
@@ -53,7 +53,7 @@ public:
 	const char *get_id() const { return "keyboard_sdl2"; }
 	bool probe() {
 		if (!sdl2)
-			sdl2 = SDL2Context::acquire();
+			sdl2 = SDL2Context::acquire(0);
 		return true;
 	}
 	void cleanup() {
@@ -67,7 +67,7 @@ public:
 		h = handler;
 	}
 	bool poll() {
-		sdl2->poll();
+		sdl2->poll(0);
 		return false;
 	}
 	void get_modifier_state(InputModifierState &state) const { state = st; }
