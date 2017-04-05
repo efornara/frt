@@ -13,5 +13,3 @@ addons:
       - libgles2-mesa-dev
 script:
   - make ci
-notifications:
-  email: false

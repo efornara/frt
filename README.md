@@ -3,13 +3,13 @@ FRT
 
 FRT is a Godot "platform" targeting single board computers.
 
-## Usage
+## Usage (Raspberry Pi running raspbian)
 
-If you have a raspberry Pi with raspbian, you don't need to compile from
-source. FRT does not need X11 to run, and should also run on raspbian lite.
+FRT does not need X11 to run, and should also run on raspbian lite.
 
-Make sure that you have increased the amount of memory for the GPU. I
-use 256M on a 512M Raspberry Pi B.
+Make sure that you have increased the amount of memory for the GPU.
+Some demos work with just the default 64M reserved for the GPU, but most
+of them will need more.
 
 Download, uncompress, install somewhere in your path one binary from
 here:
@@ -29,31 +29,6 @@ Run a demo:
 	$ cd Godot-Demos-2.1-20170121/2d/platformer
 	$ godot.frt.opt.pi1 -v
 
-*IMPORTANT*: Press **Win+Q** to exit.
+Press *Win+Q* to exit.
 
-## Compiling
-
-FRT is not really a patch, as it leaves the godot source untouched. To
-compile, start from the official 2.1.2-stable source tarball:
-
-[https://github.com/godotengine/godot/releases/tag/2.1.2-stable](https://github.com/godotengine/godot/releases/tag/2.1.2-stable)
-
-Go to the platform directory and clone this repository:
-
-	$ cd ~/godot-2.1.2-stable
-	$ cd platform
-	$ git clone https://github.com/efornara/frt
-
-From the main directory, you have a new "platform" available:
-
-	$ cd ~/godot-2.1.2-stable
-	$ scons platform=frt target=release tools=no frt_arch=pi3 -j 4
-
-This should work on the upcoming 2.1.3 version too.
-
-## Godot 3.0 compilation status
-
-[![Build Status](https://api.travis-ci.org/efornara/frt.svg?branch=master)](https://travis-ci.org/efornara/frt/builds)
-
-An eventual error here does not reflect the compilation status of FRT on the
-latest stable platform (2.1).
+To compile FRT from source, see [Compile.md](doc/Compile.md).
