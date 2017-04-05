@@ -53,7 +53,7 @@ public:
 	const char *get_id() const { return "video_sdl2"; }
 	bool probe() {
 		if (!sdl2)
-			sdl2 = SDL2Context::acquire();
+			sdl2 = SDL2Context::acquire(true);
 		return true;
 	}
 	void cleanup() {

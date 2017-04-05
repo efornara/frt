@@ -39,30 +39,45 @@ namespace frt {
 class SDL2Context {
 private:
 	int users;
-	SDL2Context() : users(0) {
+	bool create_window;
+	SDL_Window *window;
+	SDL_Renderer *renderer;
+	SDL2Context() : users(0), create_window(true), window(0), renderer(0) {
 		SDL_Init(SDL_INIT_VIDEO);
 	}
 	~SDL2Context() {
+		if (renderer)
+			SDL_DestroyRenderer(renderer);
+		if (window)
+			SDL_DestroyWindow(window);
 		SDL_Quit();
 	}
 
 public:
 	void poll() {
+		if (create_window && !window)
+			SDL_CreateWindowAndRenderer(100, 100, 0, &window, &renderer);
 		SDL_Event ev;
 		while (SDL_PollEvent(&ev))
 			if (ev.type == SDL_QUIT)
 				exit(0);
+		if (window && renderer) {
+			SDL_RenderClear(renderer);
+			SDL_RenderPresent(renderer);
+		}
 	}
 	/*
 		Unfortunately, no RAII since users are driven by probe/cleanup.
 		Be careful: no safeguards here!
 	 */
-	static SDL2Context *acquire() {
+	static SDL2Context *acquire(bool window_owner = false) {
 		Registry *registry = Registry::instance();
 		SDL2Context **ctx = (SDL2Context **)registry->get_context("sdl2");
 		if (!*ctx)
 			*ctx = new SDL2Context();
 		(*ctx)->users++;
+		if (window_owner)
+			(*ctx)->create_window = false;
 		return *ctx;
 	}
 	void release() {
