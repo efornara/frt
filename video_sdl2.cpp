@@ -23,9 +23,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <stdlib.h>
-#include <assert.h>
-
 #ifdef FRT_TEST
 #define FRT_MOCK_GODOT_GL_CONTEXT
 #else
@@ -34,46 +31,39 @@
 #endif
 
 #include "frt.h"
-
-#include <SDL2/SDL.h>
-
-/*
-	WARNING: This is not a proper implementation!
-	It is just a minimal version to help to test other modules on a typical
-	UNIX setup.
- */
+#include "sdl2.h"
 
 namespace frt {
 
 class VideoSDL2 : public Video, public ContextGL {
 private:
+	SDL2Context *sdl2;
+	SDL_Window *window;
 	Vec2 screen_size;
 	Vec2 view_size;
-	bool initialized;
-	SDL_Window *window;
 	SDL_GLContext gl;
 
 public:
 	VideoSDL2()
-		: initialized(false), window(0) {
+		: sdl2(0), window(0) {
 		screen_size.x = 1200;
 		screen_size.y = 680;
 	}
 	// Module
 	const char *get_id() const { return "video_sdl2"; }
 	bool probe() {
-		if (initialized)
-			return true;
-		SDL_Init(SDL_INIT_VIDEO);
-		initialized = true;
+		if (!sdl2)
+			sdl2 = SDL2Context::acquire();
 		return true;
 	}
 	void cleanup() {
 		if (window)
 			SDL_DestroyWindow(window);
 		// SDL_GL_DeleteContext(gl);
-		SDL_Quit();
-		initialized = false;
+		if (sdl2) {
+			sdl2->release();
+			sdl2 = 0;
+		}
 	}
 	// Video
 	Vec2 get_screen_size() const { return screen_size; }
@@ -98,10 +88,7 @@ public:
 		SDL_GL_MakeCurrent(window, gl);
 	}
 	void swap_buffers() {
-		SDL_Event ev;
-		while (SDL_PollEvent(&ev))
-			if (ev.type == SDL_QUIT)
-				exit(0);
+		sdl2->poll();
 		SDL_GL_SwapWindow(window);
 	}
 	int get_window_width() { return view_size.x; }
