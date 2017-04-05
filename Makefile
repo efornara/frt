@@ -2,8 +2,7 @@
 
 CLANG_FORMAT = clang-format-3.5
 
-# TODO
-include porting/Local.mk
+include Local.mk
 
 clean:
 	rm -f *.o

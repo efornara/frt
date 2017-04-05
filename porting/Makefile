@@ -7,7 +7,8 @@ LDFLAGS = -ggdb
 OBJS =
 LIBS =
 
-include Local.mk
+# TODO
+include ../Local.mk
 
 test.bin: $(OBJS)
 	$(CXX) $(LDFLAGS) -o test.bin $(OBJS) $(LIBS)
