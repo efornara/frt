@@ -341,6 +341,8 @@ public:
 		// keep it simple: hard-coded order should be fine
 		if (env->mouse && env->mouse->handle_meta(gd_code, pressed))
 			return true;
+		if (env->keyboard && env->keyboard->handle_meta(gd_code, pressed))
+			return true;
 		return false;
 	}
 	void run() {

@@ -140,6 +140,7 @@ private:
 	static const int right_mask = 0x02;
 	static const int wait_ms = 100;
 	Handler *h;
+	bool grabbed;
 	InputModifierState st;
 	struct {
 		int shift;
@@ -165,7 +166,7 @@ private:
 	}
 
 public:
-	KeyboardLinuxInput() {
+	KeyboardLinuxInput() : h(0), grabbed(false) {
 		st.shift = false;
 		st.alt = false;
 		st.control = false;
@@ -179,6 +180,18 @@ public:
 	const char *get_id() const { return "keyboard_linux_input"; }
 	bool probe() { return open("event-kbd"); }
 	void cleanup() { close(); }
+	bool handle_meta(int gd_code, bool pressed) {
+		if (pressed)
+			return false;
+		switch (gd_code) {
+		case 'K':
+			if (LinuxInput::grab(!grabbed, wait_ms))
+				grabbed = !grabbed;
+			return true;
+		default:
+			return false;
+		}
+	}
 	// LinuxInput
 	void handle(const input_event &ev) {
 		if (ev.type != EV_KEY || (ev.value != KV_Pressed && ev.value != KV_Released))
@@ -198,8 +211,8 @@ public:
 	}
 	// Keyboard
 	void set_handler(Handler *handler) {
-		LinuxInput::grab(wait_ms);
 		h = handler;
+		grabbed = LinuxInput::grab(true, wait_ms);
 	}
 	bool poll() { return LinuxInput::poll(); }
 	void get_modifier_state(InputModifierState &state) const { state = st; }

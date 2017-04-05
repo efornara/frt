@@ -44,14 +44,28 @@ class MouseLinuxInput : public Mouse, public LinuxInput {
 private:
 	static const int wait_ms = 100;
 	Handler *h;
+	bool grabbed;
 	Vec2 size;
 	Vec2 pos;
 
 public:
+	MouseLinuxInput() : h(0), grabbed(false) {}
 	// Module
 	const char *get_id() const { return "mouse_linux_input"; }
 	bool probe() { return open("event-mouse"); }
 	void cleanup() { close(); }
+	bool handle_meta(int gd_code, bool pressed) {
+		if (pressed)
+			return false;
+		switch (gd_code) {
+		case 'M':
+			if (LinuxInput::grab(!grabbed, wait_ms))
+				grabbed = !grabbed;
+			return true;
+		default:
+			return false;
+		}
+	}
 	// LinuxInput
 	void handle(const input_event &ev) {
 		if (ev.type == EV_REL) {
@@ -101,8 +115,8 @@ public:
 		pos.y = size.y - 1;
 	}
 	void set_handler(Handler *handler) {
-		LinuxInput::grab(wait_ms);
 		h = handler;
+		grabbed = LinuxInput::grab(true, wait_ms);
 	}
 	bool poll() { return LinuxInput::poll(); }
 };

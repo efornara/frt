@@ -29,6 +29,20 @@ Run a demo:
 	$ cd Godot-Demos-2.1-20170121/2d/platformer
 	$ godot.frt.opt.pi1 -v
 
-Press *Win+Q* to exit.
+Press *Win+Q* to quit.
+
+This is the list of meta (Win) keys recognized by *this commit* of FRT.
+The current binaries only support Win+Q.
+
+| Meta  | Action |
+| :---: | :--- |
+| *Q* | *Quit* |
+| K | Grab / ungrab the keyboard |
+| M | Grab / ungrab the mouse |
+| Return | Mouse Left Button (virtual mouse) |
+| Cursor Keys | Mouse Motion (virtual mouse) |
+
+The virtual mouse keys are available only if a keyboard is found, but a
+mouse is not.
 
 To compile FRT from source, see [Compile.md](doc/Compile.md).

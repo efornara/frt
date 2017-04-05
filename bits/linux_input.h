@@ -76,16 +76,18 @@ protected:
 			return false;
 		return true;
 	}
-	bool grab(int wait_ms) {
+	bool grab(bool grab, int wait_ms) {
 		/*
 			HACK to let other clients get release keys at startup
 			TODO: better handling
 		 */
-		if (grabbed)
+		if (this->grabbed == grab)
 			return true;
 		usleep(wait_ms * 1000);
-		grabbed = (ioctl(fd, EVIOCGRAB, 1) == 0);
-		return grabbed;
+		if (ioctl(fd, EVIOCGRAB, grab ? 1 : 0))
+			return false;
+		this->grabbed = grab;
+		return true;
 	}
 	void close() {
 		if (fd != -1) {
