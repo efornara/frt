@@ -55,7 +55,7 @@ def configure(env):
 	elif (env["target"] == "release_debug"):
 		env.Append(CCFLAGS=['-O2', '-ffast-math', '-DDEBUG_ENABLED'])
 	elif (env["target"] == "debug"):
-		env.Append(CCFLAGS=['-g2', '-Wall', '-DDEBUG_ENABLED', '-DDEBUG_MEMORY_ENABLED'])
+		env.Append(CCFLAGS=['-g2', '-DDEBUG_ENABLED', '-DDEBUG_MEMORY_ENABLED'])
 
 	if (env["frt_arch"] == "pi1"):
 		env.Append(CCFLAGS=['-mcpu=arm1176jzf-s', '-mfpu=vfp'])
