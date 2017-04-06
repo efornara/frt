@@ -81,3 +81,7 @@ def configure(env):
 		env.Append(CCFLAGS=['-I/opt/vc/include/'])
 		env.Append(LINKFLAGS=['-L/opt/vc/lib/'])
 		env.Append(LIBS=['brcmGLESv2', 'brcmEGL', 'bcm_host'])
+
+	import version
+	if version.major >= 3:
+		env.Append(LIBS=['-ldl'])
