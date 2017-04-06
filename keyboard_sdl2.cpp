@@ -30,7 +30,7 @@
 #endif
 
 #include "frt.h"
-#include "sdl2.h"
+#include "bits/sdl2.h"
 
 #include "import/gdkeys.h"
 

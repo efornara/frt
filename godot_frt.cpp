@@ -56,6 +56,7 @@ static void probe_modules() {
 
 	const char *mouse_modules[] = {
 		"mouse_linux_input",
+		"mouse_sdl2",
 		0
 	};
 	module = frt->probe(mouse_modules);
