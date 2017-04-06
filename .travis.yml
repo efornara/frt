@@ -7,9 +7,10 @@ addons:
   apt:
     packages:
       - build-essential
-      - pkg-config
       - scons
-      - libasound2-dev
+      - pkg-config
+      - libsdl2-dev
       - libgles2-mesa-dev
+      - libasound2-dev
 script:
   - make ci

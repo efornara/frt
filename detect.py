@@ -74,8 +74,10 @@ def configure(env):
 	env.Append(LIBS=['pthread'])
 
 	if (env["frt_arch"] == "none"):
-		env.Append(LIBS=['-lEGL', '-lGLESv2', '-lX11'])
+		env.Append(FRT_MODULES=['video_sdl2.cpp', 'keyboard_sdl2.cpp'])
+		env.Append(LIBS=['-lGLESv2', '-lSDL2'])
 	else:
+		env.Append(FRT_MODULES=['video_bcm.cpp', 'keyboard_linux_input.cpp', 'mouse_linux_input.cpp'])
 		env.Append(CCFLAGS=['-I/opt/vc/include/'])
 		env.Append(LINKFLAGS=['-L/opt/vc/lib/'])
 		env.Append(LIBS=['brcmGLESv2', 'brcmEGL', 'bcm_host'])

@@ -1,17 +1,5 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 
 Import('env')
 
-if env['frt_arch'] == 'none':
-	video = "video_x11.cpp"
-else:
-	video = "video_bcm.cpp"
-
-common_server = [\
-    "os_frt.cpp",
-    "keyboard_linux_input.cpp",
-    "mouse_linux_input.cpp",
-    video,
-]
-
-env.Program('#bin/godot', ['godot_frt.cpp'] + common_server)
+env.Program('#bin/godot', ['godot_frt.cpp', 'os_frt.cpp'] + env['FRT_MODULES'])

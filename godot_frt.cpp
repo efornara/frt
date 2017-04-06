@@ -40,7 +40,7 @@ static void probe_modules() {
 
 	const char *video_modules[] = {
 		"video_bcm",
-		"video_x11",
+		"video_sdl2",
 		0
 	};
 	module = frt->probe(video_modules);
@@ -48,6 +48,7 @@ static void probe_modules() {
 
 	const char *keyboard_modules[] = {
 		"keyboard_linux_input",
+		"keyboard_sdl2",
 		0
 	};
 	module = frt->probe(keyboard_modules);

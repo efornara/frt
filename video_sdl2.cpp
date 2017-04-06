@@ -94,6 +94,9 @@ public:
 	int get_window_width() { return view_size.x; }
 	int get_window_height() { return view_size.y; }
 	Error initialize() {
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 		window = SDL_CreateWindow("FRT", SDL_WINDOWPOS_UNDEFINED,
 		  SDL_WINDOWPOS_UNDEFINED, view_size.x, view_size.y,
 		  SDL_WINDOW_OPENGL);
