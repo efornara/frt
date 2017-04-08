@@ -35,6 +35,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include <sys/time.h>
+
 #include <bcm_host.h>
 
 #include <GLES2/gl2.h>
@@ -124,6 +126,12 @@ public:
 		vc_dispmanx_resource_delete(resource);
 		has_resource = false;
 	}
+	void show(DISPMANX_UPDATE_HANDLE_T update, const Display &display, bool enable) {
+		if (added_to_display() && !enable)
+			remove(update);
+		else if (!added_to_display() && enable)
+			add(update, display);
+	}
 	bool added_to_display() const { return added; }
 };
 
@@ -148,12 +156,6 @@ public:
 	void set_metrics(const Display &display) {
 		Vec2 dpy_size = display.get_size();
 		vc_dispmanx_rect_set(&dst, 0, 0, dpy_size.x, dpy_size.y);
-	}
-	void show(DISPMANX_UPDATE_HANDLE_T update, const Display &display, bool enable) {
-		if (added_to_display() && !enable)
-			remove(update);
-		else if (!added_to_display() && enable)
-			add(update, display);
 	}
 };
 
@@ -279,10 +281,11 @@ private:
 	static const uint32_t mask_color = 0xffffffff;
 	static const uint32_t transparent_color = 0x00000000;
 	static const int layer_visible = 102;
-	static const int layer_hidden = 99;
+	static const int min_dt_us = 16667;
 	uint8_t data[width * height * pixel_size];
 	int x, y;
 	bool visible, need_updating;
+	struct timeval last_update;
 	inline uint8_t *fill_byte(uint8_t *p, int shape, int mask) {
 		uint32_t color;
 		int bitmask = 0x01;
@@ -323,6 +326,7 @@ public:
 		x = dpy_size.x - 1;
 		y = dpy_size.y - 1;
 		fill_dst();
+		gettimeofday(&last_update, 0);
 	}
 	Vec2 set_pos(const View &view, const Vec2 &screen) {
 		Vec2 res;
@@ -330,33 +334,34 @@ public:
 		res.y = (int)((screen.y - view.oy) * view.scaley);
 		x = screen.x;
 		y = screen.y;
+		fill_dst();
 		if (visible)
 			need_updating = true;
 		return res;
 	}
-	void set_visible(bool visible) {
+	void set_visible(const Display &display, bool visible) {
+		if (this->visible == visible)
+			return;
 		this->visible = visible;
 		DISPMANX_UPDATE_HANDLE_T update;
 		update = vc_dispmanx_update_start(1);
-		vc_dispmanx_element_change_layer(
-				update, element, visible ? layer_visible : layer_hidden);
-		fill_dst();
-		vc_dispmanx_element_change_attributes(
-				update, element, ELEMENT_CHANGE_DEST_RECT, 0, 255, &dst,
-				&src, 0, DISPMANX_NO_ROTATE);
+		show(update, display, visible);
 		vc_dispmanx_update_submit_sync(update);
 	}
 	void schedule_update_if_needed(bool vsync) {
-		/*
-			Without vsync, dpymnx async updates might be too fast, so,
-			when vsync is disabled, the pointer is not updated.
-			TODO: better handling?
-		*/
-		if (!need_updating || !vsync)
+		if (!need_updating || !visible)
 			return;
+		if (!vsync) {
+			struct timeval now;
+			struct timeval dt;
+			gettimeofday(&now, 0);
+			timersub(&now, &last_update, &dt);
+			if (dt.tv_sec == 0 && dt.tv_usec < min_dt_us)
+				return;
+			last_update = now;
+		}
 		DISPMANX_UPDATE_HANDLE_T update;
 		update = vc_dispmanx_update_start(1);
-		fill_dst();
 		vc_dispmanx_element_change_attributes(
 				update, element, ELEMENT_CHANGE_DEST_RECT, 0, 255, &dst,
 				&src, 0, DISPMANX_NO_ROTATE);
@@ -517,7 +522,7 @@ public:
 		return pointer.set_pos(view, screen);
 	}
 	void show_pointer(bool enable) {
-		pointer.set_visible(enable);
+		pointer.set_visible(dpymnx, enable);
 	}
 	ContextGL *create_the_gl_context(Vec2 size) {
 		view_size = size;
