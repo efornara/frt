@@ -145,23 +145,29 @@ public:
 	}
 };
 
+static void update_cb(DISPMANX_UPDATE_HANDLE_T u, void *arg) {
+}
+
 class View : public Element {
 private:
+	enum Gravity {
+		Center,
+		TopLeft,
+		TopRight,
+		BottomRight,
+		BottomLeft,
+	};
 	friend class Pointer;
 	Vec2 size;
+	Vec2 dpy_size;
 	int ox, oy;
 	float scalex, scaley;
+	bool fullscreen;
+	Gravity gravity;
 
-public:
-	View()
-		: Element(101) {}
-	Vec2 get_size() const { return size; }
-	void set_metrics(const Display &display, const Vec2 &size) {
-		this->size = size;
-		vc_dispmanx_rect_set(&src, 0, 0, size.x << 16, size.y << 16);
+	void set_dst_fullscreen() {
 		Vec2 win;
 		double req_aspect = (double)size.x / size.y;
-		Vec2 dpy_size = display.get_size();
 		double scr_aspect = (double)dpy_size.x / dpy_size.y;
 		if (req_aspect >= scr_aspect) {
 			win.x = dpy_size.x;
@@ -176,12 +182,82 @@ public:
 		scaley = (float)size.y / win.y;
 		vc_dispmanx_rect_set(&dst, ox, oy, win.x, win.y);
 	}
+	void set_dst_window() {
+		switch (gravity) {
+			case Center:
+				ox = (dpy_size.x - size.x) / 2;
+				break;
+			case TopLeft:
+			case BottomLeft:
+				ox = 0;
+				break;
+			case TopRight:
+			case BottomRight:
+				ox = dpy_size.x - size.x;
+				break;
+		}
+		switch (gravity) {
+			case Center:
+				oy = (dpy_size.y - size.y) / 2;
+				break;
+			case TopLeft:
+			case TopRight:
+				oy = 0;
+				break;
+			case BottomLeft:
+			case BottomRight:
+				oy = dpy_size.y - size.y;
+				break;
+		}
+		scalex = 1.0f;
+		scaley = 1.0f;
+		vc_dispmanx_rect_set(&dst, ox, oy, size.x, size.y);
+	}
+	void set_dst() {
+		if (fullscreen)
+			set_dst_fullscreen();
+		else
+			set_dst_window();
+	}
+	void schedule_update() {
+		DISPMANX_UPDATE_HANDLE_T update;
+		update = vc_dispmanx_update_start(1);
+		vc_dispmanx_element_change_attributes(
+				update, element, ELEMENT_CHANGE_DEST_RECT, 0, 255, &dst,
+				&src, 0, DISPMANX_NO_ROTATE);
+		vc_dispmanx_update_submit(update, update_cb, 0);
+	}
+
+public:
+	View()
+		: Element(101), fullscreen(true), gravity(Center) {}
+	Vec2 get_size() const { return size; }
+	void set_metrics(const Display &display, const Vec2 &size) {
+		this->size = size;
+		vc_dispmanx_rect_set(&src, 0, 0, size.x << 16, size.y << 16);
+		dpy_size = display.get_size();
+		set_dst();
+	}
+	bool toggle_fullscreen() {
+		fullscreen = !fullscreen;
+		set_dst();
+		schedule_update();
+		return fullscreen;
+	}
+	bool toggle_window() {
+		if (fullscreen)
+			fullscreen = !fullscreen;
+		else if (gravity == BottomLeft)
+			gravity = Center;
+		else
+			gravity = (Gravity)((int)gravity + 1);
+		set_dst();
+		schedule_update();
+		return fullscreen;
+	}
 };
 
 #include "import/cursor.h"
-
-static void update_cb(DISPMANX_UPDATE_HANDLE_T u, void *arg) {
-}
 
 class Pointer : public Element {
 private:
@@ -402,6 +478,20 @@ public:
 	}
 	void cleanup() {
 		cleanup_egl_and_dpymnx();
+	}
+	bool handle_meta(int gd_code, bool pressed) {
+		if (!pressed)
+			return false;
+		switch (gd_code) {
+			case 'F':
+				view.toggle_fullscreen();
+				return true;
+			case 'W':
+				view.toggle_window();
+				return true;
+			default:
+				return false;
+		}
 	}
 	// Video
 	Vec2 get_screen_size() const { return screen_size; }

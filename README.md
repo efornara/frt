@@ -37,6 +37,8 @@ The current binaries only support Win+Q.
 | Meta  | Action |
 | :---: | :--- |
 | *Q* | *Quit* |
+| F | Toggle fullscreen |
+| W | Change window gravity |
 | K | Grab / ungrab the keyboard |
 | M | Grab / ungrab the mouse |
 | Return | Mouse Left Button (virtual mouse) |
