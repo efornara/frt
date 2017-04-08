@@ -84,6 +84,7 @@ public:
 class Element {
 private:
 	bool has_resource;
+	bool added;
 
 protected:
 	DISPMANX_RESOURCE_HANDLE_T resource;
@@ -102,16 +103,20 @@ protected:
 
 public:
 	Element(int layer_)
-		: has_resource(false), layer(layer_) {}
+		: has_resource(false), added(false), layer(layer_) {}
 	DISPMANX_ELEMENT_HANDLE_T get_element() const { return element; }
 	void add(DISPMANX_UPDATE_HANDLE_T update, const Display &display) {
 		element = vc_dispmanx_element_add(
 				update, display.get_handle(), layer, &dst, resource, &src,
 				DISPMANX_PROTECTION_NONE, NULL_ALPHA, NULL_CLAMP,
 				DISPMANX_NO_ROTATE);
+		added = true;
 	}
 	void remove(DISPMANX_UPDATE_HANDLE_T update) {
+		if (!added)
+			return;
 		vc_dispmanx_element_remove(update, element);
+		added = false;
 	}
 	void delete_resource() {
 		if (!has_resource)
@@ -119,6 +124,7 @@ public:
 		vc_dispmanx_resource_delete(resource);
 		has_resource = false;
 	}
+	bool added_to_display() const { return added; }
 };
 
 class Background : public Element {
@@ -142,6 +148,12 @@ public:
 	void set_metrics(const Display &display) {
 		Vec2 dpy_size = display.get_size();
 		vc_dispmanx_rect_set(&dst, 0, 0, dpy_size.x, dpy_size.y);
+	}
+	void show(DISPMANX_UPDATE_HANDLE_T update, const Display &display, bool enable) {
+		if (added_to_display() && !enable)
+			remove(update);
+		else if (!added_to_display() && enable)
+			add(update, display);
 	}
 };
 
@@ -219,13 +231,10 @@ private:
 		else
 			set_dst_window();
 	}
-	void schedule_update() {
-		DISPMANX_UPDATE_HANDLE_T update;
-		update = vc_dispmanx_update_start(1);
+	void schedule_update(DISPMANX_UPDATE_HANDLE_T update) {
 		vc_dispmanx_element_change_attributes(
 				update, element, ELEMENT_CHANGE_DEST_RECT, 0, 255, &dst,
 				&src, 0, DISPMANX_NO_ROTATE);
-		vc_dispmanx_update_submit(update, update_cb, 0);
 	}
 
 public:
@@ -238,21 +247,21 @@ public:
 		dpy_size = display.get_size();
 		set_dst();
 	}
-	bool toggle_fullscreen() {
+	bool toggle_fullscreen(DISPMANX_UPDATE_HANDLE_T update) {
 		fullscreen = !fullscreen;
 		set_dst();
-		schedule_update();
+		schedule_update(update);
 		return fullscreen;
 	}
-	bool toggle_window() {
+	bool toggle_window(DISPMANX_UPDATE_HANDLE_T update) {
 		if (fullscreen)
-			fullscreen = !fullscreen;
+			fullscreen = false;
 		else if (gravity == BottomLeft)
 			gravity = Center;
 		else
 			gravity = (Gravity)((int)gravity + 1);
 		set_dst();
-		schedule_update();
+		schedule_update(update);
 		return fullscreen;
 	}
 };
@@ -480,14 +489,22 @@ public:
 		cleanup_egl_and_dpymnx();
 	}
 	bool handle_meta(int gd_code, bool pressed) {
+		DISPMANX_UPDATE_HANDLE_T update;
+		bool fullscreen;
 		if (!pressed)
 			return false;
 		switch (gd_code) {
 			case 'F':
-				view.toggle_fullscreen();
+				update = vc_dispmanx_update_start(1);
+				fullscreen = view.toggle_fullscreen(update);
+				background.show(update, dpymnx, fullscreen);
+				vc_dispmanx_update_submit(update, update_cb, 0);
 				return true;
 			case 'W':
-				view.toggle_window();
+				update = vc_dispmanx_update_start(1);
+				fullscreen = view.toggle_window(update);
+				background.show(update, dpymnx, fullscreen);
+				vc_dispmanx_update_submit(update, update_cb, 0);
 				return true;
 			default:
 				return false;
