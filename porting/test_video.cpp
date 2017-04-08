@@ -37,6 +37,7 @@ using namespace frt;
 
 Video *video;
 ContextGL *gl;
+int y;
 bool repeat = false;
 
 #ifdef __unix__
@@ -72,14 +73,16 @@ static void dispatch_meta() {}
 static void usleep(int us) {}
 #endif
 
-void iteration() {
+void iteration(bool vsync) {
 	const int position_period = 300;
 	const int visibility_period = 100;
-	int y = 0;
-	gl->set_use_vsync(true);
+	gl->set_use_vsync(vsync);
 	for (int i = 0; i < position_period; i++, y++) {
 		video->move_pointer(Vec2(y, y));
-		glClearColor(0., 0., sin((M_PI * i) / position_period), 1.);
+		if (vsync)
+			glClearColor(0., 0., sin((M_PI * i) / position_period), 1.);
+		else
+			glClearColor(sin((M_PI * i) / position_period), 0., 0., 1.);
 		glClear(GL_COLOR_BUFFER_BIT);
 		switch (i % visibility_period) {
 			case 0:
@@ -93,16 +96,8 @@ void iteration() {
 		}
 		gl->swap_buffers();
 		dispatch_meta();
-	}
-	video->show_pointer(false); // !vsync disables pointer updates anyway
-	gl->set_use_vsync(false);
-	for (int i = 0; i < position_period; i++, y++) {
-		video->move_pointer(Vec2(y, y));
-		glClearColor(sin((M_PI * i) / position_period), 0., 0., 1.);
-		glClear(GL_COLOR_BUFFER_BIT);
-		gl->swap_buffers();
-		dispatch_meta();
-		usleep(2000); // too fast otherwise
+		if (!vsync)
+			usleep(2000); // too fast otherwise
 	}
 }
 
@@ -114,8 +109,10 @@ int main(int argc, char *argv[]) {
 	assert(gl);
 	gl->initialize();
 	gl->make_current();
-	do
-		iteration();
-	while (repeat);
+	do {
+		y = 0;
+		iteration(true);
+		iteration(false);
+	} while (repeat);
 	video->cleanup();
 }
