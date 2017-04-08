@@ -28,7 +28,6 @@
 
 #include <math.h>
 #include <assert.h>
-#include <unistd.h>
 
 #include <GLES2/gl2.h>
 
@@ -36,17 +35,48 @@
 
 using namespace frt;
 
-int main(int argc, char *argv[]) {
-	Video *video = (Video *)Registry::instance()->probe_single();
-	assert(video);
-	Vec2 size(640, 480);
-	ContextGL *gl = video->create_the_gl_context(size);
-	assert(gl);
-	gl->initialize();
-	gl->make_current();
+Video *video;
+ContextGL *gl;
+bool repeat = false;
+
+#ifdef __unix__
+
+#include <ctype.h>
+#include <unistd.h>
+#include <sys/select.h>
+
+static void dispatch_meta() {
+	struct timeval tv = { 0, 0 };
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(STDIN_FILENO, &fds);
+	if (select(1, &fds, NULL, NULL, &tv) == 1) {
+		char buf[64];
+		int r = read(STDIN_FILENO, buf, sizeof(buf));
+		for (int i = 0; i < r; i++) {
+			int c = buf[i];
+			if (c == '1') {
+				repeat = true;
+			} else if (c == '0') {
+				repeat = false;
+			} else if (isalpha(c)) {
+				video->handle_meta(toupper(c), true);
+				video->handle_meta(toupper(c), false);
+			}
+		}
+	}
+}
+
+#else
+static void dispatch_meta() {}
+static void usleep(int us) {}
+#endif
+
+void iteration() {
 	const int position_period = 300;
 	const int visibility_period = 100;
 	int y = 0;
+	gl->set_use_vsync(true);
 	for (int i = 0; i < position_period; i++, y++) {
 		video->move_pointer(Vec2(y, y));
 		glClearColor(0., 0., sin((M_PI * i) / position_period), 1.);
@@ -62,6 +92,7 @@ int main(int argc, char *argv[]) {
 				break;
 		}
 		gl->swap_buffers();
+		dispatch_meta();
 	}
 	video->show_pointer(false); // !vsync disables pointer updates anyway
 	gl->set_use_vsync(false);
@@ -70,7 +101,21 @@ int main(int argc, char *argv[]) {
 		glClearColor(sin((M_PI * i) / position_period), 0., 0., 1.);
 		glClear(GL_COLOR_BUFFER_BIT);
 		gl->swap_buffers();
+		dispatch_meta();
 		usleep(2000); // too fast otherwise
 	}
+}
+
+int main(int argc, char *argv[]) {
+	video = (Video *)Registry::instance()->probe_single();
+	assert(video);
+	Vec2 size(640, 480);
+	gl = video->create_the_gl_context(size);
+	assert(gl);
+	gl->initialize();
+	gl->make_current();
+	do
+		iteration();
+	while (repeat);
 	video->cleanup();
 }
