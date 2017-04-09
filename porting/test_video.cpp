@@ -35,6 +35,7 @@
 
 using namespace frt;
 
+App *app;
 Video *video;
 ContextGL *gl;
 int y;
@@ -94,6 +95,7 @@ void iteration(bool vsync) {
 			default:
 				break;
 		}
+		app->dispatch_events();
 		gl->swap_buffers();
 		dispatch_meta();
 		if (!vsync)
@@ -102,7 +104,8 @@ void iteration(bool vsync) {
 }
 
 int main(int argc, char *argv[]) {
-	video = (Video *)App::instance()->probe_single();
+	app = App::instance();
+	video = (Video *)app->probe_single();
 	assert(video);
 	Vec2 size(640, 480);
 	gl = video->create_the_gl_context(size);

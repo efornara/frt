@@ -36,7 +36,7 @@ static const SDL_EventType handled_types[] = {
 	SDL_LASTEVENT,
 };
 
-class MouseSDL2 : public Mouse {
+class MouseSDL2 : public Mouse, public EventHandler {
 private:
 	SDL2User *sdl2;
 	Handler *h;
@@ -49,7 +49,7 @@ public:
 	const char *get_id() const { return "mouse_sdl2"; }
 	bool probe() {
 		if (!sdl2)
-			sdl2 = SDL2Context::acquire(handled_types);
+			sdl2 = SDL2Context::acquire(handled_types, this);
 		return true;
 	}
 	void cleanup() {
@@ -62,52 +62,52 @@ public:
 	Vec2 get_pos() const { return pos; }
 	void set_size(Vec2 size) {}
 	void set_handler(Handler *handler) { h = handler; }
-	bool poll() {
+	bool poll() { return false; }
+	// EventHandler
+	void handle_event() {
 		SDL_Event ev;
-		while (sdl2->poll(&ev)) {
-			Button button;
-			bool unhandled = false;
-			switch (ev.type) {
-				case SDL_MOUSEMOTION:
-					pos.x = ev.motion.x;
-					pos.y = ev.motion.y;
-					if (h)
-						h->handle_mouse_motion(pos);
-					break;
-				case SDL_MOUSEBUTTONUP:
-				case SDL_MOUSEBUTTONDOWN:
-					switch (ev.button.button) {
-						case SDL_BUTTON_LEFT:
-							button = Left;
-							break;
-						case SDL_BUTTON_RIGHT:
-							button = Right;
-							break;
-						case SDL_BUTTON_MIDDLE:
-							button = Middle;
-							break;
-						default:
-							unhandled = true;
-							break;
-					}
-					if (h && !unhandled)
-						h->handle_mouse_button(button, ev.button.state == SDL_PRESSED);
-					break;
-				case SDL_MOUSEWHEEL:
-					if (ev.wheel.y > 0)
-						button = WheelUp;
-					else if (ev.wheel.y < 0)
-						button = WheelDown;
-					else
+		sdl2->get_event(ev);
+		Button button;
+		bool unhandled = false;
+		switch (ev.type) {
+			case SDL_MOUSEMOTION:
+				pos.x = ev.motion.x;
+				pos.y = ev.motion.y;
+				if (h)
+					h->handle_mouse_motion(pos);
+				break;
+			case SDL_MOUSEBUTTONUP:
+			case SDL_MOUSEBUTTONDOWN:
+				switch (ev.button.button) {
+					case SDL_BUTTON_LEFT:
+						button = Left;
+						break;
+					case SDL_BUTTON_RIGHT:
+						button = Right;
+						break;
+					case SDL_BUTTON_MIDDLE:
+						button = Middle;
+						break;
+					default:
 						unhandled = true;
-					if (h && !unhandled) {
-						h->handle_mouse_button(button, true);
-						h->handle_mouse_button(button, false); // TODO: needed?
-					}
-					break;
-			}
+						break;
+				}
+				if (h && !unhandled)
+					h->handle_mouse_button(button, ev.button.state == SDL_PRESSED);
+				break;
+			case SDL_MOUSEWHEEL:
+				if (ev.wheel.y > 0)
+					button = WheelUp;
+				else if (ev.wheel.y < 0)
+					button = WheelDown;
+				else
+					unhandled = true;
+				if (h && !unhandled) {
+					h->handle_mouse_button(button, true);
+					h->handle_mouse_button(button, false); // TODO: needed?
+				}
+				break;
 		}
-		return false;
 	}
 };
 

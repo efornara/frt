@@ -53,7 +53,7 @@ public:
 	const char *get_id() const { return "video_sdl2"; }
 	bool probe() {
 		if (!sdl2)
-			sdl2 = SDL2Context::acquire(0, true);
+			sdl2 = SDL2Context::acquire(0, 0, true);
 		return true;
 	}
 	void cleanup() {
@@ -88,7 +88,6 @@ public:
 		SDL_GL_MakeCurrent(window, gl);
 	}
 	void swap_buffers() {
-		sdl2->poll(0);
 		SDL_GL_SwapWindow(window);
 	}
 	int get_window_width() { return view_size.x; }

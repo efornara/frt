@@ -42,17 +42,18 @@ struct SDL2User {
 private:
 	friend SDL2Context;
 	SDL2Context *ctx;
+	EventHandler *h;
 	const SDL_EventType *types;
 	bool valid;
 	SDL2User()
 		: valid(false) {}
 
 public:
-	inline bool poll(SDL_Event *ev);
+	inline void get_event(SDL_Event &ev);
 	inline void release();
 };
 
-class SDL2Context {
+class SDL2Context : public EventDispatcher {
 private:
 	friend SDL2User;
 	static const int max_users = 10;
@@ -61,65 +62,19 @@ private:
 	bool create_window;
 	SDL_Window *window;
 	SDL_Renderer *renderer;
+	SDL_Event ev;
 	SDL2Context()
 		: n_users(0), create_window(true), window(0), renderer(0) {
 		SDL_Init(SDL_INIT_VIDEO);
 	}
-	~SDL2Context() {
+	virtual ~SDL2Context() {
 		if (renderer)
 			SDL_DestroyRenderer(renderer);
 		if (window)
 			SDL_DestroyWindow(window);
 		SDL_Quit();
 	}
-	bool poll(const SDL_EventType *types, SDL_Event *event) {
-		if (create_window && !window)
-			SDL_CreateWindowAndRenderer(100, 100, 0, &window, &renderer);
-		while (1) {
-			SDL_PumpEvents();
-			SDL_Event ev;
-			if (SDL_PeepEvents(&ev, 1, SDL_PEEKEVENT, SDL_FIRSTEVENT,
-			  SDL_LASTEVENT) == 0) {
-				// no events: flush the screen
-				if (window && renderer) {
-					SDL_RenderClear(renderer);
-					SDL_RenderPresent(renderer);
-				}
-				return false;
-			}
-			// is this event type handled by any user?
-			bool user_event = false;
-			for (int i = 0; i < max_users; i++) {
-				if (!users[i].valid || !users[i].types)
-					continue;
-				const SDL_EventType *t = users[i].types;
-				for (int j = 0; t[j] != SDL_LASTEVENT; j++)
-					if (t[j] == ev.type)
-						user_event = true;
-			}
-			// this user in particular?
-			if (user_event && types) {
-				for (int j = 0; types[j] != SDL_LASTEVENT; j++)
-					if (types[j] == ev.type) {
-						// ok: return it to the user
-						SDL_PollEvent(&ev);
-						if (event)
-							*event = ev;
-						return true;
-					}
-			}
-			if (!user_event) {
-				// no user is asking for this type of event: handle it here
-				SDL_PollEvent(&ev);
-				if (ev.type == SDL_QUIT)
-					exit(0);
-			} else {
-				// some other user is waiting for this event...
-				return false;
-			}
-		}
-	}
-	SDL2User *acquire_(const SDL_EventType *types, bool window_owner) {
+	SDL2User *acquire_(const SDL_EventType *types, EventHandler *handler, bool window_owner) {
 		for (int i = 0; i < max_users; i++) {
 			if (users[i].valid)
 				continue;
@@ -127,6 +82,7 @@ private:
 			users[i].valid = true;
 			users[i].ctx = this;
 			users[i].types = types;
+			users[i].h = handler;
 			if (window_owner)
 				create_window = false;
 			return &users[i];
@@ -138,8 +94,36 @@ private:
 		if (--n_users == 0) {
 			delete this;
 			App *app = App::instance();
+			app->remove_dispatcher(this);
 			SDL2Context **ctx = (SDL2Context **)app->get_context("sdl2");
 			*ctx = 0;
+		}
+	}
+	// EventDispatcher
+	void dispatch_events() {
+		if (create_window && !window)
+			SDL_CreateWindowAndRenderer(100, 100, 0, &window, &renderer);
+		while (SDL_PollEvent(&ev)) {
+			int i;
+			for (i = 0; i < max_users; i++) {
+				if (!users[i].valid || !users[i].types)
+					continue;
+				const SDL_EventType *t = users[i].types;
+				for (int j = 0; t[j] != SDL_LASTEVENT; j++) {
+					if (t[j] == ev.type) {
+						if (users[i].h)
+							users[i].h->handle_event();
+					}
+				}
+			}
+			if (i == max_users) {
+				if (ev.type == SDL_QUIT)
+					App::instance()->quit();
+			}
+		}
+		if (window && renderer) {
+			SDL_RenderClear(renderer);
+			SDL_RenderPresent(renderer);
 		}
 	}
 
@@ -148,17 +132,19 @@ private:
 		Be careful: no safeguards here!
 	 */
 public:
-	static SDL2User *acquire(const SDL_EventType *types, bool window_owner = false) {
+	static SDL2User *acquire(const SDL_EventType *types, EventHandler *handler, bool window_owner = false) {
 		App *app = App::instance();
 		SDL2Context **ctx = (SDL2Context **)app->get_context("sdl2");
-		if (!*ctx)
+		if (!*ctx) {
 			*ctx = new SDL2Context();
-		return (*ctx)->acquire_(types, window_owner);
+			app->add_dispatcher(*ctx);
+		}
+		return (*ctx)->acquire_(types, handler, window_owner);
 	}
 };
 
-inline bool SDL2User::poll(SDL_Event *ev) {
-	return ctx->poll(types, ev);
+inline void SDL2User::get_event(SDL_Event &ev) {
+	ev = ctx->ev;
 }
 
 inline void SDL2User::release() {

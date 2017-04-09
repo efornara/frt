@@ -68,6 +68,29 @@ void **App::get_context(const char *key) {
 	return &c[nc++].value;
 }
 
+void App::add_dispatcher(EventDispatcher *dispatcher) {
+	if (nd >= max_dispatchers)
+		return;
+	d[nd++] = dispatcher;
+}
+
+void App::remove_dispatcher(EventDispatcher *dispatcher) {
+	int i;
+	for (i = 0; i < nd; i++)
+		if (d[i] == dispatcher)
+			break;
+	if (i == nd)
+		return;
+	nd--;
+	for (; i < nd; i++)
+		d[i] = d[i + 1];
+}
+
+void App::dispatch_events() {
+	for (int i = 0; i < nd; i++)
+		d[i]->dispatch_events();
+}
+
 App *App::instance() {
 	static App *r = 0;
 	if (!r)

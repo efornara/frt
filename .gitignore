@@ -2,5 +2,6 @@
 *.swp
 *.pyc
 *.bin
+a.out
 logo.h
 private/

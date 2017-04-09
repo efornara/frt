@@ -38,10 +38,19 @@ struct Module {
 	virtual bool handle_meta(int gd_code, bool pressed) { return false; }
 };
 
+struct EventDispatcher {
+	virtual void dispatch_events() = 0;
+};
+
+struct EventHandler {
+	virtual void handle_event() = 0;
+};
+
 class App {
 public:
 	static const int max_modules = 30;
 	static const int max_contexts = 10;
+	static const int max_dispatchers = 10;
 	void register_(Module *module);
 	int size() const { return nm; }
 	Module *get(int i) const { return m[i]; }
@@ -53,17 +62,24 @@ public:
 		return probe(ids);
 	}
 	void **get_context(const char *key);
+	void add_dispatcher(EventDispatcher *dispatcher);
+	void remove_dispatcher(EventDispatcher *dispatcher);
+	void dispatch_events();
+	void quit() { running = false; }
+	bool is_running() const { return running; }
 	static App *instance();
 
 private:
 	App()
-		: nm(0), nc(0) {}
+		: nm(0), nc(0), nd(0), running(true) {}
 	Module *m[max_modules];
 	struct {
 		const char *key;
 		void *value;
 	} c[max_contexts];
-	int nm, nc;
+	EventDispatcher *d[max_dispatchers];
+	int nm, nc, nd;
+	bool running;
 };
 
 struct RegisterModule {

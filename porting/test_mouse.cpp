@@ -63,12 +63,16 @@ static struct MouseHandler : public Mouse::Handler {
 } handler;
 
 int main(int argc, char *argv[]) {
-	Mouse *mouse = (Mouse *)App::instance()->probe_single();
+	App *app = App::instance();
+	Mouse *mouse = (Mouse *)app->probe_single();
 	assert(mouse);
 	mouse->set_size(Vec2(640, 480));
 	mouse->set_handler(&handler);
 	handler.mouse = mouse;
-	while (!mouse->poll())
+	while (app->is_running()) {
+		mouse->poll(); // TODO: remove
+		app->dispatch_events();
 		usleep(20000);
+	}
 	mouse->cleanup();
 }

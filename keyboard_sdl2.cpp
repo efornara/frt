@@ -127,7 +127,7 @@ static const SDL_EventType handled_types[] = {
 	SDL_LASTEVENT,
 };
 
-class KeyboardSDL2 : public Keyboard {
+class KeyboardSDL2 : public Keyboard, public EventHandler {
 private:
 	SDL2User *sdl2;
 	Handler *h;
@@ -145,7 +145,7 @@ public:
 	const char *get_id() const { return "keyboard_sdl2"; }
 	bool probe() {
 		if (!sdl2)
-			sdl2 = SDL2Context::acquire(handled_types);
+			sdl2 = SDL2Context::acquire(handled_types, this);
 		return true;
 	}
 	void cleanup() {
@@ -158,27 +158,27 @@ public:
 	void set_handler(Handler *handler) {
 		h = handler;
 	}
-	bool poll() {
+	bool poll() { return false; }
+	void get_modifier_state(InputModifierState &state) const { state = st; }
+	// EventHandler
+	void handle_event() {
 		SDL_Event ev;
-		while (sdl2->poll(&ev)) {
-			st.shift = ev.key.keysym.mod & KMOD_SHIFT;
-			st.alt = ev.key.keysym.mod & KMOD_ALT;
-			st.control = ev.key.keysym.mod & KMOD_CTRL;
-			st.meta = ev.key.keysym.mod & KMOD_GUI;
-			if (ev.key.repeat)
-				continue;
-			bool pressed = ev.key.state == SDL_PRESSED;
-			for (int i = 0; keymap[i].sdl2_code; i++) {
-				if (keymap[i].sdl2_code == ev.key.keysym.sym) {
-					if (h)
-						h->handle_keyboard_key(keymap[i].gd_code, pressed);
-					break;
-				}
+		sdl2->get_event(ev);
+		st.shift = ev.key.keysym.mod & KMOD_SHIFT;
+		st.alt = ev.key.keysym.mod & KMOD_ALT;
+		st.control = ev.key.keysym.mod & KMOD_CTRL;
+		st.meta = ev.key.keysym.mod & KMOD_GUI;
+		if (ev.key.repeat)
+			return;
+		bool pressed = ev.key.state == SDL_PRESSED;
+		for (int i = 0; keymap[i].sdl2_code; i++) {
+			if (keymap[i].sdl2_code == ev.key.keysym.sym) {
+				if (h)
+					h->handle_keyboard_key(keymap[i].gd_code, pressed);
+				return;
 			}
 		}
-		return false;
 	}
-	void get_modifier_state(InputModifierState &state) const { state = st; }
 };
 
 FRT_REGISTER(KeyboardSDL2)

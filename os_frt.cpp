@@ -76,6 +76,7 @@ using namespace frt;
 
 class OS_FRT : public OS_Unix, public Runnable {
 private:
+	App *app;
 	Environment *env;
 	Vec2 screen_size;
 	ContextGL *context_gl;
@@ -103,7 +104,6 @@ private:
 #endif
 	int event_id;
 	InputDefault *input;
-	bool quit;
 	MouseVirtual mouse_virtual;
 
 public:
@@ -369,18 +369,19 @@ public:
 			env->keyboard->set_handler(&keyboard_handler);
 		}
 		main_loop->init();
-		while (!quit) {
+		while (app->is_running()) {
 			if (env->mouse && env->mouse->poll())
 				break;
 			if (env->keyboard && env->keyboard->poll())
 				break;
+			app->dispatch_events();
 			if (Main::iteration() == true)
 				break;
 		};
 		main_loop->finish();
 	}
 	OS_FRT()
-		: event_id(0), quit(false) {
+		: event_id(0) {
 #ifdef ALSA_ENABLED
 		AudioDriverManagerSW::add_driver(&driver_alsa);
 #endif
@@ -397,7 +398,7 @@ public:
 	bool handle_meta(int gd_code, bool pressed) {
 		switch (gd_code) {
 		case 'Q':
-			quit = true;
+			app->quit();
 			break;
 		default:
 			return dispatch_handle_meta(gd_code, pressed);
@@ -406,6 +407,7 @@ public:
 	}
 	// Runnable
 	void setup_env(Environment *env) {
+		app = App::instance();
 		this->env = env;
 		assert(env->video);
 		screen_size = env->video->get_screen_size();

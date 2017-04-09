@@ -55,11 +55,15 @@ static struct KeyboardHandler : public Keyboard::Handler {
 } handler;
 
 int main(int argc, char *argv[]) {
+	App *app = App::instance();
 	Keyboard *keyboard = (Keyboard *)App::instance()->probe_single();
 	assert(keyboard);
 	handler.keyboard = keyboard;
 	keyboard->set_handler(&handler);
-	while (!keyboard->poll())
+	while (app->is_running()) {
+		keyboard->poll(); // TODO: remove
+		app->dispatch_events();
 		usleep(20000);
+	}
 	keyboard->cleanup();
 }
