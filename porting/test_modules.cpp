@@ -47,7 +47,7 @@ FRT_REGISTER(Type1Impl1)
 #include "bits/frt_app_impl.h"
 
 int main(int argc, char *argv[]) {
-	frt::Registry *frt = frt::Registry::instance();
+	frt::App *app = frt::App::instance();
 	const char *type1_modules[] = {
 		"missing",
 		"type1_impl1",
@@ -55,13 +55,13 @@ int main(int argc, char *argv[]) {
 		0
 	};
 	void **ctx;
-	ctx = frt->get_context("type1");
+	ctx = app->get_context("type1");
 	assert(ctx);
 	*ctx = malloc(10);
-	ctx = frt->get_context("type1");
+	ctx = app->get_context("type1");
 	free(*ctx);
 	*ctx = 0;
-	frt::Module *module = frt->probe(type1_modules);
+	frt::Module *module = app->probe(type1_modules);
 	assert(module);
 	assert(!strcmp(module->get_id(), "type1_impl1"));
 	Type1 *type1 = (Type1 *)module;

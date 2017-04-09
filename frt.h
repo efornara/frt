@@ -38,7 +38,7 @@ struct Module {
 	virtual bool handle_meta(int gd_code, bool pressed) { return false; }
 };
 
-class Registry {
+class App {
 public:
 	static const int max_modules = 30;
 	static const int max_contexts = 10;
@@ -53,10 +53,10 @@ public:
 		return probe(ids);
 	}
 	void **get_context(const char *key);
-	static Registry *instance();
+	static App *instance();
 
 private:
-	Registry()
+	App()
 		: nm(0), nc(0) {}
 	Module *m[max_modules];
 	struct {
@@ -68,7 +68,7 @@ private:
 
 struct RegisterModule {
 	RegisterModule(Module *module) {
-		Registry::instance()->register_(module);
+		App::instance()->register_(module);
 	}
 };
 

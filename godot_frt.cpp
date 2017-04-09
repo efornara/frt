@@ -35,7 +35,7 @@ static Environment env;
 static Runnable *runnable;
 
 static void probe_modules() {
-	Registry *frt = Registry::instance();
+	App *app = App::instance();
 	Module *module;
 
 	const char *video_modules[] = {
@@ -43,7 +43,7 @@ static void probe_modules() {
 		"video_sdl2",
 		0
 	};
-	module = frt->probe(video_modules);
+	module = app->probe(video_modules);
 	env.video = (Video *)module;
 
 	const char *keyboard_modules[] = {
@@ -51,7 +51,7 @@ static void probe_modules() {
 		"keyboard_sdl2",
 		0
 	};
-	module = frt->probe(keyboard_modules);
+	module = app->probe(keyboard_modules);
 	env.keyboard = (Keyboard *)module;
 
 	const char *mouse_modules[] = {
@@ -59,14 +59,14 @@ static void probe_modules() {
 		"mouse_sdl2",
 		0
 	};
-	module = frt->probe(mouse_modules);
+	module = app->probe(mouse_modules);
 	env.mouse = (Mouse *)module;
 
 	const char *runnable_modules[] = {
 		"frt_os_unix",
 		0
 	};
-	module = frt->probe(runnable_modules);
+	module = app->probe(runnable_modules);
 	runnable = (Runnable *)module;
 }
 

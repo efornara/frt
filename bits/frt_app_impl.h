@@ -1,4 +1,4 @@
-// frt_registry_impl.h
+// frt_app_impl.h
 /*
  * FRT - A Godot platform targeting single board computers
  * Copyright (c) 2017  Emanuele Fornara
@@ -27,20 +27,20 @@
 
 namespace frt {
 
-void Registry::register_(Module *module) {
+void App::register_(Module *module) {
 	if (nm >= max_modules)
 		return;
 	m[nm++] = module;
 }
 
-Module *Registry::get(const char *id) const {
+Module *App::get(const char *id) const {
 	for (int i = 0; i < nm; i++)
 		if (!strcmp(id, m[i]->get_id()))
 			return m[i];
 	return 0;
 }
 
-Module *Registry::probe(const char *ids[]) {
+Module *App::probe(const char *ids[]) {
 	for (int i = 0; ids[i]; i++) {
 		Module *module = get(ids[i]);
 		if (module && module->probe())
@@ -49,7 +49,7 @@ Module *Registry::probe(const char *ids[]) {
 	return 0;
 }
 
-Module *Registry::probe_single() {
+Module *App::probe_single() {
 	if (nm != 1)
 		return 0;
 	if (!m[0]->probe())
@@ -57,7 +57,7 @@ Module *Registry::probe_single() {
 	return m[0];
 }
 
-void **Registry::get_context(const char *key) {
+void **App::get_context(const char *key) {
 	for (int i = 0; i < nc; i++)
 		if (!strcmp(key, c[i].key))
 			return &c[i].value;
@@ -68,10 +68,10 @@ void **Registry::get_context(const char *key) {
 	return &c[nc++].value;
 }
 
-Registry *Registry::instance() {
-	static Registry *r = 0;
+App *App::instance() {
+	static App *r = 0;
 	if (!r)
-		r = new Registry();
+		r = new App();
 	return r;
 }
 

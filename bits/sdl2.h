@@ -137,8 +137,8 @@ private:
 		u->valid = false;
 		if (--n_users == 0) {
 			delete this;
-			Registry *registry = Registry::instance();
-			SDL2Context **ctx = (SDL2Context **)registry->get_context("sdl2");
+			App *app = App::instance();
+			SDL2Context **ctx = (SDL2Context **)app->get_context("sdl2");
 			*ctx = 0;
 		}
 	}
@@ -149,8 +149,8 @@ private:
 	 */
 public:
 	static SDL2User *acquire(const SDL_EventType *types, bool window_owner = false) {
-		Registry *registry = Registry::instance();
-		SDL2Context **ctx = (SDL2Context **)registry->get_context("sdl2");
+		App *app = App::instance();
+		SDL2Context **ctx = (SDL2Context **)app->get_context("sdl2");
 		if (!*ctx)
 			*ctx = new SDL2Context();
 		return (*ctx)->acquire_(types, window_owner);

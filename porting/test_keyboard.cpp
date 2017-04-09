@@ -55,7 +55,7 @@ static struct KeyboardHandler : public Keyboard::Handler {
 } handler;
 
 int main(int argc, char *argv[]) {
-	Keyboard *keyboard = (Keyboard *)Registry::instance()->probe_single();
+	Keyboard *keyboard = (Keyboard *)App::instance()->probe_single();
 	assert(keyboard);
 	handler.keyboard = keyboard;
 	keyboard->set_handler(&handler);

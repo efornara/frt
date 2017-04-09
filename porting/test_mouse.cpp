@@ -63,7 +63,7 @@ static struct MouseHandler : public Mouse::Handler {
 } handler;
 
 int main(int argc, char *argv[]) {
-	Mouse *mouse = (Mouse *)Registry::instance()->probe_single();
+	Mouse *mouse = (Mouse *)App::instance()->probe_single();
 	assert(mouse);
 	mouse->set_size(Vec2(640, 480));
 	mouse->set_handler(&handler);

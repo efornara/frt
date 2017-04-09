@@ -102,7 +102,7 @@ void iteration(bool vsync) {
 }
 
 int main(int argc, char *argv[]) {
-	video = (Video *)Registry::instance()->probe_single();
+	video = (Video *)App::instance()->probe_single();
 	assert(video);
 	Vec2 size(640, 480);
 	gl = video->create_the_gl_context(size);
