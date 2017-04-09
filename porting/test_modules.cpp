@@ -44,7 +44,7 @@ struct Type1Impl1 : public Type1 {
 
 FRT_REGISTER(Type1Impl1)
 
-#include "bits/frt_registry_impl.h"
+#include "bits/frt_app_impl.h"
 
 int main(int argc, char *argv[]) {
 	frt::Registry *frt = frt::Registry::instance();

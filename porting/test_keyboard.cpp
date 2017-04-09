@@ -33,7 +33,7 @@
 
 #include <unistd.h>
 
-#include "bits/frt_registry_impl.h"
+#include "bits/frt_app_impl.h"
 
 using namespace frt;
 
