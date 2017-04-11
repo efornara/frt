@@ -70,7 +70,6 @@ int main(int argc, char *argv[]) {
 	mouse->set_handler(&handler);
 	handler.mouse = mouse;
 	while (app->is_running()) {
-		mouse->poll(); // TODO: remove
 		app->dispatch_events();
 		usleep(20000);
 	}

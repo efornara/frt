@@ -40,9 +40,10 @@ inline void clamp(int &v, const int max) {
 		v = max - 1;
 }
 
-class MouseLinuxInput : public Mouse, public LinuxInput {
+class MouseLinuxInput : public Mouse, public EventDispatcher, public LinuxInput {
 private:
 	static const int wait_ms = 100;
+	bool valid;
 	Handler *h;
 	bool grabbed;
 	Vec2 size;
@@ -50,11 +51,21 @@ private:
 
 public:
 	MouseLinuxInput()
-		: h(0), grabbed(false) {}
+		: valid(false), h(0), grabbed(false) {}
 	// Module
 	const char *get_id() const { return "mouse_linux_input"; }
-	bool probe() { return open("event-mouse"); }
-	void cleanup() { close(); }
+	bool probe() {
+		valid = open("event-mouse");
+		if (valid)
+			App::instance()->add_dispatcher(this);
+		return valid;
+	}
+	void cleanup() {
+		close();
+		if (valid)
+			App::instance()->remove_dispatcher(this);
+		valid = false;
+	}
 	bool handle_meta(int gd_code, bool pressed) {
 		if (pressed)
 			return false;
@@ -108,6 +119,8 @@ public:
 				h->handle_mouse_button(button, pressed);
 		}
 	}
+	// EventDispatcher
+	void dispatch_events() { poll(); }
 	// Mouse
 	Vec2 get_pos() const { return pos; }
 	void set_size(Vec2 size) {
@@ -119,7 +132,6 @@ public:
 		h = handler;
 		grabbed = LinuxInput::grab(true, wait_ms);
 	}
-	bool poll() { return LinuxInput::poll(); }
 };
 
 FRT_REGISTER(MouseLinuxInput)

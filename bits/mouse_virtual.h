@@ -27,7 +27,7 @@
 
 namespace frt {
 
-class MouseVirtual : public Mouse {
+class MouseVirtual : public Mouse, public EventDispatcher {
 private:
 	static const int speed = 2;
 	Handler *h;
@@ -50,8 +50,13 @@ public:
 	}
 	// Module
 	const char *get_id() const { return "mouse_virtual"; }
-	bool probe() { return true; }
-	void cleanup() {}
+	bool probe() {
+		App::instance()->add_dispatcher(this);
+		return true;
+	}
+	void cleanup() {
+		App::instance()->remove_dispatcher(this);
+	}
 	bool handle_meta(int gd_code, bool pressed) {
 		switch (gd_code) {
 			case GD_KEY_UP:
@@ -75,19 +80,10 @@ public:
 		}
 		return true;
 	}
-	// Mouse
-	Vec2 get_pos() const { return pos; }
-	void set_size(Vec2 size) {
-		this->size = size;
-		pos.x = size.x - 1;
-		pos.y = size.y - 1;
-	}
-	void set_handler(Handler *handler) {
-		h = handler;
-	}
-	bool poll() {
+	// EventDispatcher
+	void dispatch_events() {
 		if (!st.up && !st.down && !st.left && !st.right)
-			return false;
+			return;
 		if (st.up)
 			pos.y -= speed;
 		if (st.down)
@@ -98,7 +94,16 @@ public:
 			pos.x += speed;
 		if (h)
 			h->handle_mouse_motion(pos);
-		return false;
+	}
+	// Mouse
+	Vec2 get_pos() const { return pos; }
+	void set_size(Vec2 size) {
+		this->size = size;
+		pos.x = size.x - 1;
+		pos.y = size.y - 1;
+	}
+	void set_handler(Handler *handler) {
+		h = handler;
 	}
 };
 

@@ -112,7 +112,6 @@ struct Keyboard : public Module {
 		virtual void handle_keyboard_key(int gd_code, bool pressed) = 0;
 	};
 	virtual void set_handler(Handler *handler) = 0;
-	virtual bool poll() = 0;
 	virtual void get_modifier_state(InputModifierState &state) const = 0;
 };
 
@@ -131,7 +130,6 @@ struct Mouse : public Module {
 	virtual Vec2 get_pos() const = 0;
 	virtual void set_size(Vec2 size) = 0;
 	virtual void set_handler(Handler *handler) = 0;
-	virtual bool poll() = 0;
 };
 
 struct Environment {

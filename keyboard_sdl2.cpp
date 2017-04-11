@@ -167,7 +167,6 @@ public:
 	void set_handler(Handler *handler) {
 		h = handler;
 	}
-	bool poll() { return false; }
 	void get_modifier_state(InputModifierState &state) const { state = st; }
 	// EventHandler
 	void handle_event() {

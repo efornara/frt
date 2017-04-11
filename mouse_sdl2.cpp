@@ -62,7 +62,6 @@ public:
 	Vec2 get_pos() const { return pos; }
 	void set_size(Vec2 size) {}
 	void set_handler(Handler *handler) { h = handler; }
-	bool poll() { return false; }
 	// EventHandler
 	void handle_event() {
 		SDL_Event ev;

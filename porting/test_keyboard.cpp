@@ -61,7 +61,6 @@ int main(int argc, char *argv[]) {
 	handler.keyboard = keyboard;
 	keyboard->set_handler(&handler);
 	while (app->is_running()) {
-		keyboard->poll(); // TODO: remove
 		app->dispatch_events();
 		usleep(20000);
 	}

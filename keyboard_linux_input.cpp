@@ -135,11 +135,12 @@ static struct KeyMap {
 	  { 0, 0 },
   };
 
-class KeyboardLinuxInput : public Keyboard, public LinuxInput {
+class KeyboardLinuxInput : public Keyboard, public EventDispatcher, public LinuxInput {
 private:
 	static const int left_mask = 0x01;
 	static const int right_mask = 0x02;
 	static const int wait_ms = 100;
+	bool valid;
 	Handler *h;
 	bool grabbed;
 	InputModifierState st;
@@ -168,7 +169,7 @@ private:
 
 public:
 	KeyboardLinuxInput()
-		: h(0), grabbed(false) {
+		: valid(false), h(0), grabbed(false) {
 		st.shift = false;
 		st.alt = false;
 		st.control = false;
@@ -180,8 +181,18 @@ public:
 	}
 	// Module
 	const char *get_id() const { return "keyboard_linux_input"; }
-	bool probe() { return open("event-kbd"); }
-	void cleanup() { close(); }
+	bool probe() {
+		valid = open("event-kbd");
+		if (valid)
+			App::instance()->add_dispatcher(this);
+		return valid;
+	}
+	void cleanup() {
+		close();
+		if (valid)
+			App::instance()->remove_dispatcher(this);
+		valid = false;
+	}
 	bool handle_meta(int gd_code, bool pressed) {
 		if (pressed)
 			return false;
@@ -211,12 +222,13 @@ public:
 			}
 		}
 	}
+	// EventDispatcher
+	void dispatch_events() { poll(); }
 	// Keyboard
 	void set_handler(Handler *handler) {
 		h = handler;
 		grabbed = LinuxInput::grab(true, wait_ms);
 	}
-	bool poll() { return LinuxInput::poll(); }
 	void get_modifier_state(InputModifierState &state) const { state = st; }
 };
 

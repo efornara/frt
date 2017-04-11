@@ -354,8 +354,10 @@ public:
 		keyboard_handler.keyboard = env->keyboard;
 		mouse_handler.instance = this;
 		mouse_handler.video = env->video;
-		if (env->keyboard && !env->mouse)
+		if (env->keyboard && !env->mouse) {
+			mouse_virtual.probe();
 			env->mouse = &mouse_virtual;
+		}
 		if (env->mouse) {
 			env->mouse->set_size(screen_size);
 			Vec2 pos = env->mouse->get_pos();
@@ -370,10 +372,6 @@ public:
 		}
 		main_loop->init();
 		while (app->is_running()) {
-			if (env->mouse && env->mouse->poll())
-				break;
-			if (env->keyboard && env->keyboard->poll())
-				break;
 			app->dispatch_events();
 			if (Main::iteration() == true)
 				break;
