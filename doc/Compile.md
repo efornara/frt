@@ -2,7 +2,7 @@ Compile
 =======
 
 FRT is not really a patch, as it leaves the Godot source untouched. To
-compile, start from the official 2.1.2-stable source tarball:
+compile it, start from the official 2.1.2-stable source tarball:
 
 [https://github.com/godotengine/godot/releases/tag/2.1.2-stable](https://github.com/godotengine/godot/releases/tag/2.1.2-stable)
 
@@ -12,7 +12,7 @@ Go to the platform directory and clone this repository:
 	$ cd platform
 	$ git clone https://github.com/efornara/frt
 
-From the main directory, you have a new "platform" available:
+From the main directory, you now have a new "platform" available:
 
 	$ cd ~/godot-2.1.2-stable
 	$ scons platform=frt target=release frt_arch=pi3 -j 4

@@ -31,8 +31,7 @@ Run a demo:
 
 Press *Win+Q* to quit.
 
-This is the list of meta (Win) keys recognized by *this commit* of FRT.
-The current binaries only support Win+Q.
+This is the list of meta (Win) keys recognized by FRT.
 
 | Meta  | Action |
 | :---: | :--- |
