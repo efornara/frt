@@ -41,7 +41,8 @@ private:
 	} st;
 
 public:
-	MouseVirtual() : h(0) {
+	MouseVirtual()
+		: h(0) {
 		st.up = false;
 		st.down = false;
 		st.left = false;
@@ -53,24 +54,24 @@ public:
 	void cleanup() {}
 	bool handle_meta(int gd_code, bool pressed) {
 		switch (gd_code) {
-		case GD_KEY_UP:
-			st.up = pressed;
-			break;
-		case GD_KEY_DOWN:
-			st.down = pressed;
-			break;
-		case GD_KEY_LEFT:
-			st.left = pressed;
-			break;
-		case GD_KEY_RIGHT:
-			st.right = pressed;
-			break;
-		case GD_KEY_RETURN:
-			if (h)
-				h->handle_mouse_button(Left, pressed);
-			break;
-		default:
-			return false;
+			case GD_KEY_UP:
+				st.up = pressed;
+				break;
+			case GD_KEY_DOWN:
+				st.down = pressed;
+				break;
+			case GD_KEY_LEFT:
+				st.left = pressed;
+				break;
+			case GD_KEY_RIGHT:
+				st.right = pressed;
+				break;
+			case GD_KEY_RETURN:
+				if (h)
+					h->handle_mouse_button(Left, pressed);
+				break;
+			default:
+				return false;
 		}
 		return true;
 	}

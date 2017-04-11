@@ -92,10 +92,10 @@ void App::dispatch_events() {
 }
 
 App *App::instance() {
-	static App *r = 0;
-	if (!r)
-		r = new App();
-	return r;
+	static App *a = 0;
+	if (!a)
+		a = new App();
+	return a;
 }
 
 } // namespace frt

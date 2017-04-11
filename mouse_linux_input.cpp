@@ -49,7 +49,8 @@ private:
 	Vec2 pos;
 
 public:
-	MouseLinuxInput() : h(0), grabbed(false) {}
+	MouseLinuxInput()
+		: h(0), grabbed(false) {}
 	// Module
 	const char *get_id() const { return "mouse_linux_input"; }
 	bool probe() { return open("event-mouse"); }
@@ -58,12 +59,12 @@ public:
 		if (pressed)
 			return false;
 		switch (gd_code) {
-		case 'M':
-			if (LinuxInput::grab(!grabbed, wait_ms))
-				grabbed = !grabbed;
-			return true;
-		default:
-			return false;
+			case 'M':
+				if (LinuxInput::grab(!grabbed, wait_ms))
+					grabbed = !grabbed;
+				return true;
+			default:
+				return false;
 		}
 	}
 	// LinuxInput

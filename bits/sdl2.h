@@ -92,9 +92,9 @@ private:
 	void release(SDL2User *u) {
 		u->valid = false;
 		if (--n_users == 0) {
-			delete this;
 			App *app = App::instance();
 			app->remove_dispatcher(this);
+			delete this;
 			SDL2Context **ctx = (SDL2Context **)app->get_context("sdl2");
 			*ctx = 0;
 		}
@@ -116,10 +116,8 @@ private:
 					}
 				}
 			}
-			if (i == max_users) {
-				if (ev.type == SDL_QUIT)
-					App::instance()->quit();
-			}
+			if (ev.type == SDL_QUIT)
+				App::instance()->quit();
 		}
 		if (window && renderer) {
 			SDL_RenderClear(renderer);

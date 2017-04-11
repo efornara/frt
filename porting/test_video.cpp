@@ -70,8 +70,10 @@ static void dispatch_meta() {
 }
 
 #else
-static void dispatch_meta() {}
-static void usleep(int us) {}
+static void dispatch_meta() {
+}
+static void usleep(int us) {
+}
 #endif
 
 void iteration(bool vsync) {
