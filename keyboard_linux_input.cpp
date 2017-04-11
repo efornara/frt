@@ -100,13 +100,14 @@ static struct KeyMap {
 	  { KEY_RIGHT, GD_KEY_RIGHT },
 	  { KEY_TAB, GD_KEY_TAB },
 	  { KEY_BACKSPACE, GD_KEY_BACKSPACE },
-	  { KEY_ENTER, GD_KEY_RETURN },
 	  { KEY_INSERT, GD_KEY_INSERT },
 	  { KEY_DELETE, GD_KEY_DELETE },
 	  { KEY_HOME, GD_KEY_HOME },
 	  { KEY_END, GD_KEY_END },
 	  { KEY_PAGEUP, GD_KEY_PAGEUP },
 	  { KEY_PAGEDOWN, GD_KEY_PAGEDOWN },
+	  { KEY_ENTER, GD_KEY_RETURN },
+	  { KEY_ESC, GD_KEY_ESCAPE },
 	  { KEY_LEFTCTRL, GD_KEY_CONTROL },
 	  { KEY_RIGHTCTRL, GD_KEY_CONTROL },
 	  { KEY_LEFTALT, GD_KEY_ALT },
@@ -166,7 +167,8 @@ private:
 	}
 
 public:
-	KeyboardLinuxInput() : h(0), grabbed(false) {
+	KeyboardLinuxInput()
+		: h(0), grabbed(false) {
 		st.shift = false;
 		st.alt = false;
 		st.control = false;
@@ -184,12 +186,12 @@ public:
 		if (pressed)
 			return false;
 		switch (gd_code) {
-		case 'K':
-			if (LinuxInput::grab(!grabbed, wait_ms))
-				grabbed = !grabbed;
-			return true;
-		default:
-			return false;
+			case 'K':
+				if (LinuxInput::grab(!grabbed, wait_ms))
+					grabbed = !grabbed;
+				return true;
+			default:
+				return false;
 		}
 	}
 	// LinuxInput
