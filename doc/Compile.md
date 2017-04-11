@@ -15,7 +15,7 @@ Go to the platform directory and clone this repository:
 From the main directory, you have a new "platform" available:
 
 	$ cd ~/godot-2.1.2-stable
-	$ scons platform=frt target=release tools=no frt_arch=pi3 -j 4
+	$ scons platform=frt target=release frt_arch=pi3 -j 4
 
 This should work on the upcoming 2.1.3 version too.
 

@@ -23,13 +23,18 @@ def can_build():
 def get_opts():
 
 	return [
-		('frt_arch', 'Architecture (none/pi1/pi2/pi3)', 'pi1'),
+		('frt_arch', 'Architecture (pc/pi1/pi2/pi3)', 'pc'),
 	]
 
 
 def get_flags():
 
 	return [
+		('builtin_freetype', 'no'),
+		('builtin_openssl', 'no'),
+		('builtin_libpng', 'no'),
+		('builtin_zlib', 'no'),
+		('tools', 'no'),
 	]
 
 
@@ -43,6 +48,15 @@ def configure(env):
 		env.ParseConfig('pkg-config alsa --cflags --libs')
 	else:
 		print("ALSA libraries not found, disabling driver")
+
+	if (env['builtin_freetype'] == 'no'):
+		env.ParseConfig('pkg-config freetype2 --cflags --libs')
+	if (env['builtin_openssl'] == 'no'):
+		env.ParseConfig('pkg-config openssl --cflags --libs')
+	if (env['builtin_libpng'] == 'no'):
+		env.ParseConfig('pkg-config libpng --cflags --libs')
+	if (env['builtin_zlib'] == 'no'):
+		env.ParseConfig('pkg-config zlib --cflags --libs')
 
 	import methods
 
@@ -67,15 +81,15 @@ def configure(env):
 		env.Append(CCFLAGS=['-mcpu=cortex-a53', '-mfpu=neon-fp-armv8'])
 		env.extra_suffix += ".pi3"
 
-	if (env["frt_arch"] != "none"):
+	if (env["frt_arch"] != "pc"):
 		env.Append(CCFLAGS=['-mfloat-abi=hard', '-mlittle-endian', '-munaligned-access'])
 
 	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED'])
 	env.Append(LIBS=['pthread'])
 
-	if (env["frt_arch"] == "none"):
+	if (env["frt_arch"] == "pc"):
 		env.Append(FRT_MODULES=['video_sdl2.cpp', 'keyboard_sdl2.cpp', 'mouse_sdl2.cpp'])
-		env.Append(LIBS=['-lGLESv2', '-lSDL2'])
+		env.Append(LIBS=['GLESv2', 'SDL2'])
 	else:
 		env.Append(FRT_MODULES=['video_bcm.cpp', 'keyboard_linux_input.cpp', 'mouse_linux_input.cpp'])
 		env.Append(CCFLAGS=['-I/opt/vc/include/'])
@@ -84,4 +98,4 @@ def configure(env):
 
 	import version
 	if version.major >= 3:
-		env.Append(LIBS=['-ldl'])
+		env.Append(LIBS=['dl'])

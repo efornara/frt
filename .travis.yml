@@ -12,5 +12,9 @@ addons:
       - libsdl2-dev
       - libgles2-mesa-dev
       - libasound2-dev
+      - libfreetype6-dev
+      - libssl-dev
+      - libpng12-dev
+      - zlib1g-dev
 script:
   - make ci
