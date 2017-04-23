@@ -64,6 +64,9 @@
 #include "drivers/gles3/rasterizer_gles3.h"
 typedef AudioDriverManager AudioDriverManagerSW;
 typedef AudioDriver AudioDriverSW;
+#define set_mouse_pos set_mouse_position
+#define get_mouse_pos get_mouse_position
+#define get_mouse_speed get_last_mouse_speed
 
 #else
 #error "unhandled godot version"
@@ -134,6 +137,8 @@ public:
 			visual_server = memnew(VisualServerWrapMT(
 					visual_server, get_render_thread_mode() == RENDER_SEPARATE_THREAD));
 #else
+		RasterizerGLES3::register_config();
+		RasterizerGLES3::make_current();
 		visual_server = memnew(VisualServerRaster);
 #endif
 		// TODO: Audio Module
@@ -182,6 +187,9 @@ public:
 		audio_server->finish();
 		memdelete(audio_server);
 		visual_server->finish();
+#else // VERSION_MAJOR == 3
+		for (int i = 0; i < get_audio_driver_count(); i++)
+			AudioDriverManager::get_driver(i)->finish();
 #endif
 		memdelete(visual_server);
 #if VERSION_MAJOR == 2
@@ -264,13 +272,8 @@ public:
 		input->set_mouse_pos(mouse_pos);
 		motion_event.mouse_motion.global_x = mouse_pos.x;
 		motion_event.mouse_motion.global_y = mouse_pos.y;
-#if VERSION_MAJOR == 2
 		motion_event.mouse_motion.speed_x = input->get_mouse_speed().x;
 		motion_event.mouse_motion.speed_y = input->get_mouse_speed().y;
-#else // VERSION_MAJOR == 3
-		motion_event.mouse_motion.speed_x = input->get_last_mouse_speed().x;
-		motion_event.mouse_motion.speed_y = input->get_last_mouse_speed().y;
-#endif
 		motion_event.mouse_motion.relative_x = 0;
 		motion_event.mouse_motion.relative_y = 0;
 		input->parse_input_event(motion_event);
