@@ -40,6 +40,7 @@ static void probe_modules() {
 
 	const char *video_modules[] = {
 		"video_bcm",
+		"video_mali",
 		"video_sdl2",
 		0
 	};

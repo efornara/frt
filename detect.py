@@ -23,7 +23,7 @@ def can_build():
 def get_opts():
 
 	return [
-		('frt_arch', 'Architecture (pc/pi1/pi2/pi3)', 'pc'),
+		('frt_arch', 'Architecture (pc/pi1/pi2/pi3/mali)', 'pc'),
 	]
 
 
@@ -81,7 +81,7 @@ def configure(env):
 		env.Append(CCFLAGS=['-mcpu=cortex-a53', '-mfpu=neon-fp-armv8'])
 		env.extra_suffix += ".pi3"
 
-	if (env["frt_arch"] != "pc"):
+	if (env["frt_arch"].startswith("pi")):
 		env.Append(CCFLAGS=['-mfloat-abi=hard', '-mlittle-endian', '-munaligned-access'])
 
 	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED'])
@@ -90,6 +90,9 @@ def configure(env):
 	if (env["frt_arch"] == "pc"):
 		env.Append(FRT_MODULES=['video_sdl2.cpp', 'keyboard_sdl2.cpp', 'mouse_sdl2.cpp'])
 		env.Append(LIBS=['GLESv2', 'SDL2'])
+	elif (env["frt_arch"] == "mali"):
+		env.Append(FRT_MODULES=['video_mali.cpp', 'keyboard_linux_input.cpp', 'mouse_linux_input.cpp'])
+		env.Append(LIBS=['GLESv2', 'EGL'])
 	else:
 		env.Append(FRT_MODULES=['video_bcm.cpp', 'keyboard_linux_input.cpp', 'mouse_linux_input.cpp'])
 		env.Append(CCFLAGS=['-I/opt/vc/include/'])
