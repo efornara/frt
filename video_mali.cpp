@@ -33,78 +33,27 @@
 #include "frt.h"
 
 #include <stdio.h>
-#include <assert.h>
 
 #include <GLES2/gl2.h>
-#include <EGL/egl.h>
+
+#include "bits/egl_base_context.h"
 
 namespace frt {
 
-// TODO: factor out common EGL context
-class EGLMaliContext {
+class EGLMaliContext : public EGLBaseContext {
 private:
-	EGLDisplay display;
-	EGLContext context;
-	EGLSurface surface;
-	EGLConfig config;
 	struct {
 		uint16_t width;
 		uint16_t height;
 	} nativewindow;
 
 public:
-	void init() {
-		static const EGLint attr_list[] = {
-			EGL_RED_SIZE, 8,
-			EGL_GREEN_SIZE, 8,
-			EGL_BLUE_SIZE, 8,
-			EGL_ALPHA_SIZE, 8,
-			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-			EGL_NONE
-		};
-		static const EGLint ctx_attrs[] = {
-			EGL_CONTEXT_CLIENT_VERSION, 2,
-			EGL_NONE
-		};
-		EGLBoolean result;
-		EGLint num_config;
-		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-		assert(display != EGL_NO_DISPLAY);
-		result = eglInitialize(display, 0, 0);
-		assert(result != EGL_FALSE);
-		result = eglChooseConfig(display, attr_list, &config, 1, &num_config);
-		assert(result != EGL_FALSE);
-		result = eglBindAPI(EGL_OPENGL_ES_API);
-		assert(result != EGL_FALSE);
-		context = eglCreateContext(display, config, EGL_NO_CONTEXT, ctx_attrs);
-		assert(context != EGL_NO_CONTEXT);
-	};
-	void cleanup() {
-		eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-		eglDestroyContext(display, context);
-		eglTerminate(display);
-	}
 	void create_surface(const Vec2 &size) {
 		nativewindow.width = size.x;
 		nativewindow.height = size.y;
 		surface = eglCreateWindowSurface(display, config,
 										 (EGLNativeWindowType)&nativewindow, 0);
 		assert(surface != EGL_NO_SURFACE);
-	}
-	void destroy_surface() {
-		eglDestroySurface(display, surface);
-	}
-	void make_current() {
-		eglMakeCurrent(display, surface, surface, context);
-	}
-	void release_current() {
-		eglMakeCurrent(display, 0, 0, 0);
-	}
-	void swap_buffers() {
-		eglSwapBuffers(display, surface);
-	}
-	void swap_interval(int interval) {
-		eglSwapInterval(display, interval);
 	}
 };
 
