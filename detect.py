@@ -80,6 +80,8 @@ def configure(env):
 	elif (env["frt_arch"] == "pi3"):
 		env.Append(CCFLAGS=['-mcpu=cortex-a53', '-mfpu=neon-fp-armv8'])
 		env.extra_suffix += ".pi3"
+	elif (env["frt_arch"] == "mali"):
+		env.extra_suffix += ".mali"
 
 	if (env["frt_arch"].startswith("pi")):
 		env.Append(CCFLAGS=['-mfloat-abi=hard', '-mlittle-endian', '-munaligned-access'])
