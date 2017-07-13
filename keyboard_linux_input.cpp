@@ -26,6 +26,10 @@
 #ifdef FRT_TEST
 #define FRT_MOCK_GODOT_INPUT_MODIFIER_STATE
 #else
+#include "version.h"
+#if VERSION_MAJOR == 3
+#define FRT_MOCK_GODOT_INPUT_MODIFIER_STATE
+#endif
 #include "os/input_event.h"
 #endif
 

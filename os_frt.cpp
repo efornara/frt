@@ -59,6 +59,109 @@
 #include "servers/spatial_sound_2d/spatial_sound_2d_server_sw.h"
 #include "drivers/gles2/rasterizer_gles2.h"
 
+static int event_id = 0;
+
+class InputModifierStateSetter {
+private:
+	InputModifierState &mod;
+public:
+	InputModifierStateSetter(InputModifierState &m) : mod(m) {}
+	void set_shift(bool v) { mod.shift = v; }
+	void set_control(bool v) { mod.control = v; }
+	void set_alt(bool v) { mod.alt = v; }
+	void set_metakey(bool v) { mod.meta = v; }
+};
+
+class InputEventKeySetter : public InputModifierStateSetter {
+private:
+	InputEvent &event;
+public:
+	InputEventKeySetter(InputEvent &ev) :
+	  InputModifierStateSetter(ev.key.mod), event(ev) {
+		event.type = InputEvent::KEY;
+		event.device = 0;
+	}
+	void set_pressed(bool v) { event.key.pressed = v; }
+	void set_scancode(uint32_t v) { event.key.scancode = v; }
+	void set_unicode(uint32_t v) { event.key.unicode = v; }
+	void set_echo(bool v) { event.key.echo = v; }
+};
+
+class InputEventMouseMotionSetter : public InputModifierStateSetter {
+private:
+	InputEvent &event;
+public:
+	InputEventMouseMotionSetter(InputEvent &ev) :
+	  InputModifierStateSetter(ev.mouse_motion.mod), event(ev) {
+		event.type = InputEvent::MOUSE_MOTION;
+		event.device = 0;
+	}
+	void set_button_mask(int v) { event.mouse_motion.button_mask = v; }
+	void set_position(const Vector2 &v) {
+		event.mouse_motion.x = v.x;
+		event.mouse_motion.y = v.y;
+	}
+	void set_global_position(const Vector2 &v) {
+		event.mouse_motion.global_x = v.x;
+		event.mouse_motion.global_y = v.y;
+	}
+	void set_speed(const Vector2 &v) {
+		event.mouse_motion.speed_x = v.x;
+		event.mouse_motion.speed_y = v.y;
+	}
+	void set_relative(const Vector2 &v) {
+		event.mouse_motion.relative_x = v.x;
+		event.mouse_motion.relative_y = v.y;
+	}
+};
+
+class InputEventMouseButtonSetter : public InputModifierStateSetter {
+private:
+	InputEvent &event;
+public:
+	InputEventMouseButtonSetter(InputEvent &ev) :
+	  InputModifierStateSetter(ev.mouse_button.mod), event(ev) {
+		event.type = InputEvent::MOUSE_BUTTON;
+		event.device = 0;
+	}
+	void set_button_mask(int v) { event.mouse_button.button_mask = v; }
+	void set_position(const Vector2 &v) {
+		event.mouse_button.x = v.x;
+		event.mouse_button.y = v.y;
+	}
+	void set_global_position(const Vector2 &v) {
+		event.mouse_button.global_x = v.x;
+		event.mouse_button.global_y = v.y;
+	}
+	void set_pressed(bool v) { event.mouse_button.pressed = v; }
+	void set_button_index(int v) { event.mouse_button.button_index = v; }
+};
+
+class InputModifierRef {
+private:
+	InputModifierStateSetter setter;
+public:
+	InputModifierRef(InputModifierStateSetter &s) : setter(s) {}
+	InputModifierStateSetter* operator ->() { return &setter; }
+};
+
+template<typename T>
+class InputEventRef {
+private:
+	InputEvent event;
+	T setter;
+	InputModifierRef mod;
+public:
+	InputEventRef() : setter(event), mod(setter) { event.ID = ++event_id; };
+	void instance() {}
+	operator InputEvent() { return event; }
+	operator InputModifierRef() { return mod; }
+	T* operator ->() { return &setter; }
+};
+
+#define INPUT_MODIFIER_REF InputModifierRef
+#define INPUT_EVENT_REF(t) InputEventRef<t ## Setter>
+
 #elif VERSION_MAJOR == 3
 
 #include "drivers/gles3/rasterizer_gles3.h"
@@ -67,6 +170,9 @@ typedef AudioDriver AudioDriverSW;
 #define set_mouse_pos set_mouse_position
 #define get_mouse_pos get_mouse_position
 #define get_mouse_speed get_last_mouse_speed
+#define FRT_MOCK_GODOT_INPUT_MODIFIER_STATE
+#define INPUT_MODIFIER_REF Ref<InputEventWithModifiers>
+#define INPUT_EVENT_REF(t) Ref<t>
 
 #else
 #error "unhandled godot version"
@@ -235,8 +341,8 @@ public:
 	void release_rendering_thread() { context_gl->release_current(); }
 	void make_rendering_thread() { context_gl->make_current(); }
 	void swap_buffers() { context_gl->swap_buffers(); }
-
-	void fill_modifier_state(InputModifierState &state) {
+	void get_key_modifier_state(INPUT_MODIFIER_REF mod) {
+		InputModifierState state;
 		if (env->keyboard) {
 			env->keyboard->get_modifier_state(state);
 		} else {
@@ -245,38 +351,34 @@ public:
 			state.alt = false;
 			state.meta = false;
 		}
+		mod->set_shift(state.shift);
+		mod->set_control(state.control);
+		mod->set_alt(state.alt);
+		mod->set_metakey(state.meta);
 	}
 	void process_keyboard_event(int key, bool pressed) {
-		InputEvent event;
-		event.ID = ++event_id;
-		event.type = InputEvent::KEY;
-		event.device = 0;
-		fill_modifier_state(event.key.mod);
-		event.key.pressed = pressed;
-		event.key.scancode = key;
-		event.key.unicode = 0;
-		event.key.echo = 0;
-		input->parse_input_event(event);
+		INPUT_EVENT_REF(InputEventKey) k;
+		k.instance();
+		get_key_modifier_state(k);
+		k->set_pressed(pressed);
+		k->set_scancode(key);
+		k->set_unicode(0);
+		k->set_echo(0);
+		input->parse_input_event(k);
 	}
 	void process_mouse_motion(int x, int y) {
 		mouse_pos.x = x;
 		mouse_pos.y = y;
-		InputEvent motion_event;
-		motion_event.ID = ++event_id;
-		motion_event.type = InputEvent::MOUSE_MOTION;
-		motion_event.device = 0;
-		fill_modifier_state(motion_event.mouse_button.mod);
-		motion_event.mouse_button.button_mask = mouse_state;
-		motion_event.mouse_motion.x = mouse_pos.x;
-		motion_event.mouse_motion.y = mouse_pos.y;
+		INPUT_EVENT_REF(InputEventMouseMotion) mm;
+		mm.instance();
+		get_key_modifier_state(mm);
+		mm->set_button_mask(mouse_state);
+		mm->set_position(mouse_pos);
+		mm->set_global_position(mouse_pos);
+		mm->set_speed(input->get_mouse_speed());
+		mm->set_relative(Vector2(0, 0));
 		input->set_mouse_pos(mouse_pos);
-		motion_event.mouse_motion.global_x = mouse_pos.x;
-		motion_event.mouse_motion.global_y = mouse_pos.y;
-		motion_event.mouse_motion.speed_x = input->get_mouse_speed().x;
-		motion_event.mouse_motion.speed_y = input->get_mouse_speed().y;
-		motion_event.mouse_motion.relative_x = 0;
-		motion_event.mouse_motion.relative_y = 0;
-		input->parse_input_event(motion_event);
+		input->parse_input_event(mm);
 	}
 	void process_mouse_button(int index, bool pressed) {
 		int bit = (1 << index);
@@ -284,19 +386,15 @@ public:
 			mouse_state |= bit;
 		else
 			mouse_state &= ~bit;
-		InputEvent mouse_event;
-		mouse_event.ID = ++event_id;
-		mouse_event.type = InputEvent::MOUSE_BUTTON;
-		mouse_event.device = 0;
-		fill_modifier_state(mouse_event.mouse_button.mod);
-		mouse_event.mouse_button.button_mask = mouse_state;
-		mouse_event.mouse_button.x = mouse_pos.x;
-		mouse_event.mouse_button.y = mouse_pos.y;
-		mouse_event.mouse_button.global_x = mouse_pos.x;
-		mouse_event.mouse_button.global_y = mouse_pos.y;
-		mouse_event.mouse_button.button_index = index;
-		mouse_event.mouse_button.pressed = pressed;
-		input->parse_input_event(mouse_event);
+		INPUT_EVENT_REF(InputEventMouseButton) mb;
+		mb.instance();
+		get_key_modifier_state(mb);
+		mb->set_button_mask(mouse_state);
+		mb->set_position(mouse_pos);
+		mb->set_global_position(mouse_pos);
+		mb->set_button_index(index);
+		mb->set_pressed(pressed);
+		input->parse_input_event(mb);
 	}
 	struct KeyboardHandler : Keyboard::Handler {
 		OS_FRT *instance;
@@ -381,8 +479,7 @@ public:
 		};
 		main_loop->finish();
 	}
-	OS_FRT()
-		: event_id(0) {
+	OS_FRT() {
 #ifdef ALSA_ENABLED
 		AudioDriverManagerSW::add_driver(&driver_alsa);
 #endif
