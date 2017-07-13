@@ -4,4 +4,5 @@
 *.bin
 a.out
 logo.h
+*.gen.h
 private/

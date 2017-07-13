@@ -40,6 +40,9 @@ def get_flags():
 
 def configure(env):
 
+	import version
+	import methods
+
 	env.Append(CPPPATH=['#platform/frt'])
 
 	if os.system("pkg-config --exists alsa") == 0:
@@ -58,11 +61,14 @@ def configure(env):
 	if (env['builtin_zlib'] == 'no'):
 		env.ParseConfig('pkg-config zlib --cflags --libs')
 
-	import methods
-
-	env.Append(BUILDERS={'GLSL120': env.Builder(action=methods.build_legacygl_headers, suffix='glsl.h', src_suffix='.glsl')})
-	env.Append(BUILDERS={'GLSL': env.Builder(action=methods.build_glsl_headers, suffix='glsl.h', src_suffix='.glsl')})
-	env.Append(BUILDERS={'GLSL120GLES': env.Builder(action=methods.build_gles2_headers, suffix='glsl.h', src_suffix='.glsl')})
+	if version.major == 2:
+		if version.minor == 0 and version.patch >=4:
+			gen_suffix = 'glsl.gen.h'
+		else:
+			gen_suffix = 'glsl.h'
+		env.Append(BUILDERS={'GLSL120': env.Builder(action=methods.build_legacygl_headers, suffix=gen_suffix, src_suffix='.glsl')})
+		env.Append(BUILDERS={'GLSL': env.Builder(action=methods.build_glsl_headers, suffix=gen_suffix, src_suffix='.glsl')})
+		env.Append(BUILDERS={'GLSL120GLES': env.Builder(action=methods.build_gles2_headers, suffix=gen_suffix, src_suffix='.glsl')})
 
 	if (env["target"] == "release"):
 		env.Append(CCFLAGS=['-O2', '-ffast-math', '-fomit-frame-pointer'])
@@ -101,6 +107,5 @@ def configure(env):
 		env.Append(LINKFLAGS=['-L/opt/vc/lib/'])
 		env.Append(LIBS=['brcmGLESv2', 'brcmEGL', 'bcm_host'])
 
-	import version
 	if version.major >= 3:
 		env.Append(LIBS=['dl'])
