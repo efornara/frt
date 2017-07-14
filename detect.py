@@ -62,7 +62,7 @@ def configure(env):
 		env.ParseConfig('pkg-config zlib --cflags --libs')
 
 	if version.major == 2:
-		if version.minor == 0 and version.patch >=4:
+		if version.minor == 1 and version.patch >=4:
 			gen_suffix = 'glsl.gen.h'
 		else:
 			gen_suffix = 'glsl.h'
