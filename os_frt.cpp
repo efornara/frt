@@ -199,6 +199,8 @@ private:
 	AudioDriverDummy driver_dummy;
 	int audio_driver_index;
 	Point2 mouse_pos;
+	Point2 last_mouse_pos;
+	bool last_mouse_pos_valid;
 	MouseMode mouse_mode;
 	int mouse_state;
 	bool grab;
@@ -369,6 +371,12 @@ public:
 	void process_mouse_motion(int x, int y) {
 		mouse_pos.x = x;
 		mouse_pos.y = y;
+		if (!last_mouse_pos_valid) {
+			last_mouse_pos = mouse_pos;
+			last_mouse_pos_valid = true;
+		}
+		Vector2 rel = mouse_pos - last_mouse_pos;
+		last_mouse_pos = mouse_pos;
 		INPUT_EVENT_REF(InputEventMouseMotion) mm;
 		mm.instance();
 		get_key_modifier_state(mm);
@@ -376,12 +384,12 @@ public:
 		mm->set_position(mouse_pos);
 		mm->set_global_position(mouse_pos);
 		mm->set_speed(input->get_mouse_speed());
-		mm->set_relative(Vector2(0, 0));
+		mm->set_relative(rel);
 		input->set_mouse_pos(mouse_pos);
 		input->parse_input_event(mm);
 	}
 	void process_mouse_button(int index, bool pressed) {
-		int bit = (1 << index);
+		int bit = (1 << (index - 1));
 		if (pressed)
 			mouse_state |= bit;
 		else
