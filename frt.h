@@ -178,4 +178,11 @@ struct InputModifierState {
 
 #endif // FRT_MOCK_GODOT_INPUT_MODIFIER_STATE
 
+#ifdef FRT_TEST
+#define FRT_GLES_VERSION 2
+#else
+#include "version.h"
+#define FRT_GLES_VERSION VERSION_MAJOR
+#endif // FRT_TEST
+
 #endif // FRT_H

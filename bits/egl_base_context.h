@@ -47,7 +47,7 @@ public:
 			EGL_NONE
 		};
 		static const EGLint ctx_attrs[] = {
-			EGL_CONTEXT_CLIENT_VERSION, 2,
+			EGL_CONTEXT_CLIENT_VERSION, FRT_GLES_VERSION,
 			EGL_NONE
 		};
 		EGLBoolean result;
