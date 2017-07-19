@@ -64,8 +64,10 @@ static int event_id = 0;
 class InputModifierStateSetter {
 private:
 	InputModifierState &mod;
+
 public:
-	InputModifierStateSetter(InputModifierState &m) : mod(m) {}
+	InputModifierStateSetter(InputModifierState &m)
+		: mod(m) {}
 	void set_shift(bool v) { mod.shift = v; }
 	void set_control(bool v) { mod.control = v; }
 	void set_alt(bool v) { mod.alt = v; }
@@ -75,9 +77,10 @@ public:
 class InputEventKeySetter : public InputModifierStateSetter {
 private:
 	InputEvent &event;
+
 public:
-	InputEventKeySetter(InputEvent &ev) :
-	  InputModifierStateSetter(ev.key.mod), event(ev) {
+	InputEventKeySetter(InputEvent &ev)
+		: InputModifierStateSetter(ev.key.mod), event(ev) {
 		event.type = InputEvent::KEY;
 		event.device = 0;
 	}
@@ -90,9 +93,10 @@ public:
 class InputEventMouseMotionSetter : public InputModifierStateSetter {
 private:
 	InputEvent &event;
+
 public:
-	InputEventMouseMotionSetter(InputEvent &ev) :
-	  InputModifierStateSetter(ev.mouse_motion.mod), event(ev) {
+	InputEventMouseMotionSetter(InputEvent &ev)
+		: InputModifierStateSetter(ev.mouse_motion.mod), event(ev) {
 		event.type = InputEvent::MOUSE_MOTION;
 		event.device = 0;
 	}
@@ -118,9 +122,10 @@ public:
 class InputEventMouseButtonSetter : public InputModifierStateSetter {
 private:
 	InputEvent &event;
+
 public:
-	InputEventMouseButtonSetter(InputEvent &ev) :
-	  InputModifierStateSetter(ev.mouse_button.mod), event(ev) {
+	InputEventMouseButtonSetter(InputEvent &ev)
+		: InputModifierStateSetter(ev.mouse_button.mod), event(ev) {
 		event.type = InputEvent::MOUSE_BUTTON;
 		event.device = 0;
 	}
@@ -140,27 +145,31 @@ public:
 class InputModifierRef {
 private:
 	InputModifierStateSetter setter;
+
 public:
-	InputModifierRef(InputModifierStateSetter &s) : setter(s) {}
-	InputModifierStateSetter* operator ->() { return &setter; }
+	InputModifierRef(InputModifierStateSetter &s)
+		: setter(s) {}
+	InputModifierStateSetter *operator->() { return &setter; }
 };
 
-template<typename T>
+template <typename T>
 class InputEventRef {
 private:
 	InputEvent event;
 	T setter;
 	InputModifierRef mod;
+
 public:
-	InputEventRef() : setter(event), mod(setter) { event.ID = ++event_id; };
+	InputEventRef()
+		: setter(event), mod(setter) { event.ID = ++event_id; };
 	void instance() {}
 	operator InputEvent() { return event; }
 	operator InputModifierRef() { return mod; }
-	T* operator ->() { return &setter; }
+	T *operator->() { return &setter; }
 };
 
 #define INPUT_MODIFIER_REF InputModifierRef
-#define INPUT_EVENT_REF(t) InputEventRef<t ## Setter>
+#define INPUT_EVENT_REF(t) InputEventRef<t##Setter>
 
 #elif VERSION_MAJOR == 3
 

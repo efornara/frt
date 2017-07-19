@@ -33,12 +33,13 @@ namespace frt {
 
 void usage(const char *program_name, int code = 1) {
 	printf("\n"
-	  "usage: %s [godot args] [--frt [options]]\n"
-	  "\n"
-	  "options:\n"
-	  "  -v                  show version and exit\n"
-	  "  -h                  show this page and exit\n"
-	  "\n", program_name);
+		   "usage: %s [godot args] [--frt [options]]\n"
+		   "\n"
+		   "options:\n"
+		   "  -v                  show version and exit\n"
+		   "  -h                  show this page and exit\n"
+		   "\n",
+		   program_name);
 	exit(code);
 }
 
