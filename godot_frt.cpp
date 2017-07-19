@@ -85,6 +85,7 @@ static void cleanup_modules() {
 int main(int argc, char *argv[]) {
 	int ret_code = 255;
 	bool started = false;
+	App::instance()->parse_args(&argc, &argv);
 	probe_modules();
 	if (!runnable)
 		goto quit_with_ret_code;

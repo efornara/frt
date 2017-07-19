@@ -2,4 +2,4 @@
 
 Import('env')
 
-env.Program('#bin/godot', ['godot_frt.cpp', 'os_frt.cpp'] + env['FRT_MODULES'])
+env.Program('#bin/godot', ['godot_frt.cpp', 'os_frt.cpp', 'frt_options.cpp'] + env['FRT_MODULES'])

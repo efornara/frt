@@ -67,6 +67,7 @@ public:
 	void dispatch_events();
 	void quit() { running = false; }
 	bool is_running() const { return running; }
+	void parse_args(int *argc, char ***argv);
 	static App *instance();
 
 private:
