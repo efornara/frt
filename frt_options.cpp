@@ -31,6 +31,8 @@
 
 namespace frt {
 
+const char *perfmon_filename = 0;
+
 void usage(const char *program_name, int code = 1) {
 	printf("\n"
 		   "usage: %s [godot args] [--frt [options]]\n"
@@ -38,6 +40,7 @@ void usage(const char *program_name, int code = 1) {
 		   "options:\n"
 		   "  -v                  show version and exit\n"
 		   "  -h                  show this page and exit\n"
+		   "  -p perfmon.csv      save performance monitor data\n"
 		   "\n",
 		   program_name);
 	exit(code);
@@ -52,6 +55,10 @@ void parse_frt_args(int argc, char **argv) {
 			exit(0);
 		} else if (!strcmp(s, "-h")) {
 			usage(program_name, 0);
+		} else if (!strcmp(s, "-p")) {
+			if (++i == argc)
+				usage(program_name);
+			perfmon_filename = argv[i];
 		} else {
 			usage(program_name);
 		}

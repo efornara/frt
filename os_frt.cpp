@@ -48,6 +48,7 @@
 #include "drivers/rtaudio/audio_driver_rtaudio.h"
 #include "main/main.h"
 #include "main/input_default.h"
+#include "main/performance.h"
 #include "print_string.h"
 
 #if VERSION_MAJOR == 2
@@ -191,6 +192,56 @@ typedef AudioDriver AudioDriverSW;
 #include "bits/mouse_virtual.h"
 
 using namespace frt;
+
+namespace frt {
+extern const char *perfmon_filename;
+}
+
+static class PerfMon {
+private:
+	FILE *f;
+	char sep;
+	void init_separator() {
+		char s[32];
+		snprintf(s, sizeof(s), "%f", 2.5);
+		s[sizeof(s) - 1] = '\0';
+		sep = strchr(s, ',') ? ';' : ',';
+	}
+
+public:
+	PerfMon()
+		: f(0) {}
+	~PerfMon() { cleanup(); }
+	bool is_valid() { return f; }
+	void init() {
+		if (!perfmon_filename)
+			return;
+		if (!(f = fopen(perfmon_filename, "w")))
+			return;
+		init_separator();
+		Performance *p = Performance::get_singleton();
+		fprintf(f, "time/ticks_ms");
+		for (int i = 0; i < Performance::MONITOR_MAX; i++)
+			fprintf(f, "%c%s", sep,
+					p->get_monitor_name(Performance::Monitor(i)).ascii().get_data());
+		fprintf(f, "\n");
+	}
+	void iteration(uint32_t t) {
+		if (!f)
+			return;
+		Performance *p = Performance::get_singleton();
+		fprintf(f, "%u", (unsigned int)t);
+		for (int i = 0; i < Performance::MONITOR_MAX; i++)
+			fprintf(f, "%c%f", sep,
+					p->get_monitor(Performance::Monitor(i)));
+		fprintf(f, "\n");
+	}
+	void cleanup() {
+		if (f)
+			fclose(f);
+		f = 0;
+	}
+} perfmon;
 
 class OS_FRT : public OS_Unix, public Runnable {
 private:
@@ -489,11 +540,15 @@ public:
 			env->keyboard->set_handler(&keyboard_handler);
 		}
 		main_loop->init();
+		perfmon.init();
 		while (app->is_running()) {
 			app->dispatch_events();
 			if (Main::iteration() == true)
 				break;
+			if (perfmon.is_valid())
+				perfmon.iteration(get_ticks_msec());
 		};
+		perfmon.cleanup();
 		main_loop->finish();
 	}
 	OS_FRT() {
