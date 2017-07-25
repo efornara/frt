@@ -46,6 +46,37 @@ struct EventHandler {
 	virtual void handle_event() = 0;
 };
 
+struct Value {
+	enum Type {
+		Bool,
+		Int,
+		Float,
+		String,
+	} t;
+	union {
+		bool b;
+		int i;
+		float f;
+		const char *s;
+	} u;
+	Value(bool v) : t(Bool) { u.b = v; }
+	Value(int v) : t(Int) { u.i = v; }
+	Value(float v) : t(Float) { u.f = v; }
+	Value(const char *v) : t(String) { u.s = v; }
+};
+
+struct Param {
+	const char *name;
+	Value value;
+	enum Source {
+		Default,
+		CommandLine,
+		ProjectSettings,
+	} source;
+	Param(const char *name_, Value value_)
+		: name(name_), value(value_), source(Default) {}
+};
+
 class App {
 public:
 	static const int max_modules = 30;
@@ -68,6 +99,21 @@ public:
 	void quit() { running = false; }
 	bool is_running() const { return running; }
 	void parse_args(int *argc, char ***argv);
+	int get_n_of_params() const;
+	Param *get_param(int i) const;
+	Param *get_param(const char *name) const;
+	bool get_bool_param(const char *name) const {
+		return get_param(name)->value.u.b;
+	}
+	int get_int_param(const char *name) const {
+		return get_param(name)->value.u.i;
+	}
+	float get_float_param(const char *name) const {
+		return get_param(name)->value.u.f;
+	}
+	const char *get_string_param(const char *name) const {
+		return get_param(name)->value.u.s;
+	}
 	static App *instance();
 
 private:

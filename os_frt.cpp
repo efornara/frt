@@ -172,6 +172,10 @@ public:
 #define INPUT_MODIFIER_REF InputModifierRef
 #define INPUT_EVENT_REF(t) InputEventRef<t##Setter>
 
+#include "core/globals.h"
+#define PROJECT_SETTINGS \
+	Globals *project_settings = Globals::get_singleton();
+
 #elif VERSION_MAJOR == 3
 
 #include "drivers/gles3/rasterizer_gles3.h"
@@ -183,6 +187,10 @@ typedef AudioDriver AudioDriverSW;
 #define FRT_MOCK_GODOT_INPUT_MODIFIER_STATE
 #define INPUT_MODIFIER_REF Ref<InputEventWithModifiers>
 #define INPUT_EVENT_REF(t) Ref<t>
+
+#include "core/project_settings.h"
+#define PROJECT_SETTINGS \
+	ProjectSettings *project_settings = ProjectSettings::get_singleton();
 
 #else
 #error "unhandled godot version"
@@ -291,7 +299,43 @@ public:
 		ERR_FAIL_COND_V(!driver_, "");
 		return driver_->get_name();
 	}
+	bool _check_internal_feature_support(const String &feature) {
+		return feature == "pc";
+	}
+	void get_project_frt_params() {
+		PROJECT_SETTINGS
+		String name;
+		const int n = app->get_n_of_params();
+		for (int i = 0; i < n; i++) {
+			Param *p = app->get_param(i);
+			if (p->source == Param::CommandLine)
+				continue;
+			name = "frt/";
+			name += p->name;
+			if (!project_settings->has(name))
+				continue;
+			p->source = Param::ProjectSettings;
+			Value &v = p->value;
+			switch (v.t) {
+			case Value::Bool:
+				v.u.b = bool(project_settings->get(name));
+				break;
+			case Value::Int:
+				v.u.i = int(project_settings->get(name));
+				break;
+			case Value::Float:
+				v.u.f = float(project_settings->get(name));
+				break;
+			case Value::String: {
+				String s = String(project_settings->get(name));
+				v.u.s = strdup(s.ascii());
+				// TODO: keep track and dealloc string copy
+				} break;
+			}
+		}
+	}
 	void initialize(const VideoMode &desired, int video_driver, int audio_driver) {
+		get_project_frt_params();
 		args = OS::get_singleton()->get_cmdline_args();
 		current_videomode = desired;
 		main_loop = 0;

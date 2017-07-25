@@ -30,6 +30,32 @@
 namespace frt {
 
 class EGLBaseContext {
+private:
+	void build_attr_list(EGLint *attr_list) {
+		App *app = App::instance();
+		int n = 0;
+		const int color_size = app->get_int_param("color_size");
+		attr_list[n++] = EGL_RED_SIZE;
+		attr_list[n++] = color_size;
+		attr_list[n++] = EGL_GREEN_SIZE;
+		attr_list[n++] = color_size;
+		attr_list[n++] = EGL_BLUE_SIZE;
+		attr_list[n++] = color_size;
+		const int alpha_size = app->get_int_param("alpha_size");
+		attr_list[n++] = EGL_ALPHA_SIZE;
+		attr_list[n++] = alpha_size >= 0 ? alpha_size : EGL_DONT_CARE;
+		const int depth_size = app->get_int_param("depth_size");
+		attr_list[n++] = EGL_DEPTH_SIZE;
+		attr_list[n++] = depth_size >= 0 ? depth_size : EGL_DONT_CARE;
+		if (app->get_bool_param("multisample")) {
+			attr_list[n++] = EGL_SAMPLE_BUFFERS;
+			attr_list[n++] = 1;
+		}
+		attr_list[n++] = EGL_SURFACE_TYPE;
+		attr_list[n++] = EGL_WINDOW_BIT;
+		attr_list[n++] = EGL_NONE;
+	}
+
 protected:
 	EGLDisplay display;
 	EGLContext context;
@@ -38,14 +64,7 @@ protected:
 
 public:
 	void init() {
-		static const EGLint attr_list[] = {
-			EGL_RED_SIZE, 8,
-			EGL_GREEN_SIZE, 8,
-			EGL_BLUE_SIZE, 8,
-			EGL_ALPHA_SIZE, 8,
-			EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-			EGL_NONE
-		};
+		static EGLint attr_list[32];
 		static const EGLint ctx_attrs[] = {
 			EGL_CONTEXT_CLIENT_VERSION, FRT_GLES_VERSION,
 			EGL_NONE
@@ -56,6 +75,7 @@ public:
 		assert(display != EGL_NO_DISPLAY);
 		result = eglInitialize(display, 0, 0);
 		assert(result != EGL_FALSE);
+		build_attr_list(attr_list);
 		result = eglChooseConfig(display, attr_list, &config, 1, &num_config);
 		assert(result != EGL_FALSE);
 		result = eglBindAPI(EGL_OPENGL_ES_API);
