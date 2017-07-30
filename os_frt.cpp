@@ -309,7 +309,7 @@ public:
 	}
 	void extract_resource_fatal(const char *msg) {
 		printf("frt: failed extracting resource '%s': %s.\n",
-		  extract_resource_name, msg);
+			   extract_resource_name, msg);
 		exit(1);
 	}
 	void extract_resource_if_requested() {
@@ -356,19 +356,19 @@ public:
 			p->source = Param::ProjectSettings;
 			Value &v = p->value;
 			switch (v.t) {
-			case Value::Bool:
-				v.u.b = bool(project_settings->get(name));
-				break;
-			case Value::Int:
-				v.u.i = int(project_settings->get(name));
-				break;
-			case Value::Float:
-				v.u.f = float(project_settings->get(name));
-				break;
-			case Value::String: {
-				String s = String(project_settings->get(name));
-				v.u.s = strdup(s.ascii());
-				// TODO: keep track and dealloc string copy
+				case Value::Bool:
+					v.u.b = bool(project_settings->get(name));
+					break;
+				case Value::Int:
+					v.u.i = int(project_settings->get(name));
+					break;
+				case Value::Float:
+					v.u.f = float(project_settings->get(name));
+					break;
+				case Value::String: {
+					String s = String(project_settings->get(name));
+					v.u.s = strdup(s.ascii());
+					// TODO: keep track and dealloc string copy
 				} break;
 			}
 		}
@@ -489,7 +489,7 @@ public:
 	void make_rendering_thread() { context_gl->make_current(); }
 	void swap_buffers() { context_gl->swap_buffers(); }
 	uint32_t unicode_fallback(int gd_code, bool pressed,
-	  const InputModifierState &st) {
+							  const InputModifierState &st) {
 		if (st.alt || st.control || st.meta || !pressed)
 			return 0;
 		if (gd_code >= 'A' && gd_code <= 'Z')
@@ -499,7 +499,7 @@ public:
 		return 0;
 	}
 	void get_key_modifier_state(INPUT_MODIFIER_REF mod,
-	  InputModifierState *st = 0) {
+								InputModifierState *st = 0) {
 		InputModifierState state;
 		if (env->keyboard) {
 			env->keyboard->get_modifier_state(state);

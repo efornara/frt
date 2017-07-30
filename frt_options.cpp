@@ -73,25 +73,25 @@ void parse_frt_param(const char *name, const char *value) {
 	}
 	Value &v = p->value;
 	switch (v.t) {
-	case Value::Bool:
-		if (!strcmp(value, "true")) {
-			v.u.b = true;
-		} else if (!strcmp(value, "false")) {
-			v.u.b = false;
-		} else {
-			printf("frt: invalid boolean for '%s' (true, false)\n", name);
-			exit(1);
-		}
-		break;
-	case Value::Int:
-		v.u.i = atoi(value);
-		break;
-	case Value::Float:
-		v.u.f = (float)atof(value);
-		break;
-	case Value::String:
-		v.u.s = value;
-		break;
+		case Value::Bool:
+			if (!strcmp(value, "true")) {
+				v.u.b = true;
+			} else if (!strcmp(value, "false")) {
+				v.u.b = false;
+			} else {
+				printf("frt: invalid boolean for '%s' (true, false)\n", name);
+				exit(1);
+			}
+			break;
+		case Value::Int:
+			v.u.i = atoi(value);
+			break;
+		case Value::Float:
+			v.u.f = (float)atof(value);
+			break;
+		case Value::String:
+			v.u.s = value;
+			break;
 	}
 	p->source = Param::CommandLine;
 }

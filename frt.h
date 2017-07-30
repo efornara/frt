@@ -59,10 +59,14 @@ struct Value {
 		float f;
 		const char *s;
 	} u;
-	Value(bool v) : t(Bool) { u.b = v; }
-	Value(int v) : t(Int) { u.i = v; }
-	Value(float v) : t(Float) { u.f = v; }
-	Value(const char *v) : t(String) { u.s = v; }
+	Value(bool v)
+		: t(Bool) { u.b = v; }
+	Value(int v)
+		: t(Int) { u.i = v; }
+	Value(float v)
+		: t(Float) { u.f = v; }
+	Value(const char *v)
+		: t(String) { u.s = v; }
 };
 
 struct Param {
