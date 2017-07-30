@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <assert.h>
 #include <errno.h>
 #include <unistd.h>
@@ -33,6 +34,7 @@
 #include "version.h"
 #include "os/os.h"
 #include "os/input.h"
+#include "os/file_access.h"
 #include "drivers/unix/os_unix.h"
 #include "drivers/gl_context/context_gl.h"
 #include "servers/visual_server.h"
@@ -203,6 +205,7 @@ using namespace frt;
 
 namespace frt {
 extern const char *perfmon_filename;
+extern const char *extract_resource_name;
 }
 
 static class PerfMon {
@@ -302,6 +305,40 @@ public:
 	bool _check_internal_feature_support(const String &feature) {
 		return feature == "pc";
 	}
+	void extract_resource_fatal(const char *msg) {
+		printf("frt: failed extracting resource '%s': %s.\n",
+		  extract_resource_name, msg);
+		exit(1);
+	}
+	void extract_resource_if_requested() {
+		const char *s = extract_resource_name;
+		if (!s)
+			return;
+		if (!isalnum(*s))
+			extract_resource_fatal("invalid name");
+		for (int i = 0; s[i]; i++)
+			if (!isalnum(*s) && !strchr(".-_", *s))
+				extract_resource_fatal("invalid name");
+		String name = "res://frt/";
+		name += s;
+		if (!FileAccess::exists(name))
+			extract_resource_fatal("not found");
+		FileAccess *in = FileAccess::open(name, FileAccess::READ);
+		if (!in)
+			extract_resource_fatal("failed opening resource");
+		Vector<uint8_t> buf;
+		buf.resize(in->get_len());
+		int n = in->get_buffer(buf.ptr(), buf.size());
+		if (n != buf.size())
+			extract_resource_fatal("failed reading resource");
+		in->close();
+		FileAccess *out = FileAccess::open(s, FileAccess::WRITE);
+		if (!out)
+			extract_resource_fatal("failed opening output file");
+		out->store_buffer(buf.ptr(), buf.size());
+		out->close();
+		exit(0);
+	}
 	void get_project_frt_params() {
 		PROJECT_SETTINGS
 		String name;
@@ -336,6 +373,7 @@ public:
 	}
 	void initialize(const VideoMode &desired, int video_driver, int audio_driver) {
 		get_project_frt_params();
+		extract_resource_if_requested();
 		args = OS::get_singleton()->get_cmdline_args();
 		current_videomode = desired;
 		main_loop = 0;

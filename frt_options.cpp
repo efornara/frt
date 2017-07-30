@@ -32,6 +32,7 @@
 namespace frt {
 
 const char *perfmon_filename = 0;
+const char *extract_resource_name = 0;
 
 struct Param params[] = {
 	Param("color_size", 8),
@@ -56,6 +57,7 @@ void usage(const char *program_name, int code = 1) {
 		   "  -v                  show version and exit\n"
 		   "  -h                  show this page and exit\n"
 		   "  -p perfmon.csv      save performance monitor data\n"
+		   "  -e resource         extract resource\n"
 		   "\n",
 		   program_name);
 	show_param_list();
@@ -107,6 +109,10 @@ void parse_frt_args(int argc, char **argv) {
 			if (++i == argc)
 				usage(program_name);
 			perfmon_filename = argv[i];
+		} else if (!strcmp(s, "-e")) {
+			if (++i == argc)
+				usage(program_name);
+			extract_resource_name = argv[i];
 		} else {
 			char *sep = strchr(argv[i], '=');
 			if (!sep)
