@@ -485,7 +485,18 @@ public:
 	void release_rendering_thread() { context_gl->release_current(); }
 	void make_rendering_thread() { context_gl->make_current(); }
 	void swap_buffers() { context_gl->swap_buffers(); }
-	void get_key_modifier_state(INPUT_MODIFIER_REF mod) {
+	uint32_t unicode_fallback(int gd_code, bool pressed,
+	  const InputModifierState &st) {
+		if (st.alt || st.control || st.meta || !pressed)
+			return 0;
+		if (gd_code >= 'A' && gd_code <= 'Z')
+			return st.shift ? gd_code : gd_code + ('a' - 'A');
+		if (gd_code >= ' ' && gd_code <= '~')
+			return gd_code;
+		return 0;
+	}
+	void get_key_modifier_state(INPUT_MODIFIER_REF mod,
+	  InputModifierState *st = 0) {
 		InputModifierState state;
 		if (env->keyboard) {
 			env->keyboard->get_modifier_state(state);
@@ -499,14 +510,17 @@ public:
 		mod->set_control(state.control);
 		mod->set_alt(state.alt);
 		mod->set_metakey(state.meta);
+		if (st)
+			*st = state;
 	}
 	void process_keyboard_event(int key, bool pressed) {
 		INPUT_EVENT_REF(InputEventKey) k;
 		k.instance();
-		get_key_modifier_state(k);
+		InputModifierState st;
+		get_key_modifier_state(k, &st);
 		k->set_pressed(pressed);
 		k->set_scancode(key);
-		k->set_unicode(0);
+		k->set_unicode(unicode_fallback(key, pressed, st));
 		k->set_echo(0);
 		input->parse_input_event(k);
 	}
