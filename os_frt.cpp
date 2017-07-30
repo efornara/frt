@@ -143,6 +143,7 @@ public:
 	}
 	void set_pressed(bool v) { event.mouse_button.pressed = v; }
 	void set_button_index(int v) { event.mouse_button.button_index = v; }
+	void set_doubleclick(bool v) { event.mouse_button.doubleclick = v; }
 };
 
 class InputModifierRef {
@@ -287,6 +288,7 @@ private:
 	int event_id;
 	InputDefault *input;
 	MouseVirtual mouse_virtual;
+	uint64_t last_click;
 
 public:
 	int get_video_driver_count() const { return 1; }
@@ -422,6 +424,7 @@ public:
 		physics_2d_server = memnew(Physics2DServerSW);
 		physics_2d_server->init();
 		input = memnew(InputDefault);
+		last_click = 0;
 		_ensure_data_dir();
 	}
 	void finalize() {
@@ -558,6 +561,16 @@ public:
 		mb->set_global_position(mouse_pos);
 		mb->set_button_index(index);
 		mb->set_pressed(pressed);
+		if (index == 1 && pressed) {
+			const uint64_t t = get_ticks_usec();
+			const uint64_t dt = t - last_click;
+			if (dt < 300000) {
+				last_click = 0;
+				mb->set_doubleclick(true);
+			} else {
+				last_click = t;
+			}
+		}
 		input->parse_input_event(mb);
 	}
 	struct KeyboardHandler : Keyboard::Handler {
