@@ -31,9 +31,9 @@ def get_flags():
 
 	return [
 		('builtin_freetype', 'no'),
-		('builtin_openssl', 'no'),
 		('builtin_libpng', 'no'),
 		('builtin_zlib', 'no'),
+		('module_openssl_enabled', 'no'),
 		('tools', 'no'),
 	]
 
