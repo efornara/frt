@@ -101,7 +101,7 @@ void parse_frt_args(int argc, char **argv) {
 	for (int i = 1; i < argc; i++) {
 		const char *s = argv[i];
 		if (!strcmp(s, "-v")) {
-			printf("frt 0.9.1\n");
+			printf("frt 0.9.2\n");
 			exit(0);
 		} else if (!strcmp(s, "-h")) {
 			usage(program_name, 0);
