@@ -31,7 +31,7 @@
 
 using namespace frt;
 
-static Environment env;
+static Env env;
 static Runnable *runnable;
 
 static void probe_modules() {

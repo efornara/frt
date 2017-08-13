@@ -258,7 +258,7 @@ public:
 class OS_FRT : public OS_Unix, public Runnable {
 private:
 	App *app;
-	Environment *env;
+	Env *env;
 	Vec2 screen_size;
 	ContextGL *context_gl;
 	VisualServer *visual_server;
@@ -685,7 +685,7 @@ public:
 		return true;
 	}
 	// Runnable
-	void setup_env(Environment *env) {
+	void setup_env(Env *env) {
 		app = App::instance();
 		this->env = env;
 		assert(env->video);

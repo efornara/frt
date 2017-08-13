@@ -183,14 +183,14 @@ struct Mouse : public Module {
 	virtual void set_handler(Handler *handler) = 0;
 };
 
-struct Environment {
+struct Env {
 	Video *video;
 	Keyboard *keyboard;
 	Mouse *mouse;
 };
 
 struct Runnable : public Module {
-	virtual void setup_env(Environment *env) = 0;
+	virtual void setup_env(Env *env) = 0;
 	virtual void run_() = 0;
 	virtual int get_exit_code_() = 0;
 };
