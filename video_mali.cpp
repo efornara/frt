@@ -34,9 +34,15 @@
 
 #include <stdio.h>
 
-#include <GLES2/gl2.h>
-
 #include "bits/egl_base_context.h"
+
+#if FRT_GLES_VERSION == 2
+#include "dl/gles2.gen.h"
+#define frt_load_gles frt_load_gles2
+#else
+#include "dl/gles3.gen.h"
+#define frt_load_gles frt_load_gles3
+#endif
 
 namespace frt {
 
@@ -84,6 +90,10 @@ public:
 		: initialized(false), vsync(true) {}
 	const char *get_id() const { return "video_mali"; }
 	bool probe() {
+		if (!frt_load_egl("libEGL.so"))
+			return false;
+		if (!frt_load_gles("libGLESv2.so"))
+			return false;
 		screen_size.x = 720;
 		screen_size.y = 480;
 		return true;

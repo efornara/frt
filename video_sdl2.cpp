@@ -33,6 +33,14 @@
 #include "frt.h"
 #include "bits/sdl2.h"
 
+#if FRT_GLES_VERSION == 2
+#include "dl/gles2.gen.h"
+#define frt_load_gles frt_load_gles2
+#else
+#include "dl/gles3.gen.h"
+#define frt_load_gles frt_load_gles3
+#endif
+
 namespace frt {
 
 class VideoSDL2 : public Video, public ContextGL {
@@ -52,6 +60,8 @@ public:
 	// Module
 	const char *get_id() const { return "video_sdl2"; }
 	bool probe() {
+		if (!frt_load_gles("libGLESv2.so"))
+			return false;
 		if (!sdl2)
 			sdl2 = SDL2Context::acquire(0, 0, true);
 		return true;

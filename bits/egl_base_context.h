@@ -25,7 +25,7 @@
 
 #include <assert.h>
 
-#include <EGL/egl.h>
+#include "dl/egl.gen.h"
 
 namespace frt {
 

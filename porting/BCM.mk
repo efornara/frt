@@ -8,6 +8,6 @@
 # Done:
 #   $ make restore
  
-OBJS += test_video.o video_bcm.o
+OBJS += test_video.o video_bcm.o frt_options.o bcm.gen.o egl.gen.o gles2.gen.o
 CXXFLAGS += -I/opt/vc/include
-LIBS += -L/opt/vc/lib -lbrcmGLESv2 -lbrcmEGL -lbcm_host
+LIBS += -ldl

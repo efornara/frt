@@ -29,7 +29,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include <GLES2/gl2.h>
+#include "dl/gles2.gen.h"
 
 #include "bits/frt_app_impl.h"
 

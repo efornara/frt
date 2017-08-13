@@ -33,3 +33,6 @@
 #include <stdlib.h>
 #define PTHREAD_BSD_SET_NAME
 #endif
+
+#define GLES2_INCLUDE_H "dl/gles2.gen.h"
+#define GLES3_INCLUDE_H "dl/gles3.gen.h"

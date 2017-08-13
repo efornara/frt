@@ -36,10 +36,8 @@
 
 #include <sys/time.h>
 
-#include <bcm_host.h>
-
-#include <GLES2/gl2.h>
-
+#include "dl/bcm.gen.h"
+#include "dl/gles2.gen.h"
 #include "bits/egl_base_context.h"
 
 #define ELEMENT_CHANGE_DEST_RECT (1 << 2)
@@ -148,9 +146,9 @@ public:
 	Background()
 		: Element(100) {
 		memset(data, 0, sizeof(data));
-		vc_dispmanx_rect_set(&src, 0, 0, width << 16, height << 16);
 	}
 	void create_resource() {
+		vc_dispmanx_rect_set(&src, 0, 0, width << 16, height << 16);
 		Element::create_resource(type, width, height, pitch, data);
 	}
 	void set_metrics(const Display &display) {
@@ -316,9 +314,9 @@ public:
 	Pointer()
 		: Element(layer_visible), visible(true) {
 		convert_bitmaps(left_ptr_bits, left_ptrmsk_bits);
-		vc_dispmanx_rect_set(&src, 0, 0, width << 16, height << 16);
 	}
 	void create_resource() {
+		vc_dispmanx_rect_set(&src, 0, 0, width << 16, height << 16);
 		Element::create_resource(type, width, height, pitch, data);
 	}
 	void set_metrics(const Display &display) {
@@ -436,6 +434,12 @@ public:
 		: initialized(false), vsync(true) {}
 	const char *get_id() const { return "video_bcm"; }
 	bool probe() {
+		if (!frt_load_bcm("libbcm_host.so"))
+			return false;
+		if (!frt_load_gles2("libbrcmGLESv2.so"))
+			return false;
+		if (!frt_load_egl("libbrcmEGL.so"))
+			return false;
 		if (!dpymnx.init())
 			return false;
 		screen_size = dpymnx.get_size();

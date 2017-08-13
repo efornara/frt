@@ -5,7 +5,7 @@ CLANG_FORMAT = clang-format-3.5
 include Local.mk
 
 clean:
-	rm -f *.o
+	rm -f *.o dl/*.gen.*
 
 format:
 	$(CLANG_FORMAT) -i *.cpp *.h bits/*.h import/*.h porting/*.cpp

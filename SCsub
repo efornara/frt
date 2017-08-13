@@ -2,4 +2,15 @@
 
 Import('env')
 
+def build_dl():
+	import sys
+	dl_path = './dl'
+	sys.path.append(dl_path)
+	import procdl
+	sys.path.remove(dl_path)
+	for s in ['bcm', 'egl', 'gles2', 'gles3']:
+		procdl.build_h('dl/' + s + '.dl', 'dl/' + s + '.gen.h')
+		procdl.build_cpp('dl/' + s + '.dl', 'dl/' + s + '.gen.cpp')
+build_dl()
+
 env.Program('#bin/godot', ['godot_frt.cpp', 'os_frt.cpp', 'frt_options.cpp'] + env['FRT_MODULES'])

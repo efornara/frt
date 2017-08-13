@@ -97,15 +97,17 @@ def configure(env):
 
 	if (env["frt_arch"] == "pc"):
 		env.Append(FRT_MODULES=['video_sdl2.cpp', 'keyboard_sdl2.cpp', 'mouse_sdl2.cpp'])
-		env.Append(LIBS=['GLESv2', 'SDL2'])
+		env.Append(LIBS=['SDL2'])
 	elif (env["frt_arch"] == "mali"):
 		env.Append(FRT_MODULES=['video_mali.cpp', 'keyboard_linux_input.cpp', 'mouse_linux_input.cpp'])
-		env.Append(LIBS=['GLESv2', 'EGL'])
+		env.Append(FRT_MODULES=['dl/egl.gen.cpp'])
 	else:
 		env.Append(FRT_MODULES=['video_bcm.cpp', 'keyboard_linux_input.cpp', 'mouse_linux_input.cpp'])
+		env.Append(FRT_MODULES=['dl/bcm.gen.cpp', 'dl/egl.gen.cpp'])
 		env.Append(CCFLAGS=['-I/opt/vc/include/'])
-		env.Append(LINKFLAGS=['-L/opt/vc/lib/'])
-		env.Append(LIBS=['brcmGLESv2', 'brcmEGL', 'bcm_host'])
 
 	if version.major >= 3:
-		env.Append(LIBS=['dl'])
+		env.Append(FRT_MODULES=['dl/gles3.gen.cpp'])
+	else:
+		env.Append(FRT_MODULES=['dl/gles2.gen.cpp'])
+	env.Append(LIBS=['dl'])

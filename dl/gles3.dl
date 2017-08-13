@@ -1,0 +1,273 @@
+// gles3.dl
+/*
+ * FRT - A Godot platform targeting single board computers
+ * Copyright (c) 2017  Emanuele Fornara
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+#include <GLES3/gl3.h>
+
+typedef void (*___glActiveTexture___)(GLenum texture);
+typedef void (*___glAttachShader___)(GLuint program, GLuint shader);
+typedef void (*___glBindAttribLocation___)(GLuint program, GLuint index, const GLchar *name);
+typedef void (*___glBindBuffer___)(GLenum target, GLuint buffer);
+typedef void (*___glBindFramebuffer___)(GLenum target, GLuint framebuffer);
+typedef void (*___glBindRenderbuffer___)(GLenum target, GLuint renderbuffer);
+typedef void (*___glBindTexture___)(GLenum target, GLuint texture);
+typedef void (*___glBlendColor___)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
+typedef void (*___glBlendEquation___)(GLenum mode);
+typedef void (*___glBlendEquationSeparate___)(GLenum modeRGB, GLenum modeAlpha);
+typedef void (*___glBlendFunc___)(GLenum sfactor, GLenum dfactor);
+typedef void (*___glBlendFuncSeparate___)(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha);
+typedef void (*___glBufferData___)(GLenum target, GLsizeiptr size, const void *data, GLenum usage);
+typedef void (*___glBufferSubData___)(GLenum target, GLintptr offset, GLsizeiptr size, const void *data);
+typedef GLenum (*___glCheckFramebufferStatus___)(GLenum target);
+typedef void (*___glClear___)(GLbitfield mask);
+typedef void (*___glClearColor___)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
+typedef void (*___glClearDepthf___)(GLfloat d);
+typedef void (*___glClearStencil___)(GLint s);
+typedef void (*___glColorMask___)(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
+typedef void (*___glCompileShader___)(GLuint shader);
+typedef void (*___glCompressedTexImage2D___)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const void *data);
+typedef void (*___glCompressedTexSubImage2D___)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data);
+typedef void (*___glCopyTexImage2D___)(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border);
+typedef void (*___glCopyTexSubImage2D___)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+typedef GLuint (*___glCreateProgram___)();
+typedef GLuint (*___glCreateShader___)(GLenum type);
+typedef void (*___glCullFace___)(GLenum mode);
+typedef void (*___glDeleteBuffers___)(GLsizei n, const GLuint *buffers);
+typedef void (*___glDeleteFramebuffers___)(GLsizei n, const GLuint *framebuffers);
+typedef void (*___glDeleteProgram___)(GLuint program);
+typedef void (*___glDeleteRenderbuffers___)(GLsizei n, const GLuint *renderbuffers);
+typedef void (*___glDeleteShader___)(GLuint shader);
+typedef void (*___glDeleteTextures___)(GLsizei n, const GLuint *textures);
+typedef void (*___glDepthFunc___)(GLenum func);
+typedef void (*___glDepthMask___)(GLboolean flag);
+typedef void (*___glDepthRangef___)(GLfloat n, GLfloat f);
+typedef void (*___glDetachShader___)(GLuint program, GLuint shader);
+typedef void (*___glDisable___)(GLenum cap);
+typedef void (*___glDisableVertexAttribArray___)(GLuint index);
+typedef void (*___glDrawArrays___)(GLenum mode, GLint first, GLsizei count);
+typedef void (*___glDrawElements___)(GLenum mode, GLsizei count, GLenum type, const void *indices);
+typedef void (*___glEnable___)(GLenum cap);
+typedef void (*___glEnableVertexAttribArray___)(GLuint index);
+typedef void (*___glFinish___)();
+typedef void (*___glFlush___)();
+typedef void (*___glFramebufferRenderbuffer___)(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+typedef void (*___glFramebufferTexture2D___)(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+typedef void (*___glFrontFace___)(GLenum mode);
+typedef void (*___glGenBuffers___)(GLsizei n, GLuint *buffers);
+typedef void (*___glGenerateMipmap___)(GLenum target);
+typedef void (*___glGenFramebuffers___)(GLsizei n, GLuint *framebuffers);
+typedef void (*___glGenRenderbuffers___)(GLsizei n, GLuint *renderbuffers);
+typedef void (*___glGenTextures___)(GLsizei n, GLuint *textures);
+typedef void (*___glGetActiveAttrib___)(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name);
+typedef void (*___glGetActiveUniform___)(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name);
+typedef void (*___glGetAttachedShaders___)(GLuint program, GLsizei maxCount, GLsizei *count, GLuint *shaders);
+typedef GLint (*___glGetAttribLocation___)(GLuint program, const GLchar *name);
+typedef void (*___glGetBooleanv___)(GLenum pname, GLboolean *data);
+typedef void (*___glGetBufferParameteriv___)(GLenum target, GLenum pname, GLint *params);
+typedef GLenum (*___glGetError___)();
+typedef void (*___glGetFloatv___)(GLenum pname, GLfloat *data);
+typedef void (*___glGetFramebufferAttachmentParameteriv___)(GLenum target, GLenum attachment, GLenum pname, GLint *params);
+typedef void (*___glGetIntegerv___)(GLenum pname, GLint *data);
+typedef void (*___glGetProgramiv___)(GLuint program, GLenum pname, GLint *params);
+typedef void (*___glGetProgramInfoLog___)(GLuint program, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
+typedef void (*___glGetRenderbufferParameteriv___)(GLenum target, GLenum pname, GLint *params);
+typedef void (*___glGetShaderiv___)(GLuint shader, GLenum pname, GLint *params);
+typedef void (*___glGetShaderInfoLog___)(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
+typedef void (*___glGetShaderPrecisionFormat___)(GLenum shadertype, GLenum precisiontype, GLint *range, GLint *precision);
+typedef void (*___glGetShaderSource___)(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source);
+typedef const GLubyte * (*___glGetString___)(GLenum name);
+typedef void (*___glGetTexParameterfv___)(GLenum target, GLenum pname, GLfloat *params);
+typedef void (*___glGetTexParameteriv___)(GLenum target, GLenum pname, GLint *params);
+typedef void (*___glGetUniformfv___)(GLuint program, GLint location, GLfloat *params);
+typedef void (*___glGetUniformiv___)(GLuint program, GLint location, GLint *params);
+typedef GLint (*___glGetUniformLocation___)(GLuint program, const GLchar *name);
+typedef void (*___glGetVertexAttribfv___)(GLuint index, GLenum pname, GLfloat *params);
+typedef void (*___glGetVertexAttribiv___)(GLuint index, GLenum pname, GLint *params);
+typedef void (*___glGetVertexAttribPointerv___)(GLuint index, GLenum pname, void **pointer);
+typedef void (*___glHint___)(GLenum target, GLenum mode);
+typedef GLboolean (*___glIsBuffer___)(GLuint buffer);
+typedef GLboolean (*___glIsEnabled___)(GLenum cap);
+typedef GLboolean (*___glIsFramebuffer___)(GLuint framebuffer);
+typedef GLboolean (*___glIsProgram___)(GLuint program);
+typedef GLboolean (*___glIsRenderbuffer___)(GLuint renderbuffer);
+typedef GLboolean (*___glIsShader___)(GLuint shader);
+typedef GLboolean (*___glIsTexture___)(GLuint texture);
+typedef void (*___glLineWidth___)(GLfloat width);
+typedef void (*___glLinkProgram___)(GLuint program);
+typedef void (*___glPixelStorei___)(GLenum pname, GLint param);
+typedef void (*___glPolygonOffset___)(GLfloat factor, GLfloat units);
+typedef void (*___glReadPixels___)(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void *pixels);
+typedef void (*___glReleaseShaderCompiler___)();
+typedef void (*___glRenderbufferStorage___)(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+typedef void (*___glSampleCoverage___)(GLfloat value, GLboolean invert);
+typedef void (*___glScissor___)(GLint x, GLint y, GLsizei width, GLsizei height);
+typedef void (*___glShaderBinary___)(GLsizei count, const GLuint *shaders, GLenum binaryformat, const void *binary, GLsizei length);
+typedef void (*___glShaderSource___)(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length);
+typedef void (*___glStencilFunc___)(GLenum func, GLint ref, GLuint mask);
+typedef void (*___glStencilFuncSeparate___)(GLenum face, GLenum func, GLint ref, GLuint mask);
+typedef void (*___glStencilMask___)(GLuint mask);
+typedef void (*___glStencilMaskSeparate___)(GLenum face, GLuint mask);
+typedef void (*___glStencilOp___)(GLenum fail, GLenum zfail, GLenum zpass);
+typedef void (*___glStencilOpSeparate___)(GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass);
+typedef void (*___glTexImage2D___)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void *pixels);
+typedef void (*___glTexParameterf___)(GLenum target, GLenum pname, GLfloat param);
+typedef void (*___glTexParameterfv___)(GLenum target, GLenum pname, const GLfloat *params);
+typedef void (*___glTexParameteri___)(GLenum target, GLenum pname, GLint param);
+typedef void (*___glTexParameteriv___)(GLenum target, GLenum pname, const GLint *params);
+typedef void (*___glTexSubImage2D___)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels);
+typedef void (*___glUniform1f___)(GLint location, GLfloat v0);
+typedef void (*___glUniform1fv___)(GLint location, GLsizei count, const GLfloat *value);
+typedef void (*___glUniform1i___)(GLint location, GLint v0);
+typedef void (*___glUniform1iv___)(GLint location, GLsizei count, const GLint *value);
+typedef void (*___glUniform2f___)(GLint location, GLfloat v0, GLfloat v1);
+typedef void (*___glUniform2fv___)(GLint location, GLsizei count, const GLfloat *value);
+typedef void (*___glUniform2i___)(GLint location, GLint v0, GLint v1);
+typedef void (*___glUniform2iv___)(GLint location, GLsizei count, const GLint *value);
+typedef void (*___glUniform3f___)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+typedef void (*___glUniform3fv___)(GLint location, GLsizei count, const GLfloat *value);
+typedef void (*___glUniform3i___)(GLint location, GLint v0, GLint v1, GLint v2);
+typedef void (*___glUniform3iv___)(GLint location, GLsizei count, const GLint *value);
+typedef void (*___glUniform4f___)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+typedef void (*___glUniform4fv___)(GLint location, GLsizei count, const GLfloat *value);
+typedef void (*___glUniform4i___)(GLint location, GLint v0, GLint v1, GLint v2, GLint v3);
+typedef void (*___glUniform4iv___)(GLint location, GLsizei count, const GLint *value);
+typedef void (*___glUniformMatrix2fv___)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+typedef void (*___glUniformMatrix3fv___)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+typedef void (*___glUniformMatrix4fv___)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+typedef void (*___glUseProgram___)(GLuint program);
+typedef void (*___glValidateProgram___)(GLuint program);
+typedef void (*___glVertexAttrib1f___)(GLuint index, GLfloat x);
+typedef void (*___glVertexAttrib1fv___)(GLuint index, const GLfloat *v);
+typedef void (*___glVertexAttrib2f___)(GLuint index, GLfloat x, GLfloat y);
+typedef void (*___glVertexAttrib2fv___)(GLuint index, const GLfloat *v);
+typedef void (*___glVertexAttrib3f___)(GLuint index, GLfloat x, GLfloat y, GLfloat z);
+typedef void (*___glVertexAttrib3fv___)(GLuint index, const GLfloat *v);
+typedef void (*___glVertexAttrib4f___)(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+typedef void (*___glVertexAttrib4fv___)(GLuint index, const GLfloat *v);
+typedef void (*___glVertexAttribPointer___)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
+typedef void (*___glViewport___)(GLint x, GLint y, GLsizei width, GLsizei height);
+typedef void (*___glReadBuffer___)(GLenum src);
+typedef void (*___glDrawRangeElements___)(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const void *indices);
+typedef void (*___glTexImage3D___)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels);
+typedef void (*___glTexSubImage3D___)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *pixels);
+typedef void (*___glCopyTexSubImage3D___)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
+typedef void (*___glCompressedTexImage3D___)(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const void *data);
+typedef void (*___glCompressedTexSubImage3D___)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const void *data);
+typedef void (*___glGenQueries___)(GLsizei n, GLuint *ids);
+typedef void (*___glDeleteQueries___)(GLsizei n, const GLuint *ids);
+typedef GLboolean (*___glIsQuery___)(GLuint id);
+typedef void (*___glBeginQuery___)(GLenum target, GLuint id);
+typedef void (*___glEndQuery___)(GLenum target);
+typedef void (*___glGetQueryiv___)(GLenum target, GLenum pname, GLint *params);
+typedef void (*___glGetQueryObjectuiv___)(GLuint id, GLenum pname, GLuint *params);
+typedef GLboolean (*___glUnmapBuffer___)(GLenum target);
+typedef void (*___glGetBufferPointerv___)(GLenum target, GLenum pname, void **params);
+typedef void (*___glDrawBuffers___)(GLsizei n, const GLenum *bufs);
+typedef void (*___glUniformMatrix2x3fv___)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+typedef void (*___glUniformMatrix3x2fv___)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+typedef void (*___glUniformMatrix2x4fv___)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+typedef void (*___glUniformMatrix4x2fv___)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+typedef void (*___glUniformMatrix3x4fv___)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+typedef void (*___glUniformMatrix4x3fv___)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+typedef void (*___glBlitFramebuffer___)(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
+typedef void (*___glRenderbufferStorageMultisample___)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
+typedef void (*___glFramebufferTextureLayer___)(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer);
+typedef void * (*___glMapBufferRange___)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
+typedef void (*___glFlushMappedBufferRange___)(GLenum target, GLintptr offset, GLsizeiptr length);
+typedef void (*___glBindVertexArray___)(GLuint array);
+typedef void (*___glDeleteVertexArrays___)(GLsizei n, const GLuint *arrays);
+typedef void (*___glGenVertexArrays___)(GLsizei n, GLuint *arrays);
+typedef GLboolean (*___glIsVertexArray___)(GLuint array);
+typedef void (*___glGetIntegeri_v___)(GLenum target, GLuint index, GLint *data);
+typedef void (*___glBeginTransformFeedback___)(GLenum primitiveMode);
+typedef void (*___glEndTransformFeedback___)();
+typedef void (*___glBindBufferRange___)(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size);
+typedef void (*___glBindBufferBase___)(GLenum target, GLuint index, GLuint buffer);
+typedef void (*___glTransformFeedbackVaryings___)(GLuint program, GLsizei count, const GLchar *const*varyings, GLenum bufferMode);
+typedef void (*___glGetTransformFeedbackVarying___)(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLsizei *size, GLenum *type, GLchar *name);
+typedef void (*___glVertexAttribIPointer___)(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer);
+typedef void (*___glGetVertexAttribIiv___)(GLuint index, GLenum pname, GLint *params);
+typedef void (*___glGetVertexAttribIuiv___)(GLuint index, GLenum pname, GLuint *params);
+typedef void (*___glVertexAttribI4i___)(GLuint index, GLint x, GLint y, GLint z, GLint w);
+typedef void (*___glVertexAttribI4ui___)(GLuint index, GLuint x, GLuint y, GLuint z, GLuint w);
+typedef void (*___glVertexAttribI4iv___)(GLuint index, const GLint *v);
+typedef void (*___glVertexAttribI4uiv___)(GLuint index, const GLuint *v);
+typedef void (*___glGetUniformuiv___)(GLuint program, GLint location, GLuint *params);
+typedef GLint (*___glGetFragDataLocation___)(GLuint program, const GLchar *name);
+typedef void (*___glUniform1ui___)(GLint location, GLuint v0);
+typedef void (*___glUniform2ui___)(GLint location, GLuint v0, GLuint v1);
+typedef void (*___glUniform3ui___)(GLint location, GLuint v0, GLuint v1, GLuint v2);
+typedef void (*___glUniform4ui___)(GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3);
+typedef void (*___glUniform1uiv___)(GLint location, GLsizei count, const GLuint *value);
+typedef void (*___glUniform2uiv___)(GLint location, GLsizei count, const GLuint *value);
+typedef void (*___glUniform3uiv___)(GLint location, GLsizei count, const GLuint *value);
+typedef void (*___glUniform4uiv___)(GLint location, GLsizei count, const GLuint *value);
+typedef void (*___glClearBufferiv___)(GLenum buffer, GLint drawbuffer, const GLint *value);
+typedef void (*___glClearBufferuiv___)(GLenum buffer, GLint drawbuffer, const GLuint *value);
+typedef void (*___glClearBufferfv___)(GLenum buffer, GLint drawbuffer, const GLfloat *value);
+typedef void (*___glClearBufferfi___)(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil);
+typedef const GLubyte * (*___glGetStringi___)(GLenum name, GLuint index);
+typedef void (*___glCopyBufferSubData___)(GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size);
+typedef void (*___glGetUniformIndices___)(GLuint program, GLsizei uniformCount, const GLchar *const*uniformNames, GLuint *uniformIndices);
+typedef void (*___glGetActiveUniformsiv___)(GLuint program, GLsizei uniformCount, const GLuint *uniformIndices, GLenum pname, GLint *params);
+typedef GLuint (*___glGetUniformBlockIndex___)(GLuint program, const GLchar *uniformBlockName);
+typedef void (*___glGetActiveUniformBlockiv___)(GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint *params);
+typedef void (*___glGetActiveUniformBlockName___)(GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei *length, GLchar *uniformBlockName);
+typedef void (*___glUniformBlockBinding___)(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding);
+typedef void (*___glDrawArraysInstanced___)(GLenum mode, GLint first, GLsizei count, GLsizei instancecount);
+typedef void (*___glDrawElementsInstanced___)(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei instancecount);
+typedef GLsync (*___glFenceSync___)(GLenum condition, GLbitfield flags);
+typedef GLboolean (*___glIsSync___)(GLsync sync);
+typedef void (*___glDeleteSync___)(GLsync sync);
+typedef GLenum (*___glClientWaitSync___)(GLsync sync, GLbitfield flags, GLuint64 timeout);
+typedef void (*___glWaitSync___)(GLsync sync, GLbitfield flags, GLuint64 timeout);
+typedef void (*___glGetInteger64v___)(GLenum pname, GLint64 *data);
+typedef void (*___glGetSynciv___)(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values);
+typedef void (*___glGetInteger64i_v___)(GLenum target, GLuint index, GLint64 *data);
+typedef void (*___glGetBufferParameteri64v___)(GLenum target, GLenum pname, GLint64 *params);
+typedef void (*___glGenSamplers___)(GLsizei count, GLuint *samplers);
+typedef void (*___glDeleteSamplers___)(GLsizei count, const GLuint *samplers);
+typedef GLboolean (*___glIsSampler___)(GLuint sampler);
+typedef void (*___glBindSampler___)(GLuint unit, GLuint sampler);
+typedef void (*___glSamplerParameteri___)(GLuint sampler, GLenum pname, GLint param);
+typedef void (*___glSamplerParameteriv___)(GLuint sampler, GLenum pname, const GLint *param);
+typedef void (*___glSamplerParameterf___)(GLuint sampler, GLenum pname, GLfloat param);
+typedef void (*___glSamplerParameterfv___)(GLuint sampler, GLenum pname, const GLfloat *param);
+typedef void (*___glGetSamplerParameteriv___)(GLuint sampler, GLenum pname, GLint *params);
+typedef void (*___glGetSamplerParameterfv___)(GLuint sampler, GLenum pname, GLfloat *params);
+typedef void (*___glVertexAttribDivisor___)(GLuint index, GLuint divisor);
+typedef void (*___glBindTransformFeedback___)(GLenum target, GLuint id);
+typedef void (*___glDeleteTransformFeedbacks___)(GLsizei n, const GLuint *ids);
+typedef void (*___glGenTransformFeedbacks___)(GLsizei n, GLuint *ids);
+typedef GLboolean (*___glIsTransformFeedback___)(GLuint id);
+typedef void (*___glPauseTransformFeedback___)();
+typedef void (*___glResumeTransformFeedback___)();
+typedef void (*___glGetProgramBinary___)(GLuint program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, void *binary);
+typedef void (*___glProgramBinary___)(GLuint program, GLenum binaryFormat, const void *binary, GLsizei length);
+typedef void (*___glProgramParameteri___)(GLuint program, GLenum pname, GLint value);
+typedef void (*___glInvalidateFramebuffer___)(GLenum target, GLsizei numAttachments, const GLenum *attachments);
+typedef void (*___glInvalidateSubFramebuffer___)(GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height);
+typedef void (*___glTexStorage2D___)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height);
+typedef void (*___glTexStorage3D___)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth);
+typedef void (*___glGetInternalformativ___)(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint *params);
