@@ -114,3 +114,17 @@ bool frt_load_%(libname)s(const char *filename) {
 		'resolutions': resolutions[:-1]
 	})
 	f.close()
+
+def build_cpp_action(target, source, env):
+	build_cpp(str(source[0]), str(target[0]))
+
+def build_h_action(target, source, env):
+	build_h(str(source[0]), str(target[0]))
+
+if __name__ == '__main__':
+	import sys
+	for s in sys.argv[1:]:
+		sys.stdout.write('Processing ' + s + '... ')
+		build_cpp(s, s.replace('.dl', '.gen.cpp'))
+		build_h(s, s.replace('.dl', '.gen.h'))
+		sys.stdout.write('done.\n')
