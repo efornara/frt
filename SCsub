@@ -14,5 +14,7 @@ env.Append(BUILDERS={'DLCPP': env.Builder(action=procdl.build_cpp_action, suffix
 for dl in Glob('dl/*.dl'):
 	env.DLH(str(dl))
 	env.DLCPP(str(dl))
+for libname in ['gles2', 'gles3']:
+	env.Depends('platform_config.h', 'dl/' + libname + '.gen.h')
 
 env.Program('#bin/godot', ['godot_frt.cpp', 'os_frt.cpp', 'frt_options.cpp'] + env['FRT_MODULES'])
