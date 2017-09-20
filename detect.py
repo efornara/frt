@@ -60,6 +60,17 @@ def configure(env):
 		env.ParseConfig('pkg-config libpng --cflags --libs')
 	if (env['builtin_zlib'] == 'no'):
 		env.ParseConfig('pkg-config zlib --cflags --libs')
+        # pkg-config returns 0 when the lib exists...
+        found_udev = not os.system("pkg-config --exists libudev")
+
+        if (found_udev):
+            print("Enabling udev support")
+            env.Append(CPPFLAGS=["-DUDEV_ENABLED"])
+            env.ParseConfig('pkg-config libudev --cflags --libs')
+            env.Append(CPPFLAGS=["-DJOYDEV_ENABLED"])
+            env.Append(FRT_MODULES=['../x11/joystick_linux.cpp'])
+        else:
+            print("libudev development libraries not found, disabling udev support")
 
 	if version.major == 2:
 		if version.minor == 1 and version.patch >=4:
@@ -92,7 +103,7 @@ def configure(env):
 	if (env["frt_arch"].startswith("pi")):
 		env.Append(CCFLAGS=['-mfloat-abi=hard', '-mlittle-endian', '-munaligned-access'])
 
-	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED'])
+	env.Append(CPPFLAGS=['-DFRT_ENABLED', '-DUNIX_ENABLED', '-DGLES2_ENABLED'])
 	env.Append(LIBS=['pthread'])
 
 	if (env["frt_arch"] == "pc"):
