@@ -54,7 +54,7 @@ def configure(env):
 
 	if (env['builtin_freetype'] == 'no'):
 		env.ParseConfig('pkg-config freetype2 --cflags --libs')
-	if (env['builtin_openssl'] == 'no'):
+	if (env['builtin_openssl'] == 'no' and not (env['module_openssl_enabled'] == 'no')):
 		env.ParseConfig('pkg-config openssl --cflags --libs')
 	if (env['builtin_libpng'] == 'no'):
 		env.ParseConfig('pkg-config libpng --cflags --libs')
