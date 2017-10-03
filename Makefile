@@ -13,4 +13,4 @@ format:
 ci:
 	git clone https://github.com/godotengine/godot
 	ln -s `pwd` godot/platform/frt
-	( cd godot ; scons platform=frt target=release warnings=no frt_arch=pc )
+	( cd godot ; scons platform=frt target=release warnings=no builtin_freetype=yes builtin_libpng=yes builtin_zlib=yes module_openssl_enabled=no tools=no frt_arch=pc )
