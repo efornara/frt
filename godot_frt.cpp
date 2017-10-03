@@ -41,6 +41,7 @@ static void probe_modules() {
 	const char *video_modules[] = {
 		"video_bcm",
 		"video_mali",
+		"video_x11",
 		"video_sdl2",
 		0
 	};
@@ -49,6 +50,7 @@ static void probe_modules() {
 
 	const char *keyboard_modules[] = {
 		"keyboard_linux_input",
+		"keyboard_x11",
 		"keyboard_sdl2",
 		0
 	};
@@ -57,6 +59,7 @@ static void probe_modules() {
 
 	const char *mouse_modules[] = {
 		"mouse_linux_input",
+		"mouse_x11",
 		"mouse_sdl2",
 		0
 	};

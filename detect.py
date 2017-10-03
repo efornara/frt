@@ -96,8 +96,12 @@ def configure(env):
 	env.Append(LIBS=['pthread'])
 
 	if (env["frt_arch"] == "pc"):
-		env.Append(FRT_MODULES=['video_sdl2.cpp', 'keyboard_sdl2.cpp', 'mouse_sdl2.cpp'])
-		env.Append(LIBS=['SDL2'])
+		env.Append(FRT_MODULES=['video_x11.cpp', 'keyboard_x11.cpp', 'mouse_x11.cpp'])
+		if version.major >= 3:
+			env.Append(FRT_MODULES=['import/key_mapping_x11_3.cpp'])
+		else:
+			env.Append(FRT_MODULES=['import/key_mapping_x11_2.cpp'])
+		env.Append(FRT_MODULES=['dl/x11.gen.cpp', 'dl/egl.gen.cpp'])
 	elif (env["frt_arch"] == "mali"):
 		env.Append(FRT_MODULES=['video_mali.cpp', 'keyboard_linux_input.cpp', 'mouse_linux_input.cpp'])
 		env.Append(FRT_MODULES=['dl/egl.gen.cpp'])

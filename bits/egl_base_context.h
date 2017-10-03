@@ -63,7 +63,7 @@ protected:
 	EGLConfig config;
 
 public:
-	void init() {
+	void init(EGLNativeDisplayType display_id = EGL_DEFAULT_DISPLAY) {
 		static EGLint attr_list[32];
 		static const EGLint ctx_attrs[] = {
 			EGL_CONTEXT_CLIENT_VERSION, FRT_GLES_VERSION,
@@ -71,7 +71,7 @@ public:
 		};
 		EGLBoolean result;
 		EGLint num_config;
-		display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+		display = eglGetDisplay(display_id);
 		assert(display != EGL_NO_DISPLAY);
 		result = eglInitialize(display, 0, 0);
 		assert(result != EGL_FALSE);
@@ -83,6 +83,10 @@ public:
 		context = eglCreateContext(display, config, EGL_NO_CONTEXT, ctx_attrs);
 		assert(context != EGL_NO_CONTEXT);
 	};
+	void create_simple_surface(EGLNativeWindowType window_id) {
+		surface = eglCreateWindowSurface(display, config, window_id, 0);
+		assert(surface != EGL_NO_SURFACE);
+	}
 	void cleanup() {
 		eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 		eglDestroyContext(display, context);
