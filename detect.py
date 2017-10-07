@@ -107,7 +107,13 @@ def configure(env):
 		env.Append(FRT_MODULES=['dl/egl.gen.cpp'])
 	else:
 		env.Append(FRT_MODULES=['video_bcm.cpp', 'keyboard_linux_input.cpp', 'mouse_linux_input.cpp'])
-		env.Append(FRT_MODULES=['dl/bcm.gen.cpp', 'dl/egl.gen.cpp'])
+		env.Append(FRT_MODULES=['video_x11.cpp', 'keyboard_x11.cpp', 'mouse_x11.cpp'])
+		if version.major >= 3:
+			env.Append(FRT_MODULES=['import/key_mapping_x11_3.cpp'])
+		else:
+			env.Append(FRT_MODULES=['import/key_mapping_x11_2.cpp'])
+		env.Append(FRT_MODULES=['envprobe_pi.cpp'])
+		env.Append(FRT_MODULES=['dl/bcm.gen.cpp', 'dl/x11.gen.cpp', 'dl/egl.gen.cpp'])
 		env.Append(CCFLAGS=['-I/opt/vc/include/'])
 
 	if version.major >= 3:

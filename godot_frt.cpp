@@ -34,7 +34,7 @@ using namespace frt;
 static Env env;
 static Runnable *runnable;
 
-static void probe_modules() {
+static void probe_modules_fallback() {
 	App *app = App::instance();
 	Module *module;
 
@@ -45,8 +45,10 @@ static void probe_modules() {
 		"video_sdl2",
 		0
 	};
-	module = app->probe(video_modules);
-	env.video = (Video *)module;
+	if (!env.video) {
+		module = app->probe(video_modules);
+		env.video = (Video *)module;
+	}
 
 	const char *keyboard_modules[] = {
 		"keyboard_linux_input",
@@ -54,8 +56,10 @@ static void probe_modules() {
 		"keyboard_sdl2",
 		0
 	};
-	module = app->probe(keyboard_modules);
-	env.keyboard = (Keyboard *)module;
+	if (!env.keyboard) {
+		module = app->probe(keyboard_modules);
+		env.keyboard = (Keyboard *)module;
+	}
 
 	const char *mouse_modules[] = {
 		"mouse_linux_input",
@@ -63,15 +67,19 @@ static void probe_modules() {
 		"mouse_sdl2",
 		0
 	};
-	module = app->probe(mouse_modules);
-	env.mouse = (Mouse *)module;
+	if (!env.mouse) {
+		module = app->probe(mouse_modules);
+		env.mouse = (Mouse *)module;
+	}
+}
 
-	const char *runnable_modules[] = {
-		"frt_os_unix",
-		0
-	};
-	module = app->probe(runnable_modules);
-	runnable = (Runnable *)module;
+static void probe_modules() {
+	App *app = App::instance();
+	EnvProbe *env_probe = (EnvProbe *)app->probe("envprobe");
+	if (env_probe)
+		env_probe->probe_env(&env);
+	probe_modules_fallback();
+	runnable = (Runnable *)app->probe("frt_os_unix");
 }
 
 static void cleanup_modules() {

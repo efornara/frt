@@ -45,6 +45,14 @@
 #define frt_load_gles frt_load_gles3
 #endif
 
+// HACK - TODO: clone scons env and detect pi
+// on pi, skip EGL/GLESv2 in /opt/vc/lib
+#ifdef __arm__
+#define LIB_PREFIX "/usr/lib/arm-linux-gnueabihf/"
+#else
+#define LIB_PREFIX ""
+#endif
+
 namespace frt {
 
 class VideoX11 : public Video, public ContextGL {
@@ -80,7 +88,7 @@ public:
 		const int *types = 0;
 		x11 = X11Context::acquire(mask, types, 0, true);
 		display = x11->get_display();
-		if (!frt_load_egl("libEGL.so") || !frt_load_gles("libGLESv2.so")) {
+		if (!frt_load_egl(LIB_PREFIX "libEGL.so") || !frt_load_gles(LIB_PREFIX "libGLESv2.so")) {
 			x11->release();
 			x11 = 0;
 			return false;

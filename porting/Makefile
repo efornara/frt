@@ -1,6 +1,6 @@
 # Makefile
 
-VPATH = . .. ../dl
+VPATH = . .. ../import ../dl
 
 CXXFLAGS = -I.. -DFRT_TEST -std=c++98 -Wall -ggdb
 LDFLAGS = -ggdb

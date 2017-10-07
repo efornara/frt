@@ -189,6 +189,10 @@ struct Env {
 	Mouse *mouse;
 };
 
+struct EnvProbe : public Module {
+	virtual void probe_env(Env *env) = 0;
+};
+
 struct Runnable : public Module {
 	virtual void setup_env(Env *env) = 0;
 	virtual void run_() = 0;

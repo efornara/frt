@@ -37,7 +37,10 @@
 #include "bits/x11.h"
 
 #include "import/gdkeys.h"
+
+#ifndef FRT_MOCK_KEY_MAPPING_X11
 #include "import/key_mapping_x11.h"
+#endif
 
 // TODO: unicode
 // TODO: echo
@@ -96,7 +99,13 @@ public:
 		//KeySym keysym_unicode = 0;
 		char str[256 + 1];
 		XLookupString(&ev.xkey, str, 256, &keysym_keycode, NULL);
+#ifndef FRT_MOCK_KEY_MAPPING_X11
 		int keycode = KeyMappingX11::get_keycode(keysym_keycode);
+#else
+		int keycode = str[0];
+		if (!keycode)
+			return;
+#endif
 		if (keycode >= 'a' && keycode <= 'z')
 			keycode -= 'a' - 'A';
 		bool pressed = ev.type == KeyPress;
