@@ -67,7 +67,7 @@ private:
 	void gles2_init() {
 		if (!x11)
 			return;
-		window = x11->create_window(view_size.x, view_size.y, "FRT");
+		window = x11->create_window(view_size.x, view_size.y, FRT_WINDOW_TITLE);
 		egl.init((EGLNativeDisplayType)display);
 		egl.create_simple_surface((EGLNativeWindowType)window);
 		egl.make_current();

@@ -129,7 +129,7 @@ private:
 	// EventDispatcher
 	void dispatch_events() {
 		if (create_window && !window)
-			create(100, 100, "FRT");
+			create(100, 100, FRT_WINDOW_TITLE);
 		if (current_mask != server_mask) {
 			XSelectInput(display, window, current_mask);
 			server_mask = current_mask;

@@ -26,6 +26,9 @@
 #ifndef FRT_H
 #define FRT_H
 
+#define FRT_WINDOW_TITLE "Godot / FRT"
+#define FRT_VERSION "0.9.2"
+
 class ContextGL;
 struct InputModifierState;
 

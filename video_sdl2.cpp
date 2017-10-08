@@ -106,7 +106,7 @@ public:
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, FRT_GLES_VERSION);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-		window = SDL_CreateWindow("FRT", SDL_WINDOWPOS_UNDEFINED,
+		window = SDL_CreateWindow(FRT_WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED,
 								  SDL_WINDOWPOS_UNDEFINED, view_size.x, view_size.y,
 								  SDL_WINDOW_OPENGL);
 		assert(window);
