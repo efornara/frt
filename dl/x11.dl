@@ -38,3 +38,4 @@ typedef int (*___XPending___)(Display *);
 typedef int (*___XNextEvent___)(Display *, XEvent *);
 typedef int (*___XWarpPointer___)(Display *, Window, Window, int, int, unsigned int, unsigned int, int, int);
 typedef int (*___XLookupString___)(XKeyEvent *, char *, int, KeySym *, XComposeStatus *);
+typedef void (*___XSetWMNormalHints___)(Display *, Window, XSizeHints *);

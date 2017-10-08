@@ -87,6 +87,13 @@ private:
 		window = XCreateWindow(display, root, 0, 0,
 							   width, height, 0, CopyFromParent,
 							   InputOutput, CopyFromParent, 0, &swa);
+		XSizeHints sh;
+		sh.min_width = width;
+		sh.min_height = height;
+		sh.max_width = width;
+		sh.max_height = height;
+		sh.flags = PMinSize | PMaxSize;
+		XSetWMNormalHints(display, window, &sh);
 		XMapWindow(display, window);
 		XStoreName(display, window, title);
 		XFlush(display);
