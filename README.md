@@ -26,7 +26,7 @@ here:
 
 Run a demo:
 
-	$ cd Godot-Demos-2.1-20170121/2d/platformer
+	$ cd Godot-Demos-2.1.4-stable/2d/platformer
 	$ godot.frt.opt.pi1 -v
 
 Press *Win+Q* to quit.

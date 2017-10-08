@@ -102,7 +102,7 @@ public:
 				printf("frt: bcm/x11 integration not implemented.\n");
 				exit(1);
 			case FRT_PI_ENV_VC4:
-				printf("frt: vc4 driver requires.\n");
+				printf("frt: vc4 driver requires X11.\n");
 				exit(1);
 			case FRT_PI_ENV_VC4_X11:
 				env->video = (Video *)app->probe("video_x11");
