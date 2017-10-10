@@ -78,7 +78,8 @@ static void probe_modules() {
 	EnvProbe *env_probe = (EnvProbe *)app->probe("envprobe");
 	if (env_probe)
 		env_probe->probe_env(&env);
-	probe_modules_fallback();
+	else
+		probe_modules_fallback();
 	runnable = (Runnable *)app->probe("frt_os_unix");
 }
 
