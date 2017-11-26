@@ -33,6 +33,7 @@
 
 #include "version.h"
 #include "os/os.h"
+#include "joystick_linux.h"
 #include "os/input.h"
 #include "os/file_access.h"
 #include "drivers/unix/os_unix.h"
@@ -287,6 +288,9 @@ private:
 #endif
 	int event_id;
 	InputDefault *input;
+#ifdef JOYDEV_ENABLED
+	joystick_linux *joystick;
+#endif
 	MouseVirtual mouse_virtual;
 	uint64_t last_click;
 
@@ -424,6 +428,9 @@ public:
 		physics_2d_server = memnew(Physics2DServerSW);
 		physics_2d_server->init();
 		input = memnew(InputDefault);
+#ifdef JOYDEV_ENABLED
+		joystick = memnew(joystick_linux(input));
+#endif
 		last_click = 0;
 		_ensure_data_dir();
 	}
@@ -452,6 +459,9 @@ public:
 		memdelete(physics_server);
 		physics_2d_server->finish();
 		memdelete(physics_2d_server);
+#ifdef JOYDEV_ENABLED
+		memdelete(joystick);
+#endif
 		memdelete(input);
 		args.clear();
 	}
@@ -652,6 +662,9 @@ public:
 		perfmon.init();
 		while (app->is_running()) {
 			app->dispatch_events();
+#ifdef JOYDEV_ENABLED
+			event_id = joystick->process_joysticks(event_id);
+#endif
 			if (Main::iteration() == true)
 				break;
 			if (perfmon.is_valid())
@@ -660,6 +673,15 @@ public:
 		perfmon.cleanup();
 		main_loop->finish();
 	}
+
+	bool is_joy_known(int p_device) {
+		return input->is_joy_mapped(p_device);
+	}
+
+	String get_joy_guid(int p_device) const {
+		return input->get_joy_guid_remapped(p_device);
+	}
+
 	OS_FRT() {
 #ifdef ALSA_ENABLED
 		AudioDriverManagerSW::add_driver(&driver_alsa);
