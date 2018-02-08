@@ -188,6 +188,7 @@ typedef AudioDriver AudioDriverSW;
 #define set_mouse_pos set_mouse_position
 #define get_mouse_pos get_mouse_position
 #define get_mouse_speed get_last_mouse_speed
+#define has has_setting
 #define FRT_MOCK_GODOT_INPUT_MODIFIER_STATE
 #define INPUT_MODIFIER_REF Ref<InputEventWithModifiers>
 #define INPUT_EVENT_REF(t) Ref<t>
@@ -332,16 +333,18 @@ public:
 		FileAccess *in = FileAccess::open(name, FileAccess::READ);
 		if (!in)
 			extract_resource_fatal("failed opening resource");
-		Vector<uint8_t> buf;
-		buf.resize(in->get_len());
-		int n = in->get_buffer(buf.ptr(), buf.size());
-		if (n != buf.size())
+		int len = in->get_len();
+		uint8_t *buf = new uint8_t[len]; // memory "leak" is fine here
+		if (!buf)
+			extract_resource_fatal("failed allocating memory");
+		int n = in->get_buffer(buf, len);
+		if (n != len)
 			extract_resource_fatal("failed reading resource");
 		in->close();
 		FileAccess *out = FileAccess::open(s, FileAccess::WRITE);
 		if (!out)
 			extract_resource_fatal("failed opening output file");
-		out->store_buffer(buf.ptr(), buf.size());
+		out->store_buffer(buf, len);
 		out->close();
 		exit(0);
 	}
@@ -377,7 +380,12 @@ public:
 			}
 		}
 	}
-	void initialize(const VideoMode &desired, int video_driver, int audio_driver) {
+#if VERSION_MAJOR == 2
+	void
+#else
+	Error
+#endif
+	initialize(const VideoMode &desired, int video_driver, int audio_driver) {
 		get_project_frt_params();
 		extract_resource_if_requested();
 		args = OS::get_singleton()->get_cmdline_args();
@@ -420,8 +428,11 @@ public:
 		spatial_sound_server->init();
 		spatial_sound_2d_server = memnew(SpatialSound2DServerSW);
 		spatial_sound_2d_server->init();
-#endif
 		ERR_FAIL_COND(!visual_server);
+#else
+		if (!visual_server)
+			return FAILED;
+#endif
 		visual_server->init();
 		physics_server = memnew(PhysicsServerSW);
 		physics_server->init();
@@ -432,7 +443,11 @@ public:
 		joystick = memnew(joystick_linux(input));
 #endif
 		last_click = 0;
+#if VERSION_MAJOR == 2
 		_ensure_data_dir();
+#else
+		return OK;
+#endif
 	}
 	void finalize() {
 		if (main_loop)
@@ -495,6 +510,7 @@ public:
 	String get_name() { return "FRT"; }
 	void move_window_to_foreground() {}
 	void set_cursor_shape(CursorShape shape) {}
+	void set_custom_mouse_cursor(const RES&, OS::CursorShape, const Vector2&) {}
 	void release_rendering_thread() { context_gl->release_current(); }
 	void make_rendering_thread() { context_gl->make_current(); }
 	void swap_buffers() { context_gl->swap_buffers(); }
