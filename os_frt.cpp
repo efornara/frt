@@ -33,11 +33,11 @@
 
 #include "version.h"
 #include "os/os.h"
-#include "joystick_linux.h"
 #include "os/input.h"
 #include "os/file_access.h"
 #include "drivers/unix/os_unix.h"
 #include "drivers/gl_context/context_gl.h"
+#include "import/joystick_linux.h"
 #include "servers/visual_server.h"
 #include "servers/visual/rasterizer.h"
 #include "servers/physics_server.h"

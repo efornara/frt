@@ -68,7 +68,7 @@ def configure(env):
             env.Append(CPPFLAGS=["-DUDEV_ENABLED"])
             env.ParseConfig('pkg-config libudev --cflags --libs')
             env.Append(CPPFLAGS=["-DJOYDEV_ENABLED"])
-            env.Append(FRT_MODULES=['../x11/joystick_linux.cpp'])
+            env.Append(FRT_MODULES=['import/joystick_linux.cpp'])
         else:
             print("libudev development libraries not found, disabling udev support")
 
