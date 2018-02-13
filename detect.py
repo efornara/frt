@@ -63,7 +63,9 @@ def configure(env):
         # pkg-config returns 0 when the lib exists...
         found_udev = not os.system("pkg-config --exists libudev")
 
-        if (found_udev and version.major == 2):
+        if (version.major > 2):
+            print("Disabling joystick support in godot 3.x")
+        elif (found_udev):
             print("Enabling udev support")
             env.Append(CPPFLAGS=["-DUDEV_ENABLED"])
             env.ParseConfig('pkg-config libudev --cflags --libs')
