@@ -52,7 +52,8 @@ def parse_dl(dl, suffix):
 			continue
 		s = m.group(1)
 		symbols.append(s)
-		types.append(line.replace('___' + s + '___', 'FRT_FN_' + s))
+		ls = libname + '_' + s
+		types.append(line.replace('___' + s + '___', 'FRT_FN_' + ls))
 	f_dl.close()
 	return (libname, head, symbols, types, includes)
 
@@ -71,10 +72,12 @@ def build_h(dl, h):
 		out(s)
 	out()
 	for s in symbols:
-		out('#define ' + s + ' frt_fn_' + s)
+		ls = libname + '_' + s
+		out('#define ' + s + ' frt_fn_' + ls)
 	out()
 	for s in symbols:
-		out('extern FRT_FN_' + s + ' frt_fn_' + s + ';')
+		ls = libname + '_' + s
+		out('extern FRT_FN_' + ls + ' frt_fn_' + ls + ';')
 	out()
 	out('extern bool frt_load_' + libname + '(const char *filename);')
 	f.close()
@@ -85,10 +88,12 @@ def build_cpp(dl, cpp):
 	f.write(head)
 	assignments = ''
 	for s in symbols:
-		assignments += 'FRT_FN_' + s + ' frt_fn_' + s + ' = 0;\n'
+		ls = libname + '_' + s
+		assignments += 'FRT_FN_' + ls + ' frt_fn_' + ls + ' = 0;\n'
 	resolutions = ''
 	for s in symbols:
-		resolutions += '\tfrt_fn_' + s + ' = (FRT_FN_' + s + ')'
+		ls = libname + '_' + s
+		resolutions += '\tfrt_fn_' + ls + ' = (FRT_FN_' + ls + ')'
 		resolutions += 'dlsym(lib, "' + s + '");\n'
 	f.write("""\
 #include "%(libname)s.gen.h"

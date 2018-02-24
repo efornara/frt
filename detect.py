@@ -129,8 +129,7 @@ def configure(env):
 		env.Append(FRT_MODULES=['dl/bcm.gen.cpp', 'dl/x11.gen.cpp', 'dl/egl.gen.cpp'])
 		env.Append(CCFLAGS=['-I/opt/vc/include/'])
 
+	env.Append(FRT_MODULES=['dl/gles2.gen.cpp'])
 	if version.major >= 3:
 		env.Append(FRT_MODULES=['dl/gles3.gen.cpp'])
-	else:
-		env.Append(FRT_MODULES=['dl/gles2.gen.cpp'])
 	env.Append(LIBS=['dl'])

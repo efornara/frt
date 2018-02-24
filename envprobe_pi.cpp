@@ -62,8 +62,8 @@ static bool has_x11() {
 	void *lib = 0;
 	if (!(lib = dlopen("libX11.so", RTLD_LAZY)))
 		return false;
-	frt_fn_XOpenDisplay = (FRT_FN_XOpenDisplay)dlsym(lib, "XOpenDisplay");
-	frt_fn_XCloseDisplay = (FRT_FN_XCloseDisplay)dlsym(lib, "XCloseDisplay");
+	frt_fn_x11_XOpenDisplay = (FRT_FN_x11_XOpenDisplay)dlsym(lib, "XOpenDisplay");
+	frt_fn_x11_XCloseDisplay = (FRT_FN_x11_XCloseDisplay)dlsym(lib, "XCloseDisplay");
 	Display *display = XOpenDisplay(NULL);
 	if (display)
 		XCloseDisplay(display);
