@@ -63,16 +63,17 @@ def configure(env):
         # pkg-config returns 0 when the lib exists...
         found_udev = not os.system("pkg-config --exists libudev")
 
-        if (version.major > 2):
-            print("Disabling joystick support in godot 3.x")
-        elif (found_udev):
-            print("Enabling udev support")
-            env.Append(CPPFLAGS=["-DUDEV_ENABLED"])
-            env.ParseConfig('pkg-config libudev --cflags --libs')
-            env.Append(CPPFLAGS=["-DJOYDEV_ENABLED"])
-            env.Append(FRT_MODULES=['import/joystick_linux.cpp'])
-        else:
-            print("libudev development libraries not found, disabling udev support")
+	if (found_udev):
+		print("Enabling udev support")
+		env.Append(CPPFLAGS=["-DUDEV_ENABLED"])
+		env.ParseConfig('pkg-config libudev --cflags --libs')
+		env.Append(CPPFLAGS=["-DJOYDEV_ENABLED"])
+		if (version.major > 2):
+			env.Append(FRT_MODULES=['import/joypad_linux.cpp'])
+		else:
+			env.Append(FRT_MODULES=['import/joystick_linux.cpp'])
+	else:
+		print("libudev development libraries not found, disabling udev support")
 
 	if version.major == 2:
 		if version.minor == 1 and version.patch >=4:

@@ -37,7 +37,6 @@
 #include "os/file_access.h"
 #include "drivers/unix/os_unix.h"
 #include "drivers/gl_context/context_gl.h"
-#include "import/joystick_linux.h"
 #include "servers/visual_server.h"
 #include "servers/visual/rasterizer.h"
 #include "servers/physics_server.h"
@@ -56,6 +55,7 @@
 
 #if VERSION_MAJOR == 2
 
+#include "import/joystick_linux.h"
 #include "servers/visual/visual_server_wrap_mt.h"
 #include "servers/audio/audio_server_sw.h"
 #include "servers/audio/sample_manager_sw.h"
@@ -182,6 +182,7 @@ public:
 
 #elif VERSION_MAJOR == 3
 
+#include "import/joypad_linux.h"
 #include "drivers/gles3/rasterizer_gles3.h"
 typedef AudioDriverManager AudioDriverManagerSW;
 typedef AudioDriver AudioDriverSW;
@@ -192,6 +193,7 @@ typedef AudioDriver AudioDriverSW;
 #define FRT_MOCK_GODOT_INPUT_MODIFIER_STATE
 #define INPUT_MODIFIER_REF Ref<InputEventWithModifiers>
 #define INPUT_EVENT_REF(t) Ref<t>
+#define joystick_linux JoypadLinux
 
 #include "core/project_settings.h"
 #define PROJECT_SETTINGS \
@@ -679,7 +681,11 @@ public:
 		while (app->is_running()) {
 			app->dispatch_events();
 #ifdef JOYDEV_ENABLED
+#if VERSION_MAJOR == 2
 			event_id = joystick->process_joysticks(event_id);
+#else
+			joystick->process_joypads();
+#endif
 #endif
 			if (Main::iteration() == true)
 				break;
