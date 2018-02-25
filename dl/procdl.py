@@ -65,6 +65,7 @@ def build_h(dl, h):
 		if s:
 			f.write(s)
 		f.write('\n')
+	out('#ifndef FRT_DL_SKIP')
 	for s in includes:
 		out(s)
 	out()
@@ -79,6 +80,7 @@ def build_h(dl, h):
 		ls = libname + '_' + s
 		out('extern FRT_FN_' + ls + ' frt_fn_' + ls + ';')
 	out()
+	out('#endif')
 	out('extern bool frt_load_' + libname + '(const char *filename);')
 	f.close()
 
