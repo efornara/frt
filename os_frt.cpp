@@ -53,8 +53,12 @@
 #include "main/performance.h"
 #include "print_string.h"
 
+#define VIDEO_DRIVER_GLES2 0
+#define VIDEO_DRIVER_GLES3 1
+
 #if VERSION_MAJOR == 2
 
+#define VIDEO_DRIVER_COUNT 1
 #include "import/joystick_linux.h"
 #include "servers/visual/visual_server_wrap_mt.h"
 #include "servers/audio/audio_server_sw.h"
@@ -182,7 +186,9 @@ public:
 
 #elif VERSION_MAJOR == 3
 
+#define VIDEO_DRIVER_COUNT 2
 #include "import/joypad_linux.h"
+#include "drivers/gles2/rasterizer_gles2.h"
 #include "drivers/gles3/rasterizer_gles3.h"
 typedef AudioDriverManager AudioDriverManagerSW;
 typedef AudioDriver AudioDriverSW;
@@ -298,8 +304,13 @@ private:
 	uint64_t last_click;
 
 public:
-	int get_video_driver_count() const { return 1; }
-	const char *get_video_driver_name(int driver) const { return "GLES2"; }
+	int get_video_driver_count() const { return VIDEO_DRIVER_COUNT; }
+	const char *get_video_driver_name(int driver) const {
+		if (driver == VIDEO_DRIVER_GLES3)
+			return "GLES3";
+		else
+			return "GLES2";
+	}
 	OS::VideoMode get_default_video_mode() const {
 		return OS::VideoMode(screen_size.x, screen_size.y, true, false, true);
 	}
@@ -394,7 +405,8 @@ public:
 		current_videomode = desired;
 		main_loop = 0;
 		Vec2 view(current_videomode.width, current_videomode.height);
-		context_gl = env->video->create_the_gl_context(view);
+		int gl_version = video_driver == VIDEO_DRIVER_GLES3 ? 3 : 2;
+		context_gl = env->video->create_the_gl_context(gl_version, view);
 		context_gl->initialize();
 #if VERSION_MAJOR == 2
 		rasterizer = memnew(RasterizerGLES2);
@@ -403,8 +415,13 @@ public:
 			visual_server = memnew(VisualServerWrapMT(
 					visual_server, get_render_thread_mode() == RENDER_SEPARATE_THREAD));
 #else
-		RasterizerGLES3::register_config();
-		RasterizerGLES3::make_current();
+		if (video_driver == VIDEO_DRIVER_GLES3) {
+			RasterizerGLES3::register_config();
+			RasterizerGLES3::make_current();
+		} else {
+			RasterizerGLES2::register_config();
+			RasterizerGLES2::make_current();
+		}
 		visual_server = memnew(VisualServerRaster);
 #endif
 		// TODO: Audio Module

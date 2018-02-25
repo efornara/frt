@@ -63,10 +63,10 @@ protected:
 	EGLConfig config;
 
 public:
-	void init(EGLNativeDisplayType display_id = EGL_DEFAULT_DISPLAY) {
+	void init(int version, EGLNativeDisplayType display_id = EGL_DEFAULT_DISPLAY) {
 		static EGLint attr_list[32];
 		static const EGLint ctx_attrs[] = {
-			EGL_CONTEXT_CLIENT_VERSION, FRT_GLES_VERSION,
+			EGL_CONTEXT_CLIENT_VERSION, version,
 			EGL_NONE
 		};
 		EGLBoolean result;

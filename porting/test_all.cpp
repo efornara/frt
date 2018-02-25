@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
 	env.keyboard->set_handler(&handler);
 	env.mouse->set_handler(&handler);
 	Vec2 size(640, 480);
-	gl = env.video->create_the_gl_context(size);
+	gl = env.video->create_the_gl_context(2, size);
 	assert(gl);
 	gl->initialize();
 	gl->make_current();

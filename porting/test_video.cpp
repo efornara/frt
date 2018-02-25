@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
 	video = (Video *)app->probe_single();
 	assert(video);
 	Vec2 size(640, 480);
-	gl = video->create_the_gl_context(size);
+	gl = video->create_the_gl_context(2, size);
 	assert(gl);
 	gl->initialize();
 	gl->make_current();

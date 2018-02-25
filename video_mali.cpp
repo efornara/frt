@@ -36,13 +36,7 @@
 
 #include "bits/egl_base_context.h"
 
-#if FRT_GLES_VERSION == 2
 #include "dl/gles2.gen.h"
-#define frt_load_gles frt_load_gles2
-#else
-#include "dl/gles3.gen.h"
-#define frt_load_gles frt_load_gles3
-#endif
 
 namespace frt {
 
@@ -71,7 +65,7 @@ private:
 	Vec2 view_size;
 	bool vsync;
 	void init_egl(Vec2 size) {
-		egl.init();
+		egl.init(2);
 		egl.create_surface(size);
 		egl.make_current();
 		initialized = true;
@@ -92,7 +86,7 @@ public:
 	bool probe() {
 		if (!frt_load_egl("libEGL.so"))
 			return false;
-		if (!frt_load_gles("libGLESv2.so"))
+		if (!frt_load_gles2("libGLESv2.so"))
 			return false;
 		screen_size.x = 720;
 		screen_size.y = 480;
@@ -106,7 +100,9 @@ public:
 	Vec2 get_view_size() const { return view_size; }
 	Vec2 move_pointer(const Vec2 &screen) { return screen; }
 	void show_pointer(bool enable) {}
-	ContextGL *create_the_gl_context(Vec2 size) {
+	ContextGL *create_the_gl_context(int version, Vec2 size) {
+		if (version != 2)
+			return 0;
 		view_size = size;
 		return this;
 	}

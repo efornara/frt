@@ -37,13 +37,8 @@
 #include "bits/x11.h"
 #include "bits/egl_base_context.h"
 
-#if FRT_GLES_VERSION == 2
-#include "dl/gles2.gen.h"
-#define frt_load_gles frt_load_gles2
-#else
-#include "dl/gles3.gen.h"
-#define frt_load_gles frt_load_gles3
-#endif
+extern bool frt_load_gles2(const char *filename);
+extern bool frt_load_gles3(const char *filename);
 
 // HACK - TODO: clone scons env and detect pi
 // on pi, skip EGL/GLESv2 in /opt/vc/lib
@@ -55,6 +50,14 @@
 
 namespace frt {
 
+bool frt_load_gles(int version) {
+#if FRT_GLES_VERSION == 3
+	if (version == 3)
+		return frt_load_gles3(LIB_PREFIX "libGLESv2.so");
+#endif
+	return frt_load_gles2(LIB_PREFIX "libGLESv2.so");
+}
+
 class VideoX11 : public Video, public ContextGL {
 private:
 	X11User *x11;
@@ -63,19 +66,20 @@ private:
 	Vec2 screen_size;
 	Vec2 view_size;
 	EGLBaseContext egl;
+	int gl_version;
 	bool vsync;
-	void gles2_init() {
+	void gles_init() {
 		if (!x11)
 			return;
 		window = x11->create_window(view_size.x, view_size.y, FRT_WINDOW_TITLE);
-		egl.init((EGLNativeDisplayType)display);
+		egl.init(gl_version, (EGLNativeDisplayType)display);
 		egl.create_simple_surface((EGLNativeWindowType)window);
 		egl.make_current();
 	}
 
 public:
 	VideoX11()
-		: x11(0), display(0), window(0), vsync(true) {
+		: x11(0), display(0), window(0), gl_version(2), vsync(true) {
 		screen_size.x = 1200;
 		screen_size.y = 680;
 	}
@@ -88,7 +92,7 @@ public:
 		const int *types = 0;
 		x11 = X11Context::acquire(mask, types, 0, true);
 		display = x11->get_display();
-		if (!frt_load_egl(LIB_PREFIX "libEGL.so") || !frt_load_gles(LIB_PREFIX "libGLESv2.so")) {
+		if (!frt_load_egl(LIB_PREFIX "libEGL.so")) {
 			x11->release();
 			x11 = 0;
 			return false;
@@ -116,7 +120,10 @@ public:
 		return screen;
 	}
 	void show_pointer(bool enable) {}
-	ContextGL *create_the_gl_context(Vec2 size) {
+	ContextGL *create_the_gl_context(int version, Vec2 size) {
+		if (!frt_load_gles(version))
+			return 0;
+		gl_version = version;
 		view_size = size;
 		return this;
 	}
@@ -133,7 +140,7 @@ public:
 	int get_window_width() { return view_size.x; }
 	int get_window_height() { return view_size.y; }
 	Error initialize() {
-		gles2_init();
+		gles_init();
 		return OK;
 	}
 	void set_use_vsync(bool use) {

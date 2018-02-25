@@ -396,7 +396,7 @@ private:
 	Vec2 view_size;
 	bool vsync;
 	void init_egl_and_dpymnx(Vec2 size) {
-		egl.init();
+		egl.init(2);
 		dpymnx.open();
 		background.create_resource();
 		pointer.create_resource();
@@ -479,7 +479,9 @@ public:
 	void show_pointer(bool enable) {
 		pointer.set_visible(dpymnx, enable);
 	}
-	ContextGL *create_the_gl_context(Vec2 size) {
+	ContextGL *create_the_gl_context(int version, Vec2 size) {
+		if (version != 2)
+			return 0;
 		view_size = size;
 		return this;
 	}
