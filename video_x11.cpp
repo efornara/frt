@@ -23,7 +23,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <string.h>
 #include <assert.h>
+
+#include <unistd.h>
 
 #ifdef FRT_TEST
 #define FRT_MOCK_GODOT_GL_CONTEXT
@@ -40,22 +43,34 @@
 extern bool frt_load_gles2(const char *filename);
 extern bool frt_load_gles3(const char *filename);
 
-// HACK - TODO: clone scons env and detect pi
 // on pi, skip EGL/GLESv2 in /opt/vc/lib
-#ifdef __arm__
-#define LIB_PREFIX "/usr/lib/arm-linux-gnueabihf/"
+const char *lib(const char *s) {
+#if defined(__arm__) || defined(__aarch64__)
+	static char buf[64]; // large enough
+	strcpy(buf, "/opt/vc/lib/");
+	strcat(buf, s);
+	if (access(buf, R_OK) != 0)
+		return s;
+#if defined(__arm__)
+	strcpy(buf, "/usr/lib/arm-linux-gnueabihf/");
 #else
-#define LIB_PREFIX ""
+	strcpy(buf, "/usr/lib/aarch64-linux-gnu/");
 #endif
+	strcat(buf, s);
+	return buf;
+#else // !pi
+	return s;
+#endif
+}
 
 namespace frt {
 
 bool frt_load_gles(int version) {
 #if FRT_GLES_VERSION == 3
 	if (version == 3)
-		return frt_load_gles3(LIB_PREFIX "libGLESv2.so");
+		return frt_load_gles3(lib("libGLESv2.so"));
 #endif
-	return frt_load_gles2(LIB_PREFIX "libGLESv2.so");
+	return frt_load_gles2(lib("libGLESv2.so"));
 }
 
 class VideoX11 : public Video, public ContextGL {
@@ -92,7 +107,7 @@ public:
 		const int *types = 0;
 		x11 = X11Context::acquire(mask, types, 0, true);
 		display = x11->get_display();
-		if (!frt_load_egl(LIB_PREFIX "libEGL.so")) {
+		if (!frt_load_egl(lib("libEGL.so"))) {
 			x11->release();
 			x11 = 0;
 			return false;

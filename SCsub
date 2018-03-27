@@ -17,4 +17,9 @@ for dl in Glob('dl/*.dl'):
 for libname in ['gles2', 'gles3']:
 	env.Depends('platform_config.h', 'dl/' + libname + '.gen.h')
 
-env.Program('#bin/godot', ['godot_frt.cpp', 'os_frt.cpp', 'frt_options.cpp'] + env['FRT_MODULES'])
+frt_env = env.Clone()
+import os
+if os.path.isfile('/opt/vc/include/bcm_host.h'):
+	frt_env.Append(CCFLAGS=["-I/opt/vc/include/"])
+
+frt_env.Program('#bin/godot', ['godot_frt.cpp', 'os_frt.cpp', 'frt_options.cpp'] + env['FRT_MODULES'])

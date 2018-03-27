@@ -1,4 +1,4 @@
-// video_mali.cc
+// video_fbdev.cc
 /*
  * FRT - A Godot platform targeting single board computers
  * Copyright (c) 2017  Emanuele Fornara
@@ -57,7 +57,7 @@ public:
 	}
 };
 
-class VideoMali : public Video, public ContextGL {
+class VideoFBDev : public Video, public ContextGL {
 private:
 	EGLMaliContext egl;
 	bool initialized;
@@ -80,9 +80,9 @@ private:
 
 public:
 	// Module
-	VideoMali()
+	VideoFBDev()
 		: initialized(false), vsync(true) {}
-	const char *get_id() const { return "video_mali"; }
+	const char *get_id() const { return "video_fbdev"; }
 	bool probe() {
 		if (!frt_load_egl("libEGL.so"))
 			return false;
@@ -129,6 +129,6 @@ public:
 	bool is_using_vsync() const { return vsync; }
 };
 
-FRT_REGISTER(VideoMali)
+FRT_REGISTER(VideoFBDev)
 
 } // namespace frt

@@ -1,4 +1,4 @@
-// envprobe_pi.cpp
+// envprobe.cpp
 /*
  * FRT - A Godot platform targeting single board computers
  * Copyright (c) 2017  Emanuele Fornara
@@ -30,17 +30,24 @@
 #include <string.h>
 #include <errno.h>
 
+#include <unistd.h>
 #include <dlfcn.h>
-
-#include "dl/x11.gen.h"
 
 using namespace frt;
 
-#define FRT_PI_ENV_ERROR 0
-#define FRT_PI_ENV_BCM 1
-#define FRT_PI_ENV_BCM_X11 2
-#define FRT_PI_ENV_VC4 3
-#define FRT_PI_ENV_VC4_X11 4
+#define FRT_ENV_ERROR 0
+#define FRT_ENV_BCM 1
+#define FRT_ENV_X11 2
+#define FRT_ENV_FBDEV 3
+#define FRT_ENV_VC4_NOX11 4
+
+static bool bcm_installed() {
+#if defined(__arm__) || defined(__aarch64__)
+	return access("/opt/vc/lib/libEGL.so", R_OK) == 0;
+#else
+	return false;
+#endif
+}
 
 static bool has_vc4() {
 	FILE *f = fopen("/proc/modules", "r");
@@ -62,28 +69,37 @@ static bool has_x11() {
 	void *lib = 0;
 	if (!(lib = dlopen("libX11.so", RTLD_LAZY)))
 		return false;
-	frt_fn_x11_XOpenDisplay = (FRT_FN_x11_XOpenDisplay)dlsym(lib, "XOpenDisplay");
-	frt_fn_x11_XCloseDisplay = (FRT_FN_x11_XCloseDisplay)dlsym(lib, "XCloseDisplay");
-	Display *display = XOpenDisplay(NULL);
+	typedef void *(*FN_XOpenDisplay)(const char *);
+	typedef int (*FN_XCloseDisplay)(void *);
+	FN_XOpenDisplay fn_XOpenDisplay = (FN_XOpenDisplay)dlsym(lib, "XOpenDisplay");
+	FN_XCloseDisplay fn_XCloseDisplay = (FN_XCloseDisplay)dlsym(lib, "XCloseDisplay");
+	void *display = fn_XOpenDisplay(NULL);
 	if (display)
-		XCloseDisplay(display);
+		fn_XCloseDisplay(display);
 	dlclose(lib);
 	return (bool)display;
 }
 
-static int probe_pi() {
-	if (has_vc4()) {
+static int probe_environment() {
+	if (bcm_installed()) {
+		if (has_vc4()) {
+			if (has_x11())
+				return FRT_ENV_X11;
+			else
+				return FRT_ENV_VC4_NOX11;
+		}
+		return FRT_ENV_BCM;
+	} else {
 		if (has_x11())
-			return FRT_PI_ENV_VC4_X11;
+			return FRT_ENV_X11;
 		else
-			return FRT_PI_ENV_VC4;
+			return FRT_ENV_FBDEV;
 	}
-	return FRT_PI_ENV_BCM;
 }
 
 namespace frt {
 
-class EnvProbePi : public EnvProbe {
+class EnvProbeImpl : public EnvProbe {
 public:
 	// Module
 	const char *get_id() const { return "envprobe"; }
@@ -92,27 +108,29 @@ public:
 	// EnvProbe
 	void probe_env(Env *env) {
 		App *app = App::instance();
-		switch (probe_pi()) {
-			case FRT_PI_ENV_BCM:
+		switch (probe_environment()) {
+			case FRT_ENV_BCM:
 				env->video = (Video *)app->probe("video_bcm");
 				env->keyboard = (Keyboard *)app->probe("keyboard_linux_input");
 				env->mouse = (Mouse *)app->probe("mouse_linux_input");
 				break;
-			case FRT_PI_ENV_BCM_X11:
-				printf("frt: bcm/x11 integration not implemented.\n");
-				exit(1);
-			case FRT_PI_ENV_VC4:
-				printf("frt: vc4 driver requires X11.\n");
-				exit(1);
-			case FRT_PI_ENV_VC4_X11:
+			case FRT_ENV_X11:
 				env->video = (Video *)app->probe("video_x11");
 				env->keyboard = (Keyboard *)app->probe("keyboard_x11");
 				env->mouse = (Mouse *)app->probe("mouse_x11");
 				break;
+			case FRT_ENV_FBDEV:
+				env->video = (Video *)app->probe("video_fbdev");
+				env->keyboard = (Keyboard *)app->probe("keyboard_linux_input");
+				env->mouse = (Mouse *)app->probe("mouse_linux_input");
+				break;
+			case FRT_ENV_VC4_NOX11:
+				printf("frt: vc4 driver requires X11.\n");
+				exit(1);
 		}
 	}
 };
 
-FRT_REGISTER(EnvProbePi)
+FRT_REGISTER(EnvProbeImpl)
 
 } // namespace frt

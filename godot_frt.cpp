@@ -39,10 +39,9 @@ static void probe_modules_fallback() {
 	Module *module;
 
 	const char *video_modules[] = {
-		"video_bcm",
-		"video_mali",
 		"video_x11",
-		"video_sdl2",
+		"video_fbdev",
+		"video_bcm",
 		0
 	};
 	if (!env.video) {
@@ -51,9 +50,8 @@ static void probe_modules_fallback() {
 	}
 
 	const char *keyboard_modules[] = {
-		"keyboard_linux_input",
 		"keyboard_x11",
-		"keyboard_sdl2",
+		"keyboard_linux_input",
 		0
 	};
 	if (!env.keyboard) {
@@ -62,9 +60,8 @@ static void probe_modules_fallback() {
 	}
 
 	const char *mouse_modules[] = {
-		"mouse_linux_input",
 		"mouse_x11",
-		"mouse_sdl2",
+		"mouse_linux_input",
 		0
 	};
 	if (!env.mouse) {
