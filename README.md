@@ -46,4 +46,8 @@ This is the list of meta (Win) keys recognized by FRT.
 The virtual mouse keys are available only if a keyboard is found, but a
 mouse is not.
 
-To compile FRT from source, see [Compile.md](doc/Compile.md).
+## More Info
+
+- [Usage](doc/Usage.md)
+- [Extensions](doc/Extensions.md)
+- [Compile](doc/Compile.md)
