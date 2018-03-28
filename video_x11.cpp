@@ -40,11 +40,8 @@
 #include "bits/x11.h"
 #include "bits/egl_base_context.h"
 
-extern bool frt_load_gles2(const char *filename);
-extern bool frt_load_gles3(const char *filename);
-
 // on pi, skip EGL/GLESv2 in /opt/vc/lib
-const char *lib(const char *s) {
+static const char *lib(const char *s) {
 #if defined(__arm__) || defined(__aarch64__)
 	static char buf[64]; // large enough
 	strcpy(buf, "/opt/vc/lib/");
@@ -63,15 +60,18 @@ const char *lib(const char *s) {
 #endif
 }
 
-namespace frt {
+extern bool frt_load_gles2(const char *filename);
+extern bool frt_load_gles3(const char *filename);
 
-bool frt_load_gles(int version) {
+static bool frt_load_gles(int version) {
 #if FRT_GLES_VERSION == 3
 	if (version == 3)
 		return frt_load_gles3(lib("libGLESv2.so"));
 #endif
 	return frt_load_gles2(lib("libGLESv2.so"));
 }
+
+namespace frt {
 
 class VideoX11 : public Video, public ContextGL {
 private:
