@@ -324,7 +324,7 @@ public:
 		return driver_->get_name();
 	}
 	bool _check_internal_feature_support(const String &feature) {
-		return feature == "pc";
+		return feature == "pc" || feature == "etc" || feature == "etc2";
 	}
 	void extract_resource_fatal(const char *msg) {
 		printf("frt: failed extracting resource '%s': %s.\n",
