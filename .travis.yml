@@ -9,7 +9,7 @@ addons:
       - build-essential
       - scons
       - pkg-config
-      - libsdl2-dev
+      - libx11-dev
       - libgles2-mesa-dev
       - libasound2-dev
       - libfreetype6-dev
