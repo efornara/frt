@@ -73,11 +73,19 @@ static bool frt_load_gles(int version) {
 
 namespace frt {
 
-class VideoX11 : public Video, public ContextGL {
+static const long handled_mask = 0;
+
+static const int handled_types[] = {
+	ClientMessage,
+	0,
+};
+
+class VideoX11 : public Video, public ContextGL, public EventHandler {
 private:
 	X11User *x11;
 	Display *display;
 	Window window;
+	Atom wm_delete;
 	Vec2 screen_size;
 	Vec2 view_size;
 	EGLBaseContext egl;
@@ -87,6 +95,8 @@ private:
 		if (!x11)
 			return;
 		window = x11->create_window(view_size.x, view_size.y, FRT_WINDOW_TITLE);
+		wm_delete = XInternAtom(display, "WM_DELETE_WINDOW", True);
+		XSetWMProtocols(display, window, &wm_delete, 1);
 		egl.init(gl_version, (EGLNativeDisplayType)display);
 		egl.create_simple_surface((EGLNativeWindowType)window);
 		egl.make_current();
@@ -103,9 +113,7 @@ public:
 	bool probe() {
 		if (x11)
 			return true;
-		long mask = 0;
-		const int *types = 0;
-		x11 = X11Context::acquire(mask, types, 0, true);
+		x11 = X11Context::acquire(handled_mask, handled_types, this, true);
 		display = x11->get_display();
 		if (!frt_load_egl(lib("libEGL.so"))) {
 			x11->release();
@@ -127,6 +135,7 @@ public:
 	// Video
 	Vec2 get_screen_size() const { return screen_size; }
 	Vec2 get_view_size() const { return view_size; }
+	void set_title(const char *title) { XStoreName(display, window, title); }
 	Vec2 move_pointer(const Vec2 &screen) {
 		/*
 		XWarpPointer(display, None, window, 0, 0, 0, 0, screen.x, screen.y);
@@ -163,6 +172,17 @@ public:
 		vsync = use;
 	}
 	bool is_using_vsync() const { return vsync; }
+	// EventHandler
+	void handle_event() {
+		XEvent ev;
+		x11->get_event(ev);
+		switch (ev.type) {
+			case ClientMessage:
+				if ((unsigned int)ev.xclient.data.l[0] == (unsigned int)wm_delete)
+					App::instance()->quit();
+				break;
+		}
+	}
 };
 
 FRT_REGISTER(VideoX11)

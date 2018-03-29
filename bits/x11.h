@@ -26,15 +26,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#if 1
 #include "dl/x11.gen.h"
-#else
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-static inline bool frt_load_x11(const char *) {
-	return true;
-}
-#endif
 
 namespace frt {
 

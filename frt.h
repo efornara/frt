@@ -156,6 +156,7 @@ struct Vec2 {
 struct Video : public Module {
 	virtual Vec2 get_screen_size() const = 0;
 	virtual Vec2 get_view_size() const = 0;
+	virtual void set_title(const char *title) = 0;
 	virtual Vec2 move_pointer(const Vec2 &screen) = 0;
 	virtual void show_pointer(bool enable) = 0;
 	virtual ContextGL *create_the_gl_context(int version, Vec2 view) = 0;

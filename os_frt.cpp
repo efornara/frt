@@ -507,7 +507,9 @@ public:
 	Point2 get_mouse_pos() const { return mouse_pos; }
 	void set_mouse_mode(MouseMode mode) { mouse_mode = mode; }
 	OS::MouseMode get_mouse_mode() const { return mouse_mode; }
-	void set_window_title(const String &title) {}
+	void set_window_title(const String &title) {
+		env->video->set_title(title.utf8().get_data());
+	}
 	void set_video_mode(const VideoMode &video_mode, int screen) {}
 	OS::VideoMode get_video_mode(int screen) const {
 		return current_videomode;

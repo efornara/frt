@@ -130,6 +130,7 @@ public:
 	// Video
 	Vec2 get_screen_size() const { return screen_size; }
 	Vec2 get_view_size() const { return view_size; }
+	void set_title(const char *title) {}
 	Vec2 move_pointer(const Vec2 &screen) { return screen; }
 	void show_pointer(bool enable) {}
 	ContextGL *create_the_gl_context(int version, Vec2 size) {

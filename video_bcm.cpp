@@ -473,6 +473,7 @@ public:
 	// Video
 	Vec2 get_screen_size() const { return screen_size; }
 	Vec2 get_view_size() const { return view_size; }
+	void set_title(const char *title) {}
 	Vec2 move_pointer(const Vec2 &screen) {
 		return pointer.set_pos(view, screen);
 	}
