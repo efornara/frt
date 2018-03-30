@@ -221,7 +221,7 @@ public:
 		for (int i = 0; keymap[i].kernel_code; i++) {
 			if (keymap[i].kernel_code == ev.code) {
 				if (h)
-					h->handle_keyboard_key(keymap[i].gd_code, pressed);
+					h->handle_keyboard_key(keymap[i].gd_code, pressed, 0, false);
 				break;
 			}
 		}

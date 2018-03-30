@@ -13,7 +13,7 @@ OBJS += \
 	video_x11.o \
 	keyboard_x11.o \
 	mouse_x11.o \
-	envprobe_pi.o \
+	envprobe.o \
 	frt_options.o \
 	x11.gen.o \
 	egl.gen.o \

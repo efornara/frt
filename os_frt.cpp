@@ -564,15 +564,18 @@ public:
 		if (st)
 			*st = state;
 	}
-	void process_keyboard_event(int key, bool pressed) {
+	void process_keyboard_event(int key, bool pressed, uint32_t unicode, bool echo) {
 		INPUT_EVENT_REF(InputEventKey) k;
 		k.instance();
 		InputModifierState st;
 		get_key_modifier_state(k, &st);
 		k->set_pressed(pressed);
 		k->set_scancode(key);
-		k->set_unicode(unicode_fallback(key, pressed, st));
-		k->set_echo(0);
+		if (unicode)
+			k->set_unicode(unicode);
+		else
+			k->set_unicode(unicode_fallback(key, pressed, st));
+		k->set_echo(echo);
 		input->parse_input_event(k);
 	}
 	void process_mouse_motion(int x, int y) {
@@ -624,12 +627,12 @@ public:
 	struct KeyboardHandler : Keyboard::Handler {
 		OS_FRT *instance;
 		Keyboard *keyboard;
-		void handle_keyboard_key(int gd_code, bool pressed) {
+		void handle_keyboard_key(int gd_code, bool pressed, uint32_t unicode, bool echo) {
 			InputModifierState st;
 			keyboard->get_modifier_state(st);
 			if (st.meta && instance->handle_meta(gd_code, pressed))
 				return;
-			instance->process_keyboard_event(gd_code, pressed);
+			instance->process_keyboard_event(gd_code, pressed, unicode, echo);
 		}
 	} keyboard_handler;
 	struct MouseHandler : Mouse::Handler {

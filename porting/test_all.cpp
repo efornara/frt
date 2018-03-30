@@ -43,16 +43,19 @@ Env env;
 ContextGL *gl;
 
 static struct Handler : public Keyboard::Handler, public Mouse::Handler {
-	void handle_keyboard_key(int gd_code, bool pressed) {
+	void handle_keyboard_key(int gd_code, bool pressed, uint32_t unicode, bool echo) {
 		InputModifierState st;
 		env.keyboard->get_modifier_state(st);
-		printf("%c%c%c%c '%c' %010x %10d %-10s\n",
+		printf("%c%c%c%c '%c' %010x %10d %08X %c %-10s\n",
 			   st.shift ? 'S' : '-',
 			   st.alt ? 'A' : '-',
 			   st.control ? 'C' : '-',
 			   st.meta ? 'M' : '-',
 			   gd_code < 128 && isprint(gd_code) ? gd_code : '.', gd_code,
-			   gd_code, pressed ? "pressed" : "released");
+			   gd_code,
+			   unicode,
+			   echo ? 'E' : '-',
+			   pressed ? "pressed" : "released");
 		if (st.meta && gd_code == 'Q')
 			app->quit();
 	}

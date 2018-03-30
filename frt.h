@@ -29,6 +29,8 @@
 #define FRT_WINDOW_TITLE "Godot / FRT"
 #define FRT_VERSION "0.9.2"
 
+#include <stdint.h>
+
 class ContextGL;
 struct InputModifierState;
 
@@ -164,7 +166,7 @@ struct Video : public Module {
 
 struct Keyboard : public Module {
 	struct Handler {
-		virtual void handle_keyboard_key(int gd_code, bool pressed) = 0;
+		virtual void handle_keyboard_key(int gd_code, bool pressed, uint32_t unicode, bool echo) = 0;
 	};
 	virtual void set_handler(Handler *handler) = 0;
 	virtual void get_modifier_state(InputModifierState &state) const = 0;

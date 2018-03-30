@@ -42,9 +42,6 @@
 #include "import/key_mapping_x11.h"
 #endif
 
-// TODO: unicode
-// TODO: echo
-
 namespace frt {
 
 static const long handled_mask = KeyPressMask | KeyReleaseMask;
@@ -58,6 +55,7 @@ static const int handled_types[] = {
 class KeyboardX11 : public Keyboard, public EventHandler {
 private:
 	X11User *x11;
+	Display *display;
 	Handler *h;
 	InputModifierState st;
 
@@ -72,8 +70,10 @@ public:
 	// Module
 	const char *get_id() const { return "keyboard_x11"; }
 	bool probe() {
-		if (!x11)
+		if (!x11) {
 			x11 = X11Context::acquire(handled_mask, handled_types, this);
+			display = x11->get_display();
+		}
 		return true;
 	}
 	void cleanup() {
@@ -89,6 +89,7 @@ public:
 	void get_modifier_state(InputModifierState &state) const { state = st; }
 	// EventHandler
 	void handle_event() {
+		// modelled after platform/x11/os_x11.cpp, see there for rationale
 		XEvent ev;
 		x11->get_event(ev);
 		st.shift = ev.xkey.state & ShiftMask;
@@ -96,11 +97,13 @@ public:
 		st.control = ev.xkey.state & ControlMask;
 		st.meta = ev.xkey.state & Mod4Mask;
 		KeySym keysym_keycode = 0;
-		//KeySym keysym_unicode = 0;
 		char str[256 + 1];
-		XLookupString(&ev.xkey, str, 256, &keysym_keycode, NULL);
+		XLookupString(&ev.xkey, str, 256, &keysym_keycode, 0);
+		uint32_t unicode = 0;
 #ifndef FRT_MOCK_KEY_MAPPING_X11
 		int keycode = KeyMappingX11::get_keycode(keysym_keycode);
+		// just the simple case: on my system, using keysym_keycode is fine
+		unicode = KeyMappingX11::get_unicode_from_keysym(keysym_keycode);
 #else
 		int keycode = str[0];
 		if (!keycode)
@@ -109,8 +112,30 @@ public:
 		if (keycode >= 'a' && keycode <= 'z')
 			keycode -= 'a' - 'A';
 		bool pressed = ev.type == KeyPress;
+		if (!pressed) { // echo?
+			do {
+				if (XPending(display) < 1)
+					break;
+				XEvent next_ev;
+				XPeekEvent(display, &next_ev);
+				if (next_ev.type != KeyPress)
+					break;
+				const int threshold = 5;
+				int dt = (int)next_ev.xkey.time - (int)ev.xkey.time;
+				if (dt < -threshold || dt > threshold)
+					break;
+				KeySym next_keysym;
+				XLookupString(&next_ev.xkey, str, 256, &next_keysym, 0);
+				if (next_keysym != keysym_keycode)
+					break;
+				XNextEvent(display, &next_ev);
+				if (h)
+					h->handle_keyboard_key(keycode, true, unicode, true);
+				return;
+			} while (false);
+		}
 		if (h)
-			h->handle_keyboard_key(keycode, pressed);
+			h->handle_keyboard_key(keycode, pressed, unicode, false);
 	}
 };
 
