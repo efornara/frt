@@ -1,7 +1,7 @@
 // godot_frt.cpp
 /*
  * FRT - A Godot platform targeting single board computers
- * Copyright (c) 2017  Emanuele Fornara
+ * Copyright (c) 2017-2018  Emanuele Fornara
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
