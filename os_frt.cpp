@@ -189,7 +189,7 @@ public:
 #define VIDEO_DRIVER_COUNT 2
 #include "import/joypad_linux.h"
 #include "drivers/gles3/rasterizer_gles3.h"
-#define FRT_DL_SKIP 1
+#define FRT_DL_SKIP
 #include "drivers/gles2/rasterizer_gles2.h"
 typedef AudioDriverManager AudioDriverManagerSW;
 typedef AudioDriver AudioDriverSW;

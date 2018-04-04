@@ -78,7 +78,7 @@ Install the needed packages:
 
 	[chroot] # apt-get update
 	[chroot] # apt-get upgrade -y
-	[chroot] # apt-get install -y build-essential scons pkg-config libx11-dev libgles2-mesa-dev libasound2-dev libfreetype6-dev libssl-dev libpng12-dev zlib1g-dev
+	[chroot] # apt-get install -y build-essential scons pkg-config libx11-dev libgles2-mesa-dev libasound2-dev libfreetype6-dev libudev-dev libpng12-dev zlib1g-dev
 
 From another terminal, and using your main user on the host (note the `$`
 prompt), clone the Godot and FRT repositories:

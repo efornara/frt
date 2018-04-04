@@ -54,7 +54,7 @@ static struct Handler : public Keyboard::Handler, public Mouse::Handler {
 			   gd_code < 128 && isprint(gd_code) ? gd_code : '.', gd_code,
 			   gd_code,
 			   unicode,
-			   echo ? 'E' : '-',
+			   echo ? '+' : '.',
 			   pressed ? "pressed" : "released");
 		if (st.meta && gd_code == 'Q')
 			app->quit();

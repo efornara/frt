@@ -36,8 +36,11 @@
 
 #include "bits/egl_base_context.h"
 
-extern bool frt_load_gles2(const char *filename);
-extern bool frt_load_gles3(const char *filename);
+#define FRT_DL_SKIP
+#include "dl/gles2.gen.h"
+#if FRT_GLES_VERSION == 3
+#include "dl/gles3.gen.h"
+#endif
 
 static bool frt_load_gles(int version) {
 #if FRT_GLES_VERSION == 3
@@ -58,6 +61,7 @@ namespace frt {
 class EGLFBDevContext : public EGLBaseContext {
 public:
 	virtual void create_surface(const Vec2 &size) = 0;
+	virtual ~EGLFBDevContext() {}
 };
 
 class EGLMaliContext : public EGLFBDevContext {

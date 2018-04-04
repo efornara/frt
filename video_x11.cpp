@@ -60,8 +60,11 @@ static const char *lib(const char *s) {
 #endif
 }
 
-extern bool frt_load_gles2(const char *filename);
-extern bool frt_load_gles3(const char *filename);
+#define FRT_DL_SKIP
+#include "dl/gles2.gen.h"
+#if FRT_GLES_VERSION == 3
+#include "dl/gles3.gen.h"
+#endif
 
 static bool frt_load_gles(int version) {
 #if FRT_GLES_VERSION == 3
