@@ -43,7 +43,7 @@ using namespace frt;
 
 static bool bcm_installed() {
 #if defined(__arm__) || defined(__aarch64__)
-	return access("/opt/vc/lib/libEGL.so", R_OK) == 0;
+	return access("/opt/vc/lib/libbrcmEGL.so", R_OK) == 0;
 #else
 	return false;
 #endif
@@ -67,7 +67,7 @@ static bool has_vc4() {
 
 static bool has_x11() {
 	void *lib = 0;
-	if (!(lib = dlopen("libX11.so", RTLD_LAZY)))
+	if (!(lib = dlopen("libX11.so.6", RTLD_LAZY)))
 		return false;
 	typedef void *(*FN_XOpenDisplay)(const char *);
 	typedef int (*FN_XCloseDisplay)(void *);

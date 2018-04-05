@@ -69,9 +69,9 @@ static const char *lib(const char *s) {
 static bool frt_load_gles(int version) {
 #if FRT_GLES_VERSION == 3
 	if (version == 3)
-		return frt_load_gles3(lib("libGLESv2.so"));
+		return frt_load_gles3(lib("libGLESv2.so.2"));
 #endif
-	return frt_load_gles2(lib("libGLESv2.so"));
+	return frt_load_gles2(lib("libGLESv2.so.2"));
 }
 
 namespace frt {
@@ -118,7 +118,7 @@ public:
 			return true;
 		x11 = X11Context::acquire(handled_mask, handled_types, this, true);
 		display = x11->get_display();
-		if (!frt_load_egl(lib("libEGL.so"))) {
+		if (!frt_load_egl(lib("libEGL.so.1"))) {
 			x11->release();
 			x11 = 0;
 			return false;

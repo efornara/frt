@@ -152,7 +152,7 @@ public:
 		App *app = App::instance();
 		X11Context **ctx = (X11Context **)app->get_context("x11");
 		if (!*ctx) {
-			if (!frt_load_x11("libX11.so"))
+			if (!frt_load_x11("libX11.so.6"))
 				return 0;
 			*ctx = new X11Context();
 			app->add_dispatcher(*ctx);

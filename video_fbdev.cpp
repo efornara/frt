@@ -45,9 +45,9 @@
 static bool frt_load_gles(int version) {
 #if FRT_GLES_VERSION == 3
 	if (version == 3)
-		return frt_load_gles3("libGLESv2.so");
+		return frt_load_gles3("libGLESv2.so.2");
 #endif
-	return frt_load_gles2("libGLESv2.so");
+	return frt_load_gles2("libGLESv2.so.2");
 }
 
 #define FRT_FBDEV_MALI 1
@@ -111,7 +111,7 @@ public:
 		default:
 			assert(false);
 		}
-		if (!frt_load_egl("libEGL.so")) {
+		if (!frt_load_egl("libEGL.so.1")) {
 			delete egl;
 			egl = 0;
 			return false;
