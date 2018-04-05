@@ -16,18 +16,19 @@ here:
 
 [https://sourceforge.net/projects/frt/files](https://sourceforge.net/projects/frt/files)
 
-	$ gunzip godot.frt.opt.pi1.gz
-	$ sudo install godot.frt.opt.pi1 /usr/local/bin
+For example:
 
-Download and uncompress the "Demos and Examples" archive from
-here:
+	$ unzip frt_093_214_pi1.bin.zip
+	$ sudo install frt_093_214_pi1.bin /usr/local/bin
 
-[https://godotengine.org/download](https://godotengine.org/download)
+Download and uncompress the latest archive from here:
+
+[https://downloads.tuxfamily.org/godotengine/demos/2.1](https://downloads.tuxfamily.org/godotengine/demos/2.1)
 
 Run a demo:
 
 	$ cd Godot-Demos-2.1.4-stable/2d/platformer
-	$ godot.frt.opt.pi1 -v
+	$ frt_093_214_pi1.bin -v
 
 Press *Win+Q* to quit.
 
