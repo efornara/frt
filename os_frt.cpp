@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -327,9 +326,8 @@ public:
 		return feature == "pc" || feature == "etc" || feature == "etc2";
 	}
 	void extract_resource_fatal(const char *msg) {
-		printf("frt: failed extracting resource '%s': %s.\n",
+		fatal("failed extracting resource '%s': %s.",
 			   extract_resource_name, msg);
-		exit(1);
 	}
 	void extract_resource_if_requested() {
 		const char *s = extract_resource_name;
@@ -755,7 +753,8 @@ public:
 	void setup_env(Env *env) {
 		app = App::instance();
 		this->env = env;
-		assert(env->video);
+		if (!env->video)
+			fatal("no video module available.");
 		screen_size = env->video->get_screen_size();
 	}
 	void run_() { run(); }

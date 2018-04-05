@@ -23,9 +23,22 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 namespace frt {
+
+void fatal(const char *format, ...) {
+	va_list ap;
+	va_start(ap, format);
+	fprintf(stderr, "frt: ");
+	vfprintf(stderr, format, ap);
+	fprintf(stderr, "\n");
+	va_end(ap);
+	exit(1);
+}
 
 void App::register_(Module *module) {
 	if (nm >= max_modules)

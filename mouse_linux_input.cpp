@@ -27,7 +27,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 
 #include "bits/linux_input.h"
 

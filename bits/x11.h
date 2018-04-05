@@ -24,7 +24,6 @@
  */
 
 #include <stdlib.h>
-#include <assert.h>
 
 #include "dl/x11.gen.h"
 

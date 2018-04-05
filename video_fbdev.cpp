@@ -77,7 +77,8 @@ public:
 		nativewindow.height = size.y;
 		surface = eglCreateWindowSurface(display, config,
 										 (EGLNativeWindowType)&nativewindow, 0);
-		assert(surface != EGL_NO_SURFACE);
+		if (surface == EGL_NO_SURFACE)
+			fatal("video_fbdev: eglCreateWindowSurface failed.");
 	}
 };
 
@@ -109,7 +110,7 @@ public:
 			egl = new EGLMaliContext();
 			break;
 		default:
-			assert(false);
+			fatal("video_fbdev: internal error.");
 		}
 		if (!frt_load_egl("libEGL.so.1")) {
 			delete egl;

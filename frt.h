@@ -36,6 +36,12 @@ struct InputModifierState;
 
 namespace frt {
 
+void fatal(const char *format, ...)
+#ifdef __GNUC__
+__attribute__((format(printf, 1, 2)))
+#endif
+;
+
 struct Module {
 	virtual const char *get_id() const = 0;
 	virtual bool probe() = 0;

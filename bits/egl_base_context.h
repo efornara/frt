@@ -23,8 +23,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <assert.h>
-
 #include "dl/egl.gen.h"
 
 namespace frt {
@@ -72,20 +70,26 @@ public:
 		EGLBoolean result;
 		EGLint num_config;
 		display = eglGetDisplay(display_id);
-		assert(display != EGL_NO_DISPLAY);
+		if (display == EGL_NO_DISPLAY)
+			fatal("eglGetDisplay failed.");
 		result = eglInitialize(display, 0, 0);
-		assert(result != EGL_FALSE);
+		if (result == EGL_FALSE)
+			fatal("eglInitialize failed.");
 		build_attr_list(attr_list);
 		result = eglChooseConfig(display, attr_list, &config, 1, &num_config);
-		assert(result != EGL_FALSE);
+		if (result == EGL_FALSE)
+			fatal("eglChooseConfig failed.");
 		result = eglBindAPI(EGL_OPENGL_ES_API);
-		assert(result != EGL_FALSE);
+		if (result == EGL_FALSE)
+			fatal("eglBindAPI failed.");
 		context = eglCreateContext(display, config, EGL_NO_CONTEXT, ctx_attrs);
-		assert(context != EGL_NO_CONTEXT);
+		if (context == EGL_NO_CONTEXT)
+			fatal("eglCreateContext failed.");
 	};
 	void create_simple_surface(EGLNativeWindowType window_id) {
 		surface = eglCreateWindowSurface(display, config, window_id, 0);
-		assert(surface != EGL_NO_SURFACE);
+		if (surface == EGL_NO_SURFACE)
+			fatal("eglCreateWindowSurface failed.");
 	}
 	void cleanup() {
 		eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);

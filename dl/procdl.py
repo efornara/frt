@@ -100,6 +100,8 @@ def build_cpp(dl, cpp):
 	f.write("""\
 #include "%(libname)s.gen.h"
 
+#include <stdio.h>
+
 #include <dlfcn.h>
 
 static void *lib = 0;
@@ -110,8 +112,10 @@ bool frt_load_%(libname)s(const char *filename) {
 	if (lib)
 		return true;
 	lib = dlopen(filename, RTLD_LAZY);
-	if (!lib)
+	if (!lib) {
+		fprintf(stderr, "frt: dlopen failed for '%%s'.\\n", filename);
 		return false;
+	}
 %(resolutions)s
 	return true;
 }

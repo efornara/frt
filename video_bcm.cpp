@@ -380,7 +380,8 @@ public:
 		nativewindow.height = size.y;
 		surface = eglCreateWindowSurface(display, config,
 										 (EGLNativeWindowType)&nativewindow, 0);
-		assert(surface != EGL_NO_SURFACE);
+		if (surface == EGL_NO_SURFACE)
+			fatal("video_bcm: eglCreateWindowSurface failed.");
 	}
 };
 
