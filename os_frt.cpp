@@ -30,10 +30,10 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "version.h"
-#include "os/os.h"
-#include "os/input.h"
-#include "os/file_access.h"
+#include "core/version.h"
+#include "core/os/os.h"
+#include "core/os/input.h"
+#include "core/os/file_access.h"
 #include "drivers/unix/os_unix.h"
 #include "drivers/gl_context/context_gl.h"
 #include "servers/visual_server.h"
@@ -50,7 +50,7 @@
 #include "main/main.h"
 #include "main/input_default.h"
 #include "main/performance.h"
-#include "print_string.h"
+#include "core/print_string.h"
 
 #define VIDEO_DRIVER_GLES2 0
 #define VIDEO_DRIVER_GLES3 1
@@ -273,6 +273,7 @@ private:
 	ContextGL *context_gl;
 	VisualServer *visual_server;
 	VideoMode current_videomode;
+	int current_video_driver;
 	List<String> args;
 	MainLoop *main_loop;
 #ifdef ALSA_ENABLED
@@ -305,6 +306,7 @@ private:
 
 public:
 	int get_video_driver_count() const { return VIDEO_DRIVER_COUNT; }
+	int get_current_video_driver() const { return current_video_driver; }
 	const char *get_video_driver_name(int driver) const {
 		if (driver == VIDEO_DRIVER_GLES3)
 			return "GLES3";
@@ -417,9 +419,11 @@ public:
 		if (video_driver == VIDEO_DRIVER_GLES3) {
 			RasterizerGLES3::register_config();
 			RasterizerGLES3::make_current();
+			current_video_driver = VIDEO_DRIVER_GLES3;
 		} else {
 			RasterizerGLES2::register_config();
 			RasterizerGLES2::make_current();
+			current_video_driver = VIDEO_DRIVER_GLES2;
 		}
 		visual_server = memnew(VisualServerRaster);
 #endif
@@ -726,6 +730,7 @@ public:
 	}
 
 	OS_FRT() {
+		current_video_driver = VIDEO_DRIVER_GLES2;
 #ifdef ALSA_ENABLED
 		AudioDriverManagerSW::add_driver(&driver_alsa);
 #endif

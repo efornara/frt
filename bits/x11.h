@@ -33,7 +33,7 @@ class X11Context;
 
 struct X11User {
 private:
-	friend X11Context;
+	friend class X11Context;
 	X11Context *ctx;
 	EventHandler *h;
 	long mask;
@@ -51,7 +51,7 @@ public:
 
 class X11Context : public EventDispatcher {
 private:
-	friend X11User;
+	friend struct X11User;
 	static const int max_users = 10;
 	X11User users[max_users];
 	int n_users;

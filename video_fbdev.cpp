@@ -26,7 +26,7 @@
 #ifdef FRT_TEST
 #define FRT_MOCK_GODOT_GL_CONTEXT
 #else
-#include "os/os.h"
+#include "core/os/os.h"
 #include "drivers/gl_context/context_gl.h"
 #endif
 

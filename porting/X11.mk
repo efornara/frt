@@ -17,7 +17,7 @@ OBJS += \
 
 ifdef HAS_GODOT
 OBJS += key_mapping_x11_2.o
-CXXFLAGS += -I../../.. -I../../../core
+CXXFLAGS += -I../../..
 else
 CXXFLAGS += -DFRT_MOCK_KEY_MAPPING_X11
 endif

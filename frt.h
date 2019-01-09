@@ -248,7 +248,7 @@ struct InputModifierState {
 #ifdef FRT_TEST
 #define FRT_GLES_VERSION 2
 #else
-#include "version.h"
+#include "core/version.h"
 #define FRT_GLES_VERSION VERSION_MAJOR
 #endif // FRT_TEST
 
