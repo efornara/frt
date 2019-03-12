@@ -46,7 +46,6 @@
 #include "servers/visual/visual_server_raster.h"
 #include "drivers/alsa/audio_driver_alsa.h"
 #include "drivers/pulseaudio/audio_driver_pulseaudio.h"
-#include "drivers/rtaudio/audio_driver_rtaudio.h"
 #include "main/main.h"
 #include "main/input_default.h"
 #include "main/performance.h"
