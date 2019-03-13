@@ -138,6 +138,7 @@ def configure(env):
 	if env['frt_arch'].startswith('pi'):
 		env.Append(CCFLAGS=['-mfloat-abi=hard', '-mlittle-endian', '-munaligned-access'])
 
+	env.Append(CFLAGS=['-std=gnu11']) # for libwebp (maybe more in the future)
 	env.Append(CPPFLAGS=['-DFRT_ENABLED', '-DUNIX_ENABLED', '-DGLES2_ENABLED', '-DGLES_ENABLED'])
 	env.Append(LIBS=['pthread'])
 
