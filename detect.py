@@ -42,9 +42,6 @@ def get_opts():
 def get_flags():
 
 	return [
-		('builtin_freetype', no),
-		('builtin_zlib', no),
-		('module_openssl_enabled', no),
 		('tools', no),
 	]
 
