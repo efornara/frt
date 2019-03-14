@@ -3,34 +3,41 @@ FRT
 
 FRT is a Godot "platform" targeting single board computers.
 
-## Usage (Raspberry Pi running raspbian)
+## Quick Start
 
-FRT does not need X11 to run, and should also run on raspbian lite.
+FRT should run on most single board computers, as long as OpenGL ES has
+been properly configured. On a Raspberry Pi, FRT does not need X11 to run,
+and can also run from the console using the legacy driver (it should
+run out of the box on a basic raspbian lite installation).
 
-Make sure that you have increased the amount of memory for the GPU.
-Some demos work with just the default 64M reserved for the GPU, but most
-of them will need more.
+Download, uncompress, install somewhere in your path the latest
+binary from here:
 
-Download, uncompress, install somewhere in your path one binary from
-here:
-
-[https://sourceforge.net/projects/frt/files](https://sourceforge.net/projects/frt/files)
+<https://sourceforge.net/projects/frt/files/0.9.4>
 
 For example:
 
-	$ unzip frt_093_214_pi1.bin.zip
-	$ sudo install frt_093_214_pi1.bin /usr/local/bin
+	$ unzip frt_094_310.zip
+	$ sudo install frt_094_310_pi1.bin /usr/local/bin
 
-Download and uncompress the latest archive from here:
+Download and uncompress a demo from here:
 
-[https://downloads.tuxfamily.org/godotengine/demos/2.1](https://downloads.tuxfamily.org/godotengine/demos/2.1)
+<https://sourceforge.net/projects/frt/files/demos>
 
-Run a demo:
+And run it:
 
-	$ cd Godot-Demos-2.1.4-stable/2d/platformer
-	$ frt_093_214_pi1.bin -v
+	$ frt_094_310_pi1.bin --main-pack 31_2d_platformer.zip
 
 Press *Win+Q* to quit.
+
+Despite the name, the _pi1_ version should run on any Raspberry Pi,
+using either the legacy driver, or the new vc4 driver. It should also run
+on most 32-bit ARM-based boards (X11/EGL/ES).
+
+For 64-bit ARM-based boards, use the _arm64_ version.
+
+See [Usage](doc/Usage.md) for how to export a game from the Godot editor
+running on your PC.
 
 This is the list of meta (Win) keys recognized by FRT.
 

@@ -1,23 +1,64 @@
 Compile
 =======
 
-FRT is not really a patch, as it leaves the Godot source untouched. To
-compile it, start from the official 2.1.4-stable source tarball:
+To compile the Godot templates on a Raspberry Pi, start from the official
+3.1-stable source tarball:
 
-[https://github.com/godotengine/godot/releases/tag/2.1.4-stable](https://github.com/godotengine/godot/releases/tag/2.1.4-stable)
+<https://github.com/godotengine/godot/releases/tag/3.1-stable>
+
+These packages should be enough:
+
+	$ sudo apt-get install build-essential scons pkg-config libx11-dev libgles2-mesa-dev libasound2-dev libfreetype6-dev libudev-dev libpng12-dev zlib1g-dev clang
+
+## Compile Godot (X11)
+
+To compile the official X11 platform, this is, in theory, what you should do:
+
+	$ cd ~/godot-3.1-stable
+	$ scons platform=x11 target=release tools=no -j 4
+
+In practice, it is better to give the compiler some flags to better target
+the CPU of the Raspberry Pi, and especially its FPU.
+
+For example (Raspberry Pi 2/3):
+
+	$ scons platform=x11 target=release tools=no CCFLAGS="-mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -mlittle-endian -munaligned-access" -j 4
+
+Or (Raspberry Pi 1/Zero):
+
+	$ scons platform=x11 target=release tools=no CCFLAGS="-mcpu=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard -mlittle-endian -munaligned-access" -j 4
+
+You might need to use clang on some versions of debian. If so, add:
+
+	use_llvm=yes
+
+You might also need to disable some modules, for example:
+
+	module_webm_enabled=no
+
+See `release.sh` for the options that are used to generate the official
+FRT release binaries, keeping in mind that they are generated on a
+debian jessie chroot environment (gcc 4.9.2, so there is no need to use clang)
+and that SSL is disabled (so you might want to omit the relevant options if
+you want to enable it).
+
+## Compile Godot (FRT)
+
+FRT is not really a patch, as it leaves the Godot source untouched.
 
 Go to the platform directory and clone this repository:
 
-	$ cd ~/godot-2.1.4-stable
+	$ cd ~/godot-3.1-stable
 	$ cd platform
 	$ git clone https://github.com/efornara/frt
 
 From the main directory, you now have a new "platform" available:
 
-	$ cd ~/godot-2.1.4-stable
+	$ cd ~/godot-3.1-stable
 	$ scons platform=frt target=release frt_arch=pi3 -j 4
 
-See below for a list of the needed packages.
+Unlike the X11 platform, FRT disables tools by default and preselect
+some CPU-specific options according to frt\_arch.
 
 When compiling on a real Raspberry Pi, using an external Hard Disk is
 strongly advised: everything is faster and more reliable, and you can
@@ -26,17 +67,18 @@ Swap is hardly used, especially if you start Raspbian without the GUI,
 but enabling it allows you to use `-j 4` and leave the compilation
 unattended.
 
-Compiling godot-2.1.4-stable + FRT from scratch on a non-overclocked
-Raspberry Pi 2 running Raspbian jessie should take about one hour.
+Compiling godot-3.1-stable + FRT from scratch on a non-overclocked
+Raspberry Pi 3 running Raspbian jessie should take about one hour.
 
-On some Linux systems, FRT can run on a desktop. Intel IGP are known
-to work. Compile it with:
+## Compile Godot (FRT) to run on a PC
 
-	$ scons platform=frt target=release use_llvm=yes -j 4
+On some Linux systems, FRT can run on a desktop. This can be useful
+to test the ES 2.0 rendering pipeline directly on a PC.
+Intel IGPs are known to work.
+Just repeat the steps above from your Linux PC and build FRT without
+setting the architecture:
 
-The `use_llvm=yes` option is needed when compiling release /
-release\_debug targets with Godot 2.1.x.
-on a recent GCC (6+).
+	$ scons platform=frt target=release -j 8
 
 ## Cross compile (QEMU)
 
@@ -48,9 +90,12 @@ There might be better ways, and compilation is quite slow
 (around 5 hours to compile godot-2.1.4-stable from scratch on a,
 quite slow, Acer C7 C710-2847).
 
+The official FRT release binaries are not cross-compiled. They are generated
+on a Raspberry Pi.
+
 Familiarity with the Linux environment is assumed.
 Notes based on 
-[https://wiki.debian.org/EmDebian/CrossDebootstrap](https://wiki.debian.org/EmDebian/CrossDebootstrap).
+<https://wiki.debian.org/EmDebian/CrossDebootstrap>
 
 Install debootstrap and qemu:
 
@@ -107,12 +152,3 @@ to the Raspbian repository if needed.
 - Download the raspberry firmware to compile BCM support. Only the
 include directory (`/opt/vc/include`) is needed as the libraries are
 dynamically loaded.
-
-## Godot 3.0 compilation status
-
-[![Build Status](https://api.travis-ci.org/efornara/frt.svg?branch=master)](https://travis-ci.org/efornara/frt/builds)
-
-At the moment only [3.0-gles2](https://github.com/efornara/godot/tree/3.0-gles2) is supported.
-
-Note that you have to use `module_webm_enabled=no` to compile Godot 3 on
-ARM targets.
