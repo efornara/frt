@@ -324,7 +324,9 @@ public:
 		return driver_->get_name();
 	}
 	bool _check_internal_feature_support(const String &feature) {
-		return feature == "pc" || feature == "etc" || feature == "etc2";
+		if (current_video_driver == VIDEO_DRIVER_GLES3 && feature == "etc2")
+			return true;
+		return feature == "pc" || feature == "etc";
 	}
 	void extract_resource_fatal(const char *msg) {
 		fatal("failed extracting resource '%s': %s.",
