@@ -120,11 +120,14 @@ def configure(env):
 		env.Append(BUILDERS={'GLSL120GLES': env.Builder(action=methods.build_gles2_headers, suffix=gen_suffix, src_suffix='.glsl')})
 
 	if env['target'] == 'release':
-		env.Append(CCFLAGS=['-O2', '-ffast-math', '-fomit-frame-pointer'])
+		env.Append(CCFLAGS=['-O3', '-fomit-frame-pointer'])
 	elif env['target'] == 'release_debug':
-		env.Append(CCFLAGS=['-O2', '-ffast-math', '-DDEBUG_ENABLED'])
+		env.Append(CCFLAGS=['-O3', '-DDEBUG_ENABLED'])
 	elif env['target'] == 'debug':
 		env.Append(CCFLAGS=['-g2', '-DDEBUG_ENABLED', '-DDEBUG_MEMORY_ENABLED'])
+	if env['target'].startswith('release'):
+		if version.major == 2 or (version.major == 3 and version.minor == 0):
+			env.Append(CCFLAGS=['-ffast-math'])
 
 	if env['frt_arch'] == 'pi1':
 		env.Append(CCFLAGS=['-mcpu=arm1176jzf-s', '-mfpu=vfp'])
