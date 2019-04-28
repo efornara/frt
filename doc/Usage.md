@@ -48,6 +48,8 @@ However, you might want to consider Godot 2.1 in some cases:
 While the Godot 2.1 *editor* seems to be useable on a modern Raspberry Pi
 (3B+ with vc4), the Godot 3.1 *editor* doesn't seem to be.
 It works, but I wouldn't want to actually write a game with it.
+UPDATE: Compiling with the latest compilers (e.g. gcc 8 or clang 8), and
+, if possible, enabling lto, might help to make the 3.1 editor useable.
 
 2. You target slow boards (e.g. Raspberry Pi 1 / Zero).
 
@@ -56,6 +58,10 @@ It works, but I wouldn't want to actually write a game with it.
 For the last two points, it is probably better to write a minimal prototype
 of your game in both Godot 2.1 / 3.1 and measure the performance you are
 getting.
+
+Also note that Godot 3.1 is not as tested as Godot 2.1 on the Raspberry Pi,
+and some issues might come up. For example, particles are known not to work:
+[#27407](https://github.com/godotengine/godot/issues/27407).
 
 ## Exporting a game
 
