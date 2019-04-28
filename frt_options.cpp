@@ -39,6 +39,7 @@ struct Param params[] = {
 	Param("alpha_size", 8),
 	Param("depth_size", 16),
 	Param("multisample", false),
+	Param("disable_meta_keys", false),
 };
 #define N_OF_PARAMS (sizeof(params) / sizeof(Param))
 

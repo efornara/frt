@@ -267,6 +267,7 @@ public:
 class OS_FRT : public OS_Unix, public Runnable {
 private:
 	App *app;
+	Param *disable_meta_keys_param;
 	Env *env;
 	Vec2 screen_size;
 	ContextGL *context_gl;
@@ -394,6 +395,9 @@ public:
 				} break;
 			}
 		}
+	}
+	bool disable_meta_keys() {
+		return disable_meta_keys_param->value.u.b;
 	}
 #if VERSION_MAJOR == 2
 	void
@@ -631,10 +635,12 @@ public:
 		OS_FRT *instance;
 		Keyboard *keyboard;
 		void handle_keyboard_key(int gd_code, bool pressed, uint32_t unicode, bool echo) {
-			InputModifierState st;
-			keyboard->get_modifier_state(st);
-			if (st.meta && instance->handle_meta(gd_code, pressed))
-				return;
+			if (!instance->disable_meta_keys()) {
+				InputModifierState st;
+				keyboard->get_modifier_state(st);
+				if (st.meta && instance->handle_meta(gd_code, pressed))
+					return;
+			}
 			instance->process_keyboard_event(gd_code, pressed, unicode, echo);
 		}
 	} keyboard_handler;
@@ -682,6 +688,7 @@ public:
 	void run() {
 		if (!main_loop)
 			return;
+		disable_meta_keys_param = app->get_param("disable_meta_keys");
 		keyboard_handler.instance = this;
 		keyboard_handler.keyboard = env->keyboard;
 		mouse_handler.instance = this;

@@ -29,6 +29,7 @@ to stdout:
 	  alpha_size
 	  depth_size
 	  multisample
+	  disable_meta_keys
 
 The performance monitor data has been added because I have found that a
 non-optimized build of godot/frt is much slower than an optimized build,
@@ -74,3 +75,11 @@ you suspect might be due to godot/frt using a 16-bit depth buffer by
 default, you can try running it like this:
 
 	godot.frt.opt.pi1 --frt depth_size=24
+
+If you already provide a way to close the game (for example, using an
+in-game menu), you might prefer to disable the handling of meta keys
+by FRT.
+Be careful that, since FRT grabs the keyboard when running without X11,
+the user might not be able to quit the game in any other way.
+The user can in any case override the project settings by using the
+command line.
