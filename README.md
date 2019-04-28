@@ -13,12 +13,12 @@ run out of the box on a basic raspbian lite installation).
 Download, uncompress, install somewhere in your path the latest
 binary from here:
 
-<https://sourceforge.net/projects/frt/files/0.9.4>
+<https://sourceforge.net/projects/frt/files/0.9.5>
 
 For example:
 
-	$ unzip frt_094_310.zip
-	$ sudo install frt_094_310_pi1.bin /usr/local/bin
+	$ unzip frt_095_310.zip
+	$ sudo install frt_095_310_pi1.bin /usr/local/bin
 
 Download and uncompress a demo from here:
 
@@ -26,7 +26,7 @@ Download and uncompress a demo from here:
 
 And run it:
 
-	$ frt_094_310_pi1.bin --main-pack 31_2d_platformer.zip
+	$ frt_095_310_pi1.bin --main-pack 31_2d_platformer.zip
 
 Press *Win+Q* to quit.
 
