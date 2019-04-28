@@ -748,7 +748,10 @@ public:
 	bool handle_meta(int gd_code, bool pressed) {
 		switch (gd_code) {
 			case 'Q':
-				app->quit();
+				if (env->video->provides_quit())
+					return false;
+				else
+					app->quit();
 				break;
 			default:
 				return dispatch_handle_meta(gd_code, pressed);

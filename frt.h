@@ -168,6 +168,7 @@ struct Video : public Module {
 	virtual Vec2 move_pointer(const Vec2 &screen) = 0;
 	virtual void show_pointer(bool enable) = 0;
 	virtual ContextGL *create_the_gl_context(int version, Vec2 view) = 0;
+	virtual bool provides_quit() = 0;
 };
 
 struct Keyboard : public Module {

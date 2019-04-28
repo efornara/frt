@@ -145,6 +145,7 @@ public:
 		view_size = size;
 		return this;
 	}
+	bool provides_quit() { return false; }
 	// GL_Context
 	void release_current() {
 		egl->release_current();

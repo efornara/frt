@@ -39,7 +39,8 @@ For 64-bit ARM-based boards, use the _arm64_ version.
 See [Usage](doc/Usage.md) for how to export a game from the Godot editor
 running on your PC.
 
-This is the list of meta (Win) keys recognized by FRT.
+This is the list of meta (Win) keys recognized by FRT when running on
+the console (i.e. non on X11):
 
 | Meta  | Action |
 | :---: | :--- |
