@@ -36,6 +36,7 @@
 #include "frt.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "bits/linux_input.h"
@@ -169,6 +170,42 @@ private:
 		}
 		state = mask;
 	}
+	bool find_by_name(char *buf, int size, const char *name) {
+		const char *s_name = "N: Name=\"";
+		const char *s_handlers = "H: Handlers=";
+		const char *s_event = "event";
+		FILE *f = fopen("/proc/bus/input/devices", "r");
+		if (!f)
+			return false;
+		char s[1024];
+		bool found = false;
+		int state = 0, nn = strlen(name), ns;
+		while (fgets(s, sizeof(s), f) && !found) {
+			switch (state) {
+			case 0:
+				if (!strncmp(s_name, s, strlen(s_name))) {
+					ns = strlen(s);
+					if (((int)(ns - strlen(s_name) - strlen("\"\n")) == nn)
+					  && !memcmp(&s[strlen(s_name)], name, nn))
+						state = 1;
+				}
+				break;
+			case 1:
+				if (!strncmp(s_handlers, s, strlen(s_handlers))) {
+					state = 0;
+					char *event = strstr(s, s_event);
+					if (!event)
+						break;
+					int id = atoi(event + strlen(s_event));
+					snprintf(buf, size, "/dev/input/event%d", id);
+					found = true;
+				}
+				break;
+			}
+		}
+		fclose(f);
+		return found;
+	}
 
 public:
 	KeyboardLinuxInput()
@@ -185,7 +222,19 @@ public:
 	// Module
 	const char *get_id() const { return "keyboard_linux_input"; }
 	bool probe() {
-		valid = open("event-kbd");
+		char *id = getenv("FRT_KEYBOARD_ID");
+		if (id) {
+			char buf[512];
+			const char *s = 0;
+			if (id[0] == '/')
+				s = id;
+			else if (find_by_name(buf, sizeof(buf), id))
+				s = buf;
+			if (s)
+				valid = open_file(s);
+		} else {
+			valid = open_by_id_substr("event-kbd");
+		}
 		if (valid)
 			App::instance()->add_dispatcher(this);
 		return valid;

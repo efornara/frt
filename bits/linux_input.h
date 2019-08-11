@@ -67,14 +67,17 @@ private:
 protected:
 	LinuxInput()
 		: fd(-1), grabbed(false) {}
-	bool open(const char *name) {
-		char buf[512];
-		if (!parse_dir(name, buf, sizeof(buf)))
-			return false;
-		fd = ::open(buf, O_RDONLY | O_NONBLOCK);
+	bool open_file(const char *file_name) {
+		fd = ::open(file_name, O_RDONLY | O_NONBLOCK);
 		if (fd == -1)
 			return false;
 		return true;
+	}
+	bool open_by_id_substr(const char *substr) {
+		char buf[512];
+		if (!parse_dir(substr, buf, sizeof(buf)))
+			return false;
+		return open_file(buf);
 	}
 	bool grab(bool grab, int wait_ms) {
 		/*
