@@ -23,7 +23,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#define FRT_MOCK_GODOT_GL_CONTEXT
 #include "frt.h"
 
 #include <math.h>

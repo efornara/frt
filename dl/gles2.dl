@@ -167,3 +167,5 @@ typedef void (*___glVertexAttrib4f___)(GLuint index, GLfloat x, GLfloat y, GLflo
 typedef void (*___glVertexAttrib4fv___)(GLuint index, const GLfloat *v);
 typedef void (*___glVertexAttribPointer___)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
 typedef void (*___glViewport___)(GLint x, GLint y, GLsizei width, GLsizei height);
+
+typedef void (*___glRenderbufferStorageMultisample___)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);

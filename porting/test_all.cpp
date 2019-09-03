@@ -24,7 +24,6 @@
  */
 
 #define FRT_MOCK_GODOT_INPUT_MODIFIER_STATE
-#define FRT_MOCK_GODOT_GL_CONTEXT
 #include "frt.h"
 
 #include <stdio.h>

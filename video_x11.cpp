@@ -27,13 +27,6 @@
 
 #include <unistd.h>
 
-#ifdef FRT_TEST
-#define FRT_MOCK_GODOT_GL_CONTEXT
-#else
-#include "core/os/os.h"
-#include "drivers/gl_context/context_gl.h"
-#endif
-
 #include "frt.h"
 
 #include "bits/x11.h"
@@ -154,7 +147,7 @@ public:
 		return this;
 	}
 	bool provides_quit() { return true; }
-	// GL_Context
+	// ContextGL
 	void release_current() {
 		egl.release_current();
 	}
@@ -166,9 +159,9 @@ public:
 	}
 	int get_window_width() { return view_size.x; }
 	int get_window_height() { return view_size.y; }
-	Error initialize() {
+	bool initialize() {
 		gles_init();
-		return OK;
+		return true;
 	}
 	void set_use_vsync(bool use) {
 		egl.swap_interval(use ? 1 : 0);

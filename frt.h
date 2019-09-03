@@ -31,7 +31,6 @@
 
 #include <stdint.h>
 
-class ContextGL;
 struct InputModifierState;
 
 namespace frt {
@@ -161,6 +160,17 @@ struct Vec2 {
 		: x(x_), y(y_) {}
 };
 
+struct ContextGL {
+	virtual void release_current() = 0;
+	virtual void make_current() = 0;
+	virtual void swap_buffers() = 0;
+	virtual int get_window_width() = 0;
+	virtual int get_window_height() = 0;
+	virtual bool initialize() = 0;
+	virtual void set_use_vsync(bool use) = 0;
+	virtual bool is_using_vsync() const = 0;
+};
+
 struct Video : public Module {
 	virtual Vec2 get_screen_size() const = 0;
 	virtual Vec2 get_view_size() const = 0;
@@ -213,27 +223,6 @@ struct Runnable : public Module {
 };
 
 } // namespace frt
-
-#ifdef FRT_MOCK_GODOT_GL_CONTEXT
-
-enum Error {
-	OK,
-	FAILED
-};
-
-class ContextGL {
-public:
-	virtual void release_current() = 0;
-	virtual void make_current() = 0;
-	virtual void swap_buffers() = 0;
-	virtual int get_window_width() = 0;
-	virtual int get_window_height() = 0;
-	virtual Error initialize() = 0;
-	virtual void set_use_vsync(bool use) = 0;
-	virtual bool is_using_vsync() const = 0;
-};
-
-#endif // FRT_MOCK_GODOT_GL_CONTEXT
 
 #ifdef FRT_MOCK_GODOT_INPUT_MODIFIER_STATE
 

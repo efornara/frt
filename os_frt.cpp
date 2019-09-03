@@ -35,7 +35,6 @@
 #include "core/os/input.h"
 #include "core/os/file_access.h"
 #include "drivers/unix/os_unix.h"
-#include "drivers/gl_context/context_gl.h"
 #include "servers/visual_server.h"
 #include "servers/visual/rasterizer.h"
 #include "servers/physics_server.h"
