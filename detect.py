@@ -46,6 +46,7 @@ def get_flags():
 	]
 
 def check(env, key):
+
 	if not (key in env):
 		return False
 	if version.major > 2:
@@ -87,17 +88,51 @@ def configure(env):
 	else:
 		print('ALSA libraries not found, disabling driver')
 
+	# common
 	if not check(env, 'builtin_freetype'):
 		env.ParseConfig('pkg-config freetype2 --cflags --libs')
-	if not check(env, 'builtin_openssl') and check(env, 'module_openssl_enabled'):
-		env.ParseConfig('pkg-config openssl --cflags --libs')
 	if not check(env, 'builtin_libpng'):
 		env.ParseConfig('pkg-config libpng --cflags --libs')
 	if not check(env, 'builtin_zlib'):
 		env.ParseConfig('pkg-config zlib --cflags --libs')
-        # pkg-config returns 0 when the lib exists...
-        found_udev = not os.system('pkg-config --exists libudev')
+	if not check(env, 'builtin_libwebp'):
+		env.ParseConfig('pkg-config libwebp --cflags --libs')
+	if not check(env, 'builtin_libtheora'):
+		env.ParseConfig('pkg-config theora theoradec --cflags --libs')
+	if not check(env, 'builtin_libvorbis'):
+		env.ParseConfig('pkg-config vorbis vorbisfile --cflags --libs')
+	if not check(env, 'builtin_opus'):
+		env.ParseConfig('pkg-config opus opusfile --cflags --libs')
+	if not check(env, 'builtin_libogg'):
+		env.ParseConfig('pkg-config ogg --cflags --libs')
+	# 2.1 / 3.0
+	if version.major == 2 or (version.major == 3 and version.minor == 0):
+		if not check(env, 'builtin_openssl') and check(env, 'module_openssl_enabled'):
+			env.ParseConfig('pkg-config openssl --cflags --libs')
+	# 3.0+
+	if version.major == 3:
+		if not check(env, 'builtin_libvpx'):
+			env.ParseConfig('pkg-config vpx --cflags --libs')
+		if not check(env, 'builtin_bullet'):
+			env.ParseConfig('pkg-config bullet --cflags --libs')
+		if not check(env, 'builtin_enet'):
+			env.ParseConfig('pkg-config libenet --cflags --libs')
+		if not check(env, 'builtin_zstd'):
+			env.ParseConfig('pkg-config libzstd --cflags --libs')
+		if not check(env, 'builtin_pcre2'):
+			env.ParseConfig('pkg-config libpcre2-32 --cflags --libs')
+	# 3.1+
+	if version.major == 3 and version.minor >= 1:
+		if not check('builtin_mbedtls'):
+			env.Append(LIBS=['mbedtls', 'mbedcrypto', 'mbedx509'])
+		if not check('builtin_wslay'):
+			env.ParseConfig('pkg-config libwslay --cflags --libs')
+		if not check('builtin_miniupnpc'):
+			env.Prepend(CPPPATH=["/usr/include/miniupnpc"])
+			env.Append(LIBS=["miniupnpc"])
 
+	# pkg-config returns 0 when the lib exists...
+	found_udev = not os.system('pkg-config --exists libudev')
 	if found_udev:
 		print('Enabling udev support')
 		env.Append(CPPFLAGS=['-DUDEV_ENABLED'])
