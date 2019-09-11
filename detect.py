@@ -64,8 +64,6 @@ def configure(env):
 			env['CC'] = 'clang'
 			env['CXX'] = 'clang++'
 			env['LD'] = 'clang++'
-			env['AR'] = 'llvm-ar'
-			env['RANLIB'] = 'llvm-ranlib'
 		env.Append(CPPFLAGS=['-DTYPED_METHOD_BIND'])
 		env.extra_suffix = '.llvm'
 
@@ -73,6 +71,8 @@ def configure(env):
 		if check(env, 'use_llvm'):
 			env.Append(CCFLAGS=['-flto=thin'])
 			env.Append(LINKFLAGS=['-fuse-ld=lld', '-flto=thin'])
+			env['AR'] = 'llvm-ar'
+			env['RANLIB'] = 'llvm-ranlib'
 		else:
 			env.Append(CCFLAGS=['-flto'])
 			env.Append(LINKFLAGS=['-flto'])
