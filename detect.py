@@ -123,11 +123,11 @@ def configure(env):
 			env.ParseConfig('pkg-config libpcre2-32 --cflags --libs')
 	# 3.1+
 	if version.major == 3 and version.minor >= 1:
-		if not check('builtin_mbedtls'):
+		if not check(env, 'builtin_mbedtls'):
 			env.Append(LIBS=['mbedtls', 'mbedcrypto', 'mbedx509'])
-		if not check('builtin_wslay'):
+		if not check(env, 'builtin_wslay'):
 			env.ParseConfig('pkg-config libwslay --cflags --libs')
-		if not check('builtin_miniupnpc'):
+		if not check(env, 'builtin_miniupnpc'):
 			env.Prepend(CPPPATH=["/usr/include/miniupnpc"])
 			env.Append(LIBS=["miniupnpc"])
 
