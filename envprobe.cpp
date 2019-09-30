@@ -97,6 +97,42 @@ static int probe_environment() {
 	}
 }
 
+static const char *next_module(char **state) {
+	char *s = *state;
+	if (!s)
+		return 0;
+	for (int i = 0; s[i]; i++)
+		if (s[i] == ',') {
+			s[i] = '\0';
+			*state = &s[i + 1];
+			return s;
+		}
+	*state = 0;
+	return s;
+}
+
+static bool probe_environment_override(Env *env) {
+	char *modules = getenv("FRT_MODULES");
+	if (!modules)
+		return false;
+	char *s = strdup(modules);
+	char *state = s;
+	const char *video = next_module(&state);
+	const char *keyboard = next_module(&state);
+	const char *mouse = next_module(&state);
+	const char *guard = next_module(&state);
+	if (guard || !mouse) {
+		printf("frt: expected FRT_MODULES=<video>,<keyboard>,<mouse>\n");
+		exit(1);
+	}
+	App *app = App::instance();
+	env->video = (Video *)app->probe(video);
+	env->keyboard = (Keyboard *)app->probe(keyboard);
+	env->mouse = (Mouse *)app->probe(mouse);
+	free(s);
+	return true;
+}
+
 namespace frt {
 
 class EnvProbeImpl : public EnvProbe {
@@ -107,6 +143,8 @@ public:
 	void cleanup() {}
 	// EnvProbe
 	void probe_env(Env *env) {
+		if (probe_environment_override(env))
+			return;
 		App *app = App::instance();
 		switch (probe_environment()) {
 			case FRT_ENV_BCM:
