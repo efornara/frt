@@ -328,6 +328,29 @@ public:
 			return true;
 		return feature == "pc" || feature == "etc";
 	}
+#if VERSION_MAJOR >= 3
+	String get_config_path() const {
+		if (has_environment("XDG_CONFIG_HOME"))
+			return get_environment("XDG_CONFIG_HOME");
+		if (has_environment("HOME"))
+			return get_environment("HOME").plus_file(".config");
+		return ".";
+	}
+	String get_data_path() const {
+		if (has_environment("XDG_DATA_HOME"))
+			return get_environment("XDG_DATA_HOME");
+		if (has_environment("HOME"))
+			return get_environment("HOME").plus_file(".local/share");
+		return get_config_path();
+	}
+	String get_cache_path() const {
+		if (has_environment("XDG_CACHE_HOME"))
+			return get_environment("XDG_CACHE_HOME");
+		if (has_environment("HOME"))
+			return get_environment("HOME").plus_file(".cache");
+		return get_config_path();
+	}
+#endif
 	void extract_resource_fatal(const char *msg) {
 		fatal("failed extracting resource '%s': %s.",
 			   extract_resource_name, msg);
@@ -472,6 +495,7 @@ public:
 #if VERSION_MAJOR == 2
 		_ensure_data_dir();
 #else
+		_ensure_user_data_dir();
 		return OK;
 #endif
 	}
