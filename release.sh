@@ -81,6 +81,21 @@ build_31() {
 	release
 }
 
+build_32() {
+	print_header
+	( cd tag_$tag ; scons frt_arch=$arch \
+		warnings=no \
+		builtin_zlib=no \
+		builtin_freetype=yes \
+		builtin_mbedtls=no \
+		builtin_libwebsockets=no \
+		module_mbedtls_enabled=no \
+		module_websocket_enabled=no \
+		module_webm_enabled=no \
+	$build_common )
+	release
+}
+
 [ $# -gt 1 ] || die "usage: release.sh arch tag..."
 
 varch=$1
@@ -101,7 +116,7 @@ while [ $# -gt 0 ] ; do
 			[ -f $frth ] || die "release.sh: $frth not found."
 			gver=`echo $tag | cut -b -2`
 			case $gver in
-				21|30|31) ;;
+				21|30|31|32) ;;
 				*) die "release.sh: unsupported godot version: $gver."
 			esac
 			fver=`grep FRT_VERSION $frth \
