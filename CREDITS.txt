@@ -1,0 +1,21 @@
+Some code has been imported (almost) verbatim. See import/* from details.
+
+The file os_frt.cpp has been written taking the Godot code base as a reference
+(mostly platform/os_x11.cpp).
+
+For other contributions, here is a snippet of the git history of FRT:
+
+==============================================================================
+
+commit a85b77e41ccc08f0e90fa958052c3ca551f6f37f
+Author: pacoSan <psandoval@gmail.com>
+Date:   Wed Oct 16 20:01:41 2019 -0600
+
+    kmsdrm
+
+commit f438afc7c5f12a991a5c37534aeec547972ef080
+Author: Fabio Alessandrelli <fabio.alessandrelli@gmail.com>
+Date:   Wed Sep 20 21:29:08 2017 +0200
+
+    Add joystick support for RPI
+
