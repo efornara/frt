@@ -1,43 +1,32 @@
 FRT
 ===
 
-FRT is a Godot "platform" targeting single board computers.
+[Godot](https://godotengine.org) is a full 2D and 3D game engine with editor.
 
-## Quick Start
+FRT is a Godot "platform" targeting single board computers. In plain English,
+you can export a Godot game to most of them by using FRT binaries, *as long as
+the game has been designed with the limitation of the hardware in mind*.
 
-FRT should run on most single board computers, as long as OpenGL ES has
-been properly configured. On a Raspberry Pi, FRT does not need X11 to run,
-and can also run from the console using the legacy driver (it should
-run out of the box on a basic raspbian lite installation).
+## When (not) to use FRT
 
-Download, uncompress, install somewhere in your path the latest
-binary from here:
+Godot comes with a generic X11 platform that works very well on Raspberry Pis,
+as long as you enable the experimental OpenGL driver (not needed on a Pi 4).
 
-<https://sourceforge.net/projects/frt/files/0.9.5>
+So, in general, if you are only interested in exporting games for Pis starting
+from the Pi 2, your best option is probably to compile an ARM export template
+yourself starting from the official Godot source code.
 
-For example:
+## How to use FRT
 
-	$ unzip frt_095_310.zip
-	$ sudo install frt_095_310_pi1.bin /usr/local/bin
+Precompiled versions of FRT can be found here:
 
-Download and uncompress a demo from here:
+<https://sourceforge.net/projects/frt/files/>
 
-<https://sourceforge.net/projects/frt/files/demos>
+And instructions of how to export a game from the Godot editor running on your
+PC [here](doc/Usage.md).
 
-And run it:
-
-	$ frt_095_310_pi1.bin --main-pack 31_2d_platformer.zip
-
-Press *Win+Q* to quit.
-
-Despite the name, the _pi1_ version should run on any Raspberry Pi,
-using either the legacy driver, or the new vc4 driver. It should also run
-on most 32-bit ARM-based boards (X11/EGL/ES).
-
-For 64-bit ARM-based boards, use the _arm64_ version.
-
-See [Usage](doc/Usage.md) for how to export a game from the Godot editor
-running on your PC.
+If you have come across an FRT game and it is running on the console, you can
+press *Win+Q* to close it.
 
 This is the list of meta (Win) keys recognized by FRT when running on
 the console (i.e. non on X11):
@@ -58,6 +47,7 @@ mouse is not.
 ## More Info
 
 - [Usage](doc/Usage.md)
+- [Environment](doc/Environment.md)
 - [Extensions](doc/Extensions.md)
 - [Compile](doc/Compile.md)
 - [Porting](doc/Porting.md)
