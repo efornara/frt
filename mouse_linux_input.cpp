@@ -54,7 +54,7 @@ public:
 	// Module
 	const char *get_id() const { return "mouse_linux_input"; }
 	bool probe() {
-		valid = open_by_id_substr("event-mouse");
+		valid = open("FRT_MOUSE_ID", "event-mouse");
 		if (valid)
 			App::instance()->add_dispatcher(this);
 		return valid;
