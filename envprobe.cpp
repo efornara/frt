@@ -39,8 +39,7 @@ using namespace frt;
 #define FRT_ENV_BCM 1
 #define FRT_ENV_X11 2
 #define FRT_ENV_KMSDRM 3
-#define FRT_ENV_VC4_NOX11 4
-#define FRT_ENV_BCM_NOLIB 5
+#define FRT_ENV_BCM_NOLIB 4
 
 static bool bcm_installed() {
 #if defined(__arm__) || defined(__aarch64__)
@@ -111,7 +110,7 @@ static int probe_environment() {
 			if (has_x11())
 				return FRT_ENV_X11;
 			else
-				return FRT_ENV_VC4_NOX11;
+				return FRT_ENV_KMSDRM;
 		} else {
 			if (bcm_installed())
 				return FRT_ENV_BCM;
@@ -191,9 +190,6 @@ public:
 				env->keyboard = (Keyboard *)app->probe("keyboard_linux_input");
 				env->mouse = (Mouse *)app->probe("mouse_linux_input");
 				break;
-			case FRT_ENV_VC4_NOX11:
-				printf("frt: vc4 driver requires X11 on Pi 0-3.\n");
-				exit(1);
 			case FRT_ENV_BCM_NOLIB:
 				printf("frt: no libbrcmEGL.so found.\n");
 				exit(1);

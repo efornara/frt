@@ -31,40 +31,7 @@
 
 #include "bits/x11.h"
 #include "bits/egl_base_context.h"
-
-// on pi, skip EGL/GLESv2 in /opt/vc/lib
-static const char *lib(const char *s) {
-#if defined(__arm__) || defined(__aarch64__)
-	static char buf[64]; // large enough
-	strcpy(buf, "/opt/vc/lib/");
-	strcat(buf, s);
-	if (access(buf, R_OK) != 0)
-		return s;
-#if defined(__arm__)
-	strcpy(buf, "/usr/lib/arm-linux-gnueabihf/");
-#else
-	strcpy(buf, "/usr/lib/aarch64-linux-gnu/");
-#endif
-	strcat(buf, s);
-	return buf;
-#else // !pi
-	return s;
-#endif
-}
-
-#define FRT_DL_SKIP
-#include "dl/gles2.gen.h"
-#if FRT_GLES_VERSION == 3
-#include "dl/gles3.gen.h"
-#endif
-
-static bool frt_load_gles(int version) {
-#if FRT_GLES_VERSION == 3
-	if (version == 3)
-		return frt_load_gles3(lib("libGLESv2.so.2"));
-#endif
-	return frt_load_gles2(lib("libGLESv2.so.2"));
-}
+#include "bits/frt_load_gles.h"
 
 namespace frt {
 
@@ -87,8 +54,6 @@ private:
 	int gl_version;
 	bool vsync;
 	void gles_init() {
-		if (!x11)
-			return;
 		window = x11->create_window(view_size.x, view_size.y, FRT_WINDOW_TITLE);
 		wm_delete = XInternAtom(display, "WM_DELETE_WINDOW", True);
 		XSetWMProtocols(display, window, &wm_delete, 1);

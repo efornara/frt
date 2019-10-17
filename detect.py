@@ -33,7 +33,7 @@ def can_build():
 def get_opts():
 
 	return [
-		('frt_arch', 'Architecture (pc/pi1/pi2/pi3/*)', 'pc'),
+		('frt_arch', 'Architecture (pc/pi1/pi2/pi3/pi4/*)', 'pc'),
 		('use_llvm', 'Use llvm compiler', no),
 		('use_lto', 'Use link time optimization', no),
 	]

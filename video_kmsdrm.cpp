@@ -38,40 +38,7 @@
 #include <unistd.h>
 
 #include "bits/egl_base_context.h"
-
-// on pi, skip EGL/GLESv2 in /opt/vc/lib
-static const char *lib(const char *s) {
-#if defined(__arm__) || defined(__aarch64__)
-	static char buf[64]; // large enough
-	strcpy(buf, "/opt/vc/lib/");
-	strcat(buf, s);
-	if (access(buf, R_OK) != 0)
-		return s;
-#if defined(__arm__)
-	strcpy(buf, "/usr/lib/arm-linux-gnueabihf/");
-#else
-	strcpy(buf, "/usr/lib/aarch64-linux-gnu/");
-#endif
-	strcat(buf, s);
-	return buf;
-#else // !pi
-	return s;
-#endif
-}
-
-#define FRT_DL_SKIP
-#include "dl/gles2.gen.h"
-#if FRT_GLES_VERSION == 3
-#include "dl/gles3.gen.h"
-#endif
-
-static bool frt_load_gles(int version) {
-#if FRT_GLES_VERSION == 3
-	if (version == 3)
-		return frt_load_gles3(lib("libGLESv2.so.2"));
-#endif
-	return frt_load_gles2(lib("libGLESv2.so.2"));
-}
+#include "bits/frt_load_gles.h"
 
 namespace frt {
 
@@ -170,27 +137,23 @@ public:
 		}
 		else
 		{
-			//! no /dev/dri/card found
-			return;
+			fatal("no /dev/dri/card found.");
 		}
 		if (device < 0)
 		{
-			//! open returned an invalid device
-			return;
+			fatal("open returned an invalid device.");
 		}
 		else
 		{
 			resources = drmModeGetResources (device);
 			if (resources == 0)
 			{
-				//! failed to get resources
-				return;
+				fatal("failed to get resources.");
 			}
 			connector = find_connector (resources);
 			if (connector == 0)
 			{
-				//! failed to get connector. no fb?
-				return;
+				fatal("failed to get connector. no fb?");
 			}
 		}
 		connector_id = connector->connector_id;
@@ -207,26 +170,22 @@ public:
 		result = eglInitialize (display, NULL ,NULL);
 		if (result == EGL_FALSE) {
 			fatal("eglInitialize failed.");
-			return;
 		}
 		result = eglBindAPI (EGL_OPENGL_ES_API);
 		if (result == EGL_FALSE) {
 			fatal("eglBindAPI failed.");
-			return;
 		}
 
 		eglGetConfigs(display, NULL, 0, &count);
 		result = eglChooseConfig (display, attributes, &configs[0], count, &num_config);
 		if (result == EGL_FALSE) {
 			fatal("eglChooseConfig failed.");
-			return;
 		}
 
 		config_index = match_config_to_visual(display,GBM_FORMAT_XRGB8888,&configs[0],num_config);
 		context = eglCreateContext (display, configs[config_index], EGL_NO_CONTEXT, context_attribs);
 		if (context == EGL_NO_CONTEXT) {
 			fatal("eglCreateContext failed: %i.", eglGetError());
-			return;
 		}
 	}
 

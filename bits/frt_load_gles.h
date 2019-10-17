@@ -1,4 +1,4 @@
-// gbm.dl
+// frt_load_gles.h
 /*
  * FRT - A Godot platform targeting single board computers
  * Copyright (c) 2017-2019  Emanuele Fornara
@@ -23,14 +23,36 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <stddef.h>
-#include <gbm.h>
+// on pi, skip EGL/GLESv2 in /opt/vc/lib
+static const char *lib(const char *s) {
+#if defined(__arm__) || defined(__aarch64__)
+	static char buf[64]; // large enough
+	strcpy(buf, "/opt/vc/lib/");
+	strcat(buf, s);
+	if (access(buf, R_OK) != 0)
+		return s;
+#if defined(__arm__)
+	strcpy(buf, "/usr/lib/arm-linux-gnueabihf/");
+#else
+	strcpy(buf, "/usr/lib/aarch64-linux-gnu/");
+#endif
+	strcat(buf, s);
+	return buf;
+#else // !pi
+	return s;
+#endif
+}
 
-typedef struct gbm_bo *(*___gbm_surface_lock_front_buffer___)(struct gbm_surface *surface);
-typedef union gbm_bo_handle (*___gbm_bo_get_handle___)(struct gbm_bo *bo);
-typedef uint32_t (*___gbm_bo_get_stride___)(struct gbm_bo *bo);
-typedef void (*___gbm_surface_release_buffer___)(struct gbm_surface *surface, struct gbm_bo *bo);
-typedef void (*___gbm_surface_destroy___)(struct gbm_surface *surface);
-typedef void (*___gbm_device_destroy___)(struct gbm_device *gbm);
-typedef struct gbm_device *(*___gbm_create_device___)(int fd);
-typedef struct gbm_surface *(*___gbm_surface_create___)(struct gbm_device *gbm, uint32_t width, uint32_t height, uint32_t format, uint32_t flags);
+#define FRT_DL_SKIP
+#include "dl/gles2.gen.h"
+#if FRT_GLES_VERSION == 3
+#include "dl/gles3.gen.h"
+#endif
+
+static bool frt_load_gles(int version) {
+#if FRT_GLES_VERSION == 3
+	if (version == 3)
+		return frt_load_gles3(lib("libGLESv2.so.2"));
+#endif
+	return frt_load_gles2(lib("libGLESv2.so.2"));
+}
