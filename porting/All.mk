@@ -34,4 +34,10 @@ OBJS += video_bcm.o bcm.gen.o
 CXXFLAGS += -I/opt/vc/include
 endif
 
+ifdef HAS_KMSDRM
+OBJS += video_kmsdrm.o
+CXXFLAGS += -I/usr/include/libdrm
+LIBS += -ldrm -lgbm
+endif
+
 LIBS += -ldl

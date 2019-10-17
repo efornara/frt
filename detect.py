@@ -173,6 +173,9 @@ def configure(env):
 	elif env['frt_arch'] == 'pi3':
 		env.Append(CCFLAGS=['-mcpu=cortex-a53', '-mfpu=neon-fp-armv8'])
 		env.extra_suffix += '.pi3'
+	elif env['frt_arch'] == 'pi4':
+		env.Append(CCFLAGS=['-mcpu=cortex-a72', '-mfpu=neon-fp-armv8', '-mtune=cortex-a72'])
+		env.extra_suffix += '.pi4'
 	elif env['frt_arch'] != 'pc':
 		env.extra_suffix += '.' + env['frt_arch']
 
@@ -193,6 +196,8 @@ def configure(env):
 	env.Append(FRT_MODULES=['dl/x11.gen.cpp', 'dl/egl.gen.cpp'])
 	if os.path.isfile('/opt/vc/include/bcm_host.h'):
 		env.Append(FRT_MODULES=['video_bcm.cpp', 'dl/bcm.gen.cpp'])
+	if os.path.isfile('/usr/include/gbm.h'):
+		env.Append(FRT_MODULES=['video_kmsdrm.cpp', 'dl/gbm.gen.cpp', 'dl/drm.gen.cpp'])
 	env.Append(FRT_MODULES=['dl/gles2.gen.cpp'])
 	if version.major >= 3:
 		env.Append(FRT_MODULES=['dl/gles3.gen.cpp'])
