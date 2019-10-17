@@ -42,6 +42,7 @@ static void probe_modules_fallback() {
 		"video_x11",
 		"video_fbdev",
 		"video_bcm",
+		"video_kmsdrm",
 		0
 	};
 	if (!env.video) {

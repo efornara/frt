@@ -22,4 +22,7 @@ import os
 if os.path.isfile('/opt/vc/include/bcm_host.h'):
 	frt_env.Append(CCFLAGS=["-I/opt/vc/include/"])
 
+if os.path.isfile('/usr/include/libdrm/drm.h'):
+	frt_env.Append(CCFLAGS=["-I/usr/include/libdrm"])
+
 frt_env.Program('#bin/godot', ['godot_frt.cpp', 'os_frt.cpp', 'frt_options.cpp'] + env['FRT_MODULES'])

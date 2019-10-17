@@ -27,6 +27,8 @@
 
 typedef EGLContext (*___eglCreateContext___)(EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list);
 typedef EGLBoolean (*___eglChooseConfig___)(EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config);
+typedef EGLBoolean (*___eglGetConfigs___)(EGLDisplay dpy, EGLConfig * configs, EGLint config_size, EGLint * num_config);
+typedef EGLBoolean (*___eglGetConfigAttrib___)(EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint * value);
 typedef EGLSurface (*___eglCreateWindowSurface___)(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win, const EGLint *attrib_list);
 typedef EGLBoolean (*___eglDestroyContext___)(EGLDisplay dpy, EGLContext ctx);
 typedef EGLBoolean (*___eglDestroySurface___)(EGLDisplay dpy, EGLSurface surface);
@@ -37,3 +39,4 @@ typedef EGLBoolean (*___eglSwapBuffers___)(EGLDisplay dpy, EGLSurface surface);
 typedef EGLBoolean (*___eglTerminate___)(EGLDisplay dpy);
 typedef EGLBoolean (*___eglSwapInterval___)(EGLDisplay dpy, EGLint interval);
 typedef EGLBoolean (*___eglBindAPI___)(EGLenum api);
+typedef EGLint (*___eglGetError___)();
