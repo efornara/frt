@@ -1,7 +1,7 @@
 Compile
 =======
 
-To compile the Godot templates on a Raspberry Pi, start from the official
+To compile the Godot templates on a Pi, start from the official
 3.1-stable source tarball:
 
 <https://github.com/godotengine/godot/releases/tag/3.1-stable>
@@ -18,13 +18,13 @@ To compile the official X11 platform, this is, in theory, what you should do:
 	$ scons platform=x11 target=release tools=no -j 4
 
 In practice, it is better to give the compiler some flags to better target
-the CPU of the Raspberry Pi, and especially its FPU.
+the CPU of the Pi, and especially its FPU.
 
-For example (Raspberry Pi 2/3):
+For example (Pi 2/3):
 
 	$ scons platform=x11 target=release tools=no CCFLAGS="-mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -mlittle-endian -munaligned-access" -j 4
 
-Or (Raspberry Pi 1/Zero):
+Or (Pi 1/Zero):
 
 	$ scons platform=x11 target=release tools=no CCFLAGS="-mcpu=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard -mlittle-endian -munaligned-access" -j 4
 
@@ -60,7 +60,7 @@ From the main directory, you now have a new "platform" available:
 Unlike the X11 platform, FRT disables tools by default and preselect
 some CPU-specific options according to frt\_arch.
 
-When compiling on a real Raspberry Pi, using an external Hard Disk is
+When compiling on a real Pi, using an external Hard Disk is
 strongly advised: everything is faster and more reliable, and you can
 enable a swap partition without stressing the Memory Card.
 Swap is hardly used, especially if you start Raspbian without the GUI,
@@ -68,7 +68,7 @@ but enabling it allows you to use `-j 4` and leave the compilation
 unattended.
 
 Compiling godot-3.1-stable + FRT from scratch on a non-overclocked
-Raspberry Pi 3 running Raspbian jessie should take about one hour.
+Pi 3 running Raspbian jessie should take about one hour.
 
 ## Compile Godot (FRT) to run on a PC
 
@@ -91,7 +91,7 @@ There might be better ways, and compilation is quite slow
 quite slow, Acer C7 C710-2847).
 
 The official FRT release binaries are not cross-compiled. They are generated
-on a Raspberry Pi.
+on a Pi.
 
 Familiarity with the Linux environment is assumed.
 Notes based on 

@@ -35,7 +35,7 @@ These variables are not relevant under X11.
 ## `FRT_KMSDRM_DEVICE`
 
 Selection of the dri card to use is done by an heuristic tuned for the
-Raspberry Pis. For other devices, you might have to select it manually. For
+Pis. For other devices, you might have to select it manually. For
 example:
 
     FRT_KMSDRM_DEVICE=/dev/dri/renderD128

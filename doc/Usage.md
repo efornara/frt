@@ -13,7 +13,7 @@ Compile FRT, or download and uncompress a binary from:
 ### Platform: X11 vs FRT
 
 Export templates for the official X11 platform can be easily generated and
-they work on a Raspberry Pi, *provided that you switch to the new GL driver*.
+they work on a Pi, *provided that you switch to the new GL driver*.
 If this limitation is acceptable to you, there is no reason to use FRT.
 Also, the X11 platform supports the X11 environment far better than FRT.
 
@@ -22,7 +22,7 @@ There are two reasons to use FRT:
 1. You want to publish your game and you don't want to force your users
 to switch to the new GL driver.
 
-2. You want to support other single board computers. The Raspberry Pi
+2. You want to support other single board computers. The Pi
 is the exception here: a person was hired to write an OpenGL desktop driver
 for its SOC. Other boards usually adapt an OpenGL ES driver designed for
 Android, and this is usually exposed to games via EGL/ES.
@@ -37,21 +37,21 @@ want to test with both of them anyway.
 Here is my personal opinion.
 
 If you develop a 2D game on your PC and you only care about new generation
-Raspberry Pis (2/3), you should probably use Godot 3.1. It is slightly
+Pis (2/3), you should probably use Godot 3.1. It is slightly
 slower than Godot 2.1, but, as an example, the 2D platform is capped
-at 60 fps in both on a (non-overclocked) Raspberry Pi 3B+.
+at 60 fps in both on a (non-overclocked) Pi 3B+.
 Godot 3.1 is nicer to use and the community has largely migrated to Godot 3.
 
 However, you might want to consider Godot 2.1 in some cases:
 
-1. You want to develop a game on the Raspberry Pi itself.
-While the Godot 2.1 *editor* seems to be useable on a modern Raspberry Pi
+1. You want to develop a game on the Pi itself.
+While the Godot 2.1 *editor* seems to be useable on a modern Pi
 (3B+ with vc4), the Godot 3.1 *editor* doesn't seem to be.
 It works, but I wouldn't want to actually write a game with it.
 UPDATE: Compiling with the latest compilers (e.g. gcc 8 or clang 8), and
 , if possible, enabling lto, might help to make the 3.1 editor useable.
 
-2. You target slow boards (e.g. Raspberry Pi 1 / Zero).
+2. You target slow boards (e.g. Pi 1 / Zero).
 
 3. You want to develop a 3D game.
 
@@ -59,7 +59,7 @@ For the last two points, it is probably better to write a minimal prototype
 of your game in both Godot 2.1 / 3.1 and measure the performance you are
 getting.
 
-Also note that Godot 3.1 is not as tested as Godot 2.1 on the Raspberry Pi,
+Also note that Godot 3.1 is not as tested as Godot 2.1 on the Pi,
 and some issues might come up. For example, particles are known not to work:
 [#27407](https://github.com/godotengine/godot/issues/27407).
 
@@ -96,16 +96,16 @@ compiled for fairly recent ARM-based 32-bit boards.
 Here is a description of the architecture tags:
 
 - *pi1* and *pi2*. The pi1 versions are compatible with the Pi Zero and the
-  first generation of Raspberry Pis. If you plan to publish your game and the
+  first generation of Pis. If you plan to publish your game and the
   game is simple enough, you should probably use these versions even if you
-  have a faster Raspberry Pi. If your game is too heavy to run on an older
-  Raspberry Pi, you might as well use the pi2 versions. These versions are the
+  have a faster Pi. If your game is too heavy to run on an older
+  Pi, you might as well use the pi2 versions. These versions are the
   most tested. They should work on other boards too, and, beside on
-  Raspberry Pis, they have also been tested on a Olimex A10-OLinuXino-LIME.
+  Pis, they have also been tested on a A10-based board.
 
 - *arm64*. These versions should work on generic 64-bits Linux distributions.
   Note that, on this architecture, Godot 2.1 is compiled with
-  `CCFLAGS=-DNO_THREADS`. They have been tested on a Raspberry Pi 3B+
+  `CCFLAGS=-DNO_THREADS`. They have been tested on a Pi 3B+
   running [Gentoo 64-bit](https://github.com/sakaki-/gentoo-on-rpi3-64bit)
   (vc4 driver).
 

@@ -9,8 +9,9 @@ the game has been designed with the limitation of the hardware in mind*.
 
 ## When (not) to use FRT
 
-Godot comes with a generic X11 platform that works very well on Raspberry Pis,
-as long as you enable the experimental OpenGL driver (not needed on a Pi 4).
+Godot comes with a generic X11 platform that works very well on Pis, as long
+as you enable the experimental OpenGL driver (not needed on a Pi 4, not
+recommended on Pi 0-1).
 
 So, in general, if you are only interested in exporting games for Pis starting
 from the Pi 2, your best option is probably to compile an ARM export template
@@ -44,10 +45,21 @@ the console (i.e. non on X11):
 The virtual mouse keys are available only if a keyboard is found, but a
 mouse is not.
 
-## More Info
+## User Info
 
 - [Usage](doc/Usage.md)
 - [Environment](doc/Environment.md)
 - [Extensions](doc/Extensions.md)
+- [Bugs](doc/Bugs.md)
+- [Roadmap](doc/Roadmap.md)
+
+## Hardware Info
+
+- [Utgard](doc/Utgard.md)
+- [VC4](doc/VC4.md)
+- [VC6](doc/VC6.md)
+
+## Developer Info
+
 - [Compile](doc/Compile.md)
 - [Porting](doc/Porting.md)

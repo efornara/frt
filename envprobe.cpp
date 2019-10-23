@@ -74,7 +74,7 @@ static bool pi() {
 }
 
 static bool pi4_predicate(const char *line) {
-	return (bool)strstr(line, "Raspberry Pi 4");
+	return (bool)strstr(line, "aspberry Pi 4");
 }
 
 static bool pi4() {

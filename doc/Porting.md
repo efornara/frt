@@ -7,9 +7,9 @@ developing and testing a module can be done on a real board with a very quick
 test cycle. Once the module is tested, it can be compiled as part of Godot.
 
 As an example, compiling and linking every FRT module from scratch takes less
-than 5 seconds on a Raspberry Pi 2. Relinking them takes less than 1 second.
-As another example, compiling and linking the `video_fbdev` module on a Olimex
-A10-OLinuXino-LIME takes less than 3 seconds.
+than 5 seconds on a Pi 2. Relinking them takes less than 1 second.
+As another example, compiling and linking the `video_fbdev` module on a
+A10-based board takes less than 3 seconds.
 
 Modules don't need to be generic. For example, you could access a custom
 device via GPIO and make a custom module implementing the `frt::Keyboard`
