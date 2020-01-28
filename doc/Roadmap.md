@@ -1,26 +1,24 @@
 Roadmap
 =======
 
-## 0.9.7
+Subject to change.
 
-- Fullscreen support in x11 / kmsdrm
-- Proper stretch handling in bcm
-
-## 1.0.0
-
-- Tested on Godot 3.2 release
+Unscheduled: bug fixing, documentation and examples.
 
 ## 1.0.x
 
-- Bug fixing
-- Better documentation?
-- Some examples?
-
-## 1.1.0
-
-- Refactoring for upstream OS / Display split
-- Tested on Godot 4.0 release
+- Move to buster
+- Change compilation flags
+- Cross compile binary releases (publish Docker image)
+- Evaluate mono support
 
 ## 1.1.x
 
-- Bug fixing
+- Evaluate moving to (a patched) SDL2
+- Fullscreen support in x11 / kmsdrm
+- Proper stretch handling in bcm
+
+## 1.2.x
+
+- Refactoring for upstream OS / Display split
+- Tested on Godot 4.0 release
