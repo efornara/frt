@@ -30,6 +30,7 @@ to stdout:
 	  depth_size
 	  multisample
 	  disable_meta_keys
+	  blacklist_video_bcm
 
 The performance monitor data has been added because I have found that a
 non-optimized build of godot/frt is much slower than an optimized build,
@@ -76,10 +77,19 @@ default, you can try running it like this:
 
 	godot.frt.opt.pi1 --frt depth_size=24
 
+### Disabling the meta keys
+
 If you already provide a way to close the game (for example, using an
 in-game menu), you might prefer to disable the handling of meta keys
 by FRT.
 Be careful that, since FRT grabs the keyboard when running without X11,
 the user might not be able to quit the game in any other way.
-The user can in any case override the project settings by using the
-command line.
+
+### Blacklisting the bcm driver
+
+The Godot 3.x rendering engine might have problems with some 3D games running
+with the bcm video driver. In some cases, the Linux kernel could crash.
+Unless you can test extensively, it is probably safer to blacklist the bcm
+driver when releasing 3D games using Godot 3.x.
+The game will run normally when running with other drivers, but will exit
+suggesting to switch to the vc4 driver when running with the bcm driver.

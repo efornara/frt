@@ -475,6 +475,8 @@ public:
 		pointer.set_visible(dpymnx, enable);
 	}
 	ContextGL *create_the_gl_context(int version, Vec2 size) {
+		if (App::instance()->get_bool_param("blacklist_video_bcm"))
+			fatal("video_bcm: this game requires the vc4 driver.");
 		if (version != 2)
 			return 0;
 		view_size = size;

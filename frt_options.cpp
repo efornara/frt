@@ -40,6 +40,7 @@ struct Param params[] = {
 	Param("depth_size", 16),
 	Param("multisample", false),
 	Param("disable_meta_keys", false),
+	Param("blacklist_video_bcm", false),
 };
 #define N_OF_PARAMS (sizeof(params) / sizeof(Param))
 
