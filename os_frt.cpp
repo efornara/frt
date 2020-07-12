@@ -559,7 +559,11 @@ public:
 		input->set_main_loop(main_loop);
 	}
 	bool can_draw() const { return true; };
-	String get_name() { return "FRT"; }
+	String get_name()
+#if (VERSION_MAJOR == 3) && (VERSION_MINOR >= 2)
+	const
+#endif
+	{ return "FRT"; }
 	void move_window_to_foreground() {}
 	void set_cursor_shape(CursorShape shape) {}
 	void set_custom_mouse_cursor(const RES&, OS::CursorShape, const Vector2&) {}
