@@ -27,7 +27,7 @@
 #define FRT_H
 
 #define FRT_WINDOW_TITLE "Godot / FRT"
-#define FRT_VERSION "0.9.7"
+#define FRT_VERSION "0.9.8"
 
 #include <stdint.h>
 
