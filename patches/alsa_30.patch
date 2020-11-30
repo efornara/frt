@@ -1,0 +1,14 @@
+diff --git a/drivers/alsa/audio_driver_alsa.cpp b/drivers/alsa/audio_driver_alsa.cpp
+index 1e17e7253..f4bf4fbdb 100644
+--- a/drivers/alsa/audio_driver_alsa.cpp
++++ b/drivers/alsa/audio_driver_alsa.cpp
+@@ -190,7 +190,8 @@ void AudioDriverALSA::thread_func(void *p_udata) {
+ 		while (todo) {
+ 			if (ad->exit_thread)
+ 				break;
+-			uint8_t *src = (uint8_t *)ad->samples_out.ptr();
++			// FRT_PATCH_ALSA fix by charasyn (PR 43928)
++			uint16_t *src = (uint16_t *)ad->samples_out.ptr();
+ 			int wrote = snd_pcm_writei(ad->pcm_handle, (void *)(src + (total * ad->channels)), todo);
+ 
+ 			if (wrote < 0) {

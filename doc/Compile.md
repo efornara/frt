@@ -44,7 +44,11 @@ you want to enable it).
 
 ## Compile Godot (FRT)
 
-FRT is not really a patch, as it leaves the Godot source untouched.
+FRT can be compiled against the Godot engine source as it is.
+
+However there are some optional patches that you might want to apply
+to the engine. See the `patches` directory. FRT release binaries are
+generated applying the patches.
 
 Go to the platform directory and clone this repository:
 
