@@ -120,7 +120,7 @@ A few exported demo projects are available for testing:
 
 For ease of notation, this page assumes that the chosen binary has been
 renamed to `godot2.frt.bin` (for Godot 2.1) or `godot3.frt.bin`
-(for Godot 3.0 / 3.1) and it has been installed somewhere in `$PATH`.
+(for Godot 3.0 - 3.2) and it has been installed somewhere in `$PATH`.
 
 ### Godot 2.1
 
@@ -134,8 +134,12 @@ or giving its directory as a command line option:
 	~/demo $ cd
 	~ $ godot2.frt.bin -path demo
 
-You can also put the demo ZIP in the same directory as the binary and
-give them the same base name:
+You cal also run a demo PCK/ZIP directly:
+
+	~ $ godot2.frt.bin -main_pack ~/Downloads/21_2d_platformer.zip
+
+You can finally put the demo PCK/ZIP in the same directory as the
+binary and give them the same base name:
 
 	~ $ mkdir tmp
 	~ $ cd tmp
@@ -143,12 +147,10 @@ give them the same base name:
 	~/tmp $ cp /usr/local/bin/godot2.frt.bin platformer.bin
 	~/tmp $ ./platformer.bin
 
-### Godot 3.0 / 3.1
+### Godot 3.0 - 3.2
 
-You can unzip a demo (just use `--path`) or rename it as for Godot 2.
-However, you can also run a PCK/ZIP file directly:
-
-	~ $ godot3.frt.bin --main-pack ~/Downloads/30_2d_platformer.zip
+Just like for Godot 2, you can unzip a demo (just use `--path`),
+rename it, or run it directly (just use `--main-pack`).
 
 The version of Godot 3.0 supported by FRT (3.0-gles2) defaults to GLES2.
 If your board supports GLES3, you can run a GLES3 demo on it, but
@@ -177,4 +179,4 @@ I backported a limited, old version of the 3.1 GLES2 renderer to Godot 3.0
 
 Since Godot 3.1 has now been released and it officially supports
 OpenGL ES 2.0, users still using 3.0-gles2 are advised to migrate to
-Godot 3.1.
+Godot 3.1 or later.
