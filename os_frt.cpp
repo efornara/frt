@@ -275,6 +275,9 @@ private:
 	int current_video_driver;
 	List<String> args;
 	MainLoop *main_loop;
+#ifdef PULSEAUDIO_ENABLED
+	AudioDriverPulseAudio driver_pulseaudio;
+#endif
 #ifdef ALSA_ENABLED
 	AudioDriverALSA driver_alsa;
 #endif
@@ -766,6 +769,9 @@ public:
 
 	OS_FRT() {
 		current_video_driver = VIDEO_DRIVER_GLES2;
+#ifdef PULSEAUDIO_ENABLED
+		AudioDriverManagerSW::add_driver(&driver_pulseaudio);
+#endif
 #ifdef ALSA_ENABLED
 		AudioDriverManagerSW::add_driver(&driver_alsa);
 #endif
