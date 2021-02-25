@@ -1,0 +1,13 @@
+diff --git a/core/safe_refcount.h b/core/safe_refcount.h
+index a61d227217..35c0e8f55e 100644
+--- a/core/safe_refcount.h
++++ b/core/safe_refcount.h
+@@ -51,7 +51,7 @@
+ #define SAFE_NUMERIC_TYPE_PUN_GUARANTEES(m_type)                        \
+ 	static_assert(sizeof(SafeNumeric<m_type>) == sizeof(m_type), "");   \
+ 	static_assert(alignof(SafeNumeric<m_type>) == alignof(m_type), ""); \
+-	static_assert(std::is_trivially_destructible<std::atomic<m_type> >::value, "");
++	// FRT_PATCH_GCC492A std::is_trivially_destructible not supported
+ 
+ #if defined(DEBUG_ENABLED)
+ void check_lockless_atomics();

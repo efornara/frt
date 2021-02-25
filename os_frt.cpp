@@ -56,7 +56,7 @@
 #if VERSION_MAJOR == 2
 
 #define VIDEO_DRIVER_COUNT 1
-#include "import/joystick_linux.h"
+#include "platform/x11/joystick_linux.h"
 #include "servers/visual/visual_server_wrap_mt.h"
 #include "servers/audio/audio_server_sw.h"
 #include "servers/audio/sample_manager_sw.h"
@@ -184,7 +184,7 @@ public:
 #elif VERSION_MAJOR == 3
 
 #define VIDEO_DRIVER_COUNT 2
-#include "import/joypad_linux.h"
+#include "platform/x11/joypad_linux.h"
 #include "drivers/gles3/rasterizer_gles3.h"
 #define FRT_DL_SKIP
 #include "drivers/gles2/rasterizer_gles2.h"

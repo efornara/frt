@@ -13,6 +13,15 @@ else:
 	no = 'no'
 
 
+def has_wrapper_for(lib):
+
+	if version.major == 2:
+		return False
+	if (version.minor > 2) or (version.minor == 2 and version.patch >= 4):
+		return True
+	return False
+
+
 def is_active():
 
 	return True
@@ -85,7 +94,10 @@ def configure(env):
 	if os.system('pkg-config --exists alsa') == 0:
 		print('Enabling ALSA')
 		env.Append(CPPFLAGS=['-DALSA_ENABLED'])
-		env.ParseConfig('pkg-config alsa --cflags --libs')
+		if has_wrapper_for('alsa'):
+			env['alsa'] = True
+		else:
+			env.ParseConfig('pkg-config alsa --cflags --libs')
 	else:
 		print('ALSA libraries not found, disabling driver')
 
@@ -145,12 +157,12 @@ def configure(env):
 	if found_udev:
 		print('Enabling udev support')
 		env.Append(CPPFLAGS=['-DUDEV_ENABLED'])
-		env.ParseConfig('pkg-config libudev --cflags --libs')
-		env.Append(CPPFLAGS=['-DJOYDEV_ENABLED'])
-		if version.major > 2:
-			env.Append(FRT_MODULES=['import/joypad_linux.cpp'])
+		if has_wrapper_for('udev'):
+			env.Append(FRT_MODULES=['include/libudev-so_wrap.c'])
 		else:
-			env.Append(FRT_MODULES=['import/joystick_linux.cpp'])
+			env.ParseConfig('pkg-config libudev --cflags --libs')
+		env.Append(CPPFLAGS=['-DJOYDEV_ENABLED'])
+		env.Append(FRT_MODULES=['include/joypad_linux.cpp'])
 	else:
 		print('libudev development libraries not found, disabling udev support')
 
