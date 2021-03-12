@@ -34,7 +34,7 @@ print_header() {
 
 release() {
 	local bin
-	[ $arch != pc ] || return
+	[ -d releases ] || return
 	bin=releases/frt_${fver}_${tag}_${arch}.bin
 	cp tag_$tag/bin/godot.frt.opt.$arch $bin
 	strip $bin

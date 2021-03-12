@@ -197,7 +197,7 @@ def configure(env):
 	elif env['frt_arch'] == 'pi4':
 		env.Append(CCFLAGS=['-mcpu=cortex-a72', '-mfpu=neon-fp-armv8', '-mtune=cortex-a72'])
 		env.extra_suffix += '.pi4'
-	elif env['frt_arch'] != 'pc':
+	else:
 		env.extra_suffix += '.' + env['frt_arch']
 
 	if env['frt_arch'].startswith('pi'):
