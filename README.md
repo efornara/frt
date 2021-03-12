@@ -51,7 +51,6 @@ mouse is not.
 - [Environment](doc/Environment.md)
 - [Extensions](doc/Extensions.md)
 - [Bugs](doc/Bugs.md)
-- [Roadmap](doc/Roadmap.md)
 
 ## Hardware Info
 
