@@ -37,11 +37,7 @@
 #include "drivers/unix/os_unix.h"
 #include "servers/visual_server.h"
 #include "servers/visual/rasterizer.h"
-#include "servers/physics_server.h"
 #include "servers/audio/audio_driver_dummy.h"
-#include "servers/physics/physics_server_sw.h"
-#include "servers/physics_2d/physics_2d_server_sw.h"
-#include "servers/physics_2d/physics_2d_server_wrap_mt.h"
 #include "servers/visual/visual_server_raster.h"
 #include "drivers/alsa/audio_driver_alsa.h"
 #include "drivers/pulseaudio/audio_driver_pulseaudio.h"
@@ -62,6 +58,10 @@
 #include "servers/audio/sample_manager_sw.h"
 #include "servers/spatial_sound/spatial_sound_server_sw.h"
 #include "servers/spatial_sound_2d/spatial_sound_2d_server_sw.h"
+#include "servers/physics_server.h"
+#include "servers/physics/physics_server_sw.h"
+#include "servers/physics_2d/physics_2d_server_sw.h"
+#include "servers/physics_2d/physics_2d_server_wrap_mt.h"
 #include "drivers/gles2/rasterizer_gles2.h"
 
 static int event_id = 0;
@@ -289,9 +289,9 @@ private:
 	MouseMode mouse_mode;
 	int mouse_state;
 	bool grab;
+#if VERSION_MAJOR == 2
 	PhysicsServer *physics_server;
 	Physics2DServer *physics_2d_server;
-#if VERSION_MAJOR == 2
 	Rasterizer *rasterizer;
 	AudioServerSW *audio_server;
 	SampleManagerMallocSW *sample_manager;
@@ -486,10 +486,12 @@ public:
 			return FAILED;
 #endif
 		visual_server->init();
+#if VERSION_MAJOR == 2
 		physics_server = memnew(PhysicsServerSW);
 		physics_server->init();
 		physics_2d_server = memnew(Physics2DServerSW);
 		physics_2d_server->init();
+#endif
 		input = memnew(InputDefault);
 #ifdef JOYDEV_ENABLED
 		joystick = memnew(joystick_linux(input));
@@ -524,11 +526,11 @@ public:
 		memdelete(visual_server);
 #if VERSION_MAJOR == 2
 		memdelete(rasterizer);
-#endif
 		physics_server->finish();
 		memdelete(physics_server);
 		physics_2d_server->finish();
 		memdelete(physics_2d_server);
+#endif
 #ifdef JOYDEV_ENABLED
 		memdelete(joystick);
 #endif
