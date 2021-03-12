@@ -267,6 +267,7 @@ class OS_FRT : public OS_Unix, public Runnable {
 private:
 	App *app;
 	Param *disable_meta_keys_param;
+	Param *exit_on_shiftenter_param;
 	Env *env;
 	Vec2 screen_size;
 	ContextGL *context_gl;
@@ -423,6 +424,9 @@ public:
 	}
 	bool disable_meta_keys() {
 		return disable_meta_keys_param->value.u.b;
+	}
+	bool exit_on_shiftenter() {
+		return exit_on_shiftenter_param->value.u.b;
 	}
 #if VERSION_MAJOR == 2
 	void
@@ -675,6 +679,12 @@ public:
 				if (st.meta && instance->handle_meta(gd_code, pressed))
 					return;
 			}
+			if (instance->exit_on_shiftenter()) {
+				InputModifierState st;
+				keyboard->get_modifier_state(st);
+				if (st.shift && pressed && (gd_code == GD_KEY_RETURN || gd_code == GD_KEY_ENTER))
+					App::instance()->quit();
+			}
 			instance->process_keyboard_event(gd_code, pressed, unicode, echo);
 		}
 	} keyboard_handler;
@@ -723,6 +733,7 @@ public:
 		if (!main_loop)
 			return;
 		disable_meta_keys_param = app->get_param("disable_meta_keys");
+		exit_on_shiftenter_param = app->get_param("exit_on_shiftenter");
 		keyboard_handler.instance = this;
 		keyboard_handler.keyboard = env->keyboard;
 		mouse_handler.instance = this;
