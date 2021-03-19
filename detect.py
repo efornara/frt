@@ -105,7 +105,10 @@ def configure(env):
 		if os.system("pkg-config --exists libpulse") == 0:
 			print("Enabling PulseAudio")
 			env.Append(CPPDEFINES=["PULSEAUDIO_ENABLED"])
-			env.ParseConfig("pkg-config --cflags --libs libpulse")
+			if version.major == 2:
+				env.ParseConfig("pkg-config --cflags --libs libpulse-simple")
+			else:
+				env.ParseConfig("pkg-config --cflags --libs libpulse")
 		else:
 			print("PulseAudio libraries not found, disabling driver")
 
