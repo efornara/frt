@@ -41,11 +41,16 @@ def can_build():
 
 def get_opts():
 
+	if version.major > 2:
+		from SCons.Variables import BoolVariable
+	else:
+		def BoolVariable(a,b,c): return (a,b,c)
+
 	return [
 		('frt_arch', 'Architecture (pc/pi1/pi2/pi3/pi4/*)', 'pc'),
-		('use_llvm', 'Use llvm compiler', no),
-		('use_lto', 'Use link time optimization', no),
-		('pulseaudio', 'Detect and use pulseaudio', no),
+		BoolVariable('use_llvm', 'Use llvm compiler', no),
+		BoolVariable('use_lto', 'Use link time optimization', no),
+		BoolVariable('pulseaudio', 'Detect and use pulseaudio', no),
 	]
 
 
