@@ -17,7 +17,7 @@ def has_wrapper_for(lib):
 
 	if version.major == 2:
 		return False
-	if (version.minor > 2) or (version.minor == 2 and version.patch >= 4):
+	if version.minor > 2:
 		return True
 	return False
 

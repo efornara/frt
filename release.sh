@@ -81,7 +81,7 @@ build_31() {
 	release
 }
 
-build_32() {
+build_33() {
 	print_header
 	( cd tag_$tag ; scons frt_arch=$arch \
 		warnings=no \
@@ -94,6 +94,11 @@ build_32() {
 		module_webm_enabled=no \
 	$build_common )
 	release
+}
+
+build_32() {
+	echo "WARNING: 3.2.x deprecated upstream"
+	build_33
 }
 
 [ $# -gt 1 ] || die "usage: release.sh arch tag..."
@@ -116,7 +121,7 @@ while [ $# -gt 0 ] ; do
 			[ -f $frth ] || die "release.sh: $frth not found."
 			gver=`echo $tag | cut -b -2`
 			case $gver in
-				21|30|31|32) ;;
+				21|30|31|32|33) ;;
 				*) die "release.sh: unsupported godot version: $gver."
 			esac
 			fver=`grep FRT_VERSION $frth \

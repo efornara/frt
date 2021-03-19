@@ -504,7 +504,7 @@ public:
 #if VERSION_MAJOR == 2
 		_ensure_data_dir();
 #else
-#if VERSION_MINOR < 2 || (VERSION_MINOR == 2 && VERSION_PATCH < 4)
+#if VERSION_MINOR < 3
 		_ensure_user_data_dir();
 #endif
 		return OK;
