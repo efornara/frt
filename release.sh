@@ -28,15 +28,19 @@ die() {
 	exit 1
 }
 
+usage() {
+	die "usage: release.sh [--nopulse] arch tag..."
+}
+
 print_header() {
-	echo "Building frt:$fver tag:$tag arch:$arch..."
+	echo "Building frt:$fver tag:$tag arch:$arch suffix:[$suffix]..."
 }
 
 release() {
 	local bin
 	[ -d releases ] || return
-	bin=releases/frt_${fver}_${tag}_${arch}.bin
-	cp tag_$tag/bin/godot.frt.opt.$arch $bin
+	bin=releases/frt_${fver}_${tag}_${arch}${suffix}.bin
+	cp tag_$tag/bin/godot.frt.opt$suffix.$arch $bin
 	strip $bin
 }
 
@@ -50,6 +54,7 @@ build_21() {
 		builtin_zlib=no \
 		builtin_freetype=no \
 		module_openssl_enabled=no \
+		$pulse \
 		$patch \
 	$build_common )
 	release
@@ -62,6 +67,7 @@ build_30() {
 		builtin_freetype=yes \
 		module_openssl_enabled=no \
 		module_webm_enabled=no \
+		$pulse \
 	$build_common )
 	release
 }
@@ -77,6 +83,7 @@ build_31() {
 		module_mbedtls_enabled=no \
 		module_websocket_enabled=no \
 		module_webm_enabled=no \
+		$pulse \
 	$build_common )
 	release
 }
@@ -92,6 +99,7 @@ build_33() {
 		module_mbedtls_enabled=no \
 		module_websocket_enabled=no \
 		module_webm_enabled=no \
+		$pulse \
 	$build_common )
 	release
 }
@@ -101,7 +109,18 @@ build_32() {
 	build_33
 }
 
-[ $# -gt 1 ] || die "usage: release.sh arch tag..."
+[ $# -gt 1 ] || usage
+
+if [ $1 = "--nopulse" ] ; then
+	pulse="pulseaudio=no extra_suffix=nopulse"
+	suffix=".nopulse"
+	shift
+else
+	pulse="pulseaudio=yes"
+	suffix=""
+fi
+
+[ $# -gt 1 ] || usage
 
 varch=$1
 case $varch in
