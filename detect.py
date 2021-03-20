@@ -112,7 +112,7 @@ def configure(env):
 			env.Append(CPPDEFINES=["PULSEAUDIO_ENABLED"])
 			if version.major == 2:
 				env.ParseConfig("pkg-config --cflags --libs libpulse-simple")
-			elif has_wrapper_for('alsa'):
+			elif has_wrapper_for('libpulse'):
 				env.ParseConfig("pkg-config --cflags libpulse")
 			else:
 				env.ParseConfig("pkg-config --cflags --libs libpulse")
