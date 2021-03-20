@@ -29,7 +29,7 @@ die() {
 }
 
 usage() {
-	die "usage: release.sh [--nopulse] arch tag..."
+	die "usage: release.sh [--pulse] arch tag..."
 }
 
 print_header() {
@@ -111,12 +111,12 @@ build_32() {
 
 [ $# -gt 1 ] || usage
 
-if [ $1 = "--nopulse" ] ; then
-	pulse="pulseaudio=no extra_suffix=nopulse"
-	suffix=".nopulse"
+if [ $1 = "--pulse" ] ; then
+	pulse="pulseaudio=yes extra_suffix=pulse"
+	suffix=".pulse"
 	shift
 else
-	pulse="pulseaudio=yes"
+	pulse="pulseaudio=no"
 	suffix=""
 fi
 
