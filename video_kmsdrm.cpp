@@ -111,17 +111,20 @@ public:
 
 		//! Try and get the correct card to use from the env
 		const char *s = getenv("FRT_KMSDRM_DEVICE");
-		if (s)
+		if (s) {
 			if (access(s, R_OK) == 0)
 				device = open(s, O_RDWR);
-			//! No env var found, try card1 (rpi4)
-			else if (access("/dev/dri/card1", R_OK) == 0)
-				device = open("/dev/dri/card1", O_RDWR);
-			//! That didn't work, fall back to card0 (pc, pi3, others)
-			else if (access("/dev/dri/card0", R_OK) == 0)
-				device = open("/dev/dri/card0", O_RDWR);
 			else
-				fatal("no /dev/dri/card found.");
+				fatal("couldn't open %s.", s);
+		}
+		//! No env var found, try card1 (rpi4)
+		else if (access("/dev/dri/card1", R_OK) == 0)
+			device = open("/dev/dri/card1", O_RDWR);
+		//! That didn't work, fall back to card0 (pc, pi3, others)
+		else if (access("/dev/dri/card0", R_OK) == 0)
+			device = open("/dev/dri/card0", O_RDWR);
+		else
+			fatal("no /dev/dri/card found.");
 		if (device < 0)
 			fatal("open returned an invalid device.");
 		else {
