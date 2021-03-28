@@ -47,7 +47,7 @@ private:
 	X11User *x11;
 	Display *display;
 	Window window;
-	Atom wm_delete;
+	Atom wm_delete_window;
 	Vec2 screen_size;
 	Vec2 view_size;
 	EGLBaseContext egl;
@@ -55,8 +55,8 @@ private:
 	bool vsync;
 	void gles_init() {
 		window = x11->create_window(view_size.x, view_size.y, FRT_WINDOW_TITLE);
-		wm_delete = XInternAtom(display, "WM_DELETE_WINDOW", True);
-		XSetWMProtocols(display, window, &wm_delete, 1);
+		wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
+		XSetWMProtocols(display, window, &wm_delete_window, 1);
 		egl.init(gl_version, (EGLNativeDisplayType)display);
 		egl.create_simple_surface((EGLNativeWindowType)window);
 		egl.make_current();
@@ -139,7 +139,7 @@ public:
 		x11->get_event(ev);
 		switch (ev.type) {
 			case ClientMessage:
-				if ((unsigned int)ev.xclient.data.l[0] == (unsigned int)wm_delete)
+				if ((unsigned int)ev.xclient.data.l[0] == (unsigned int)wm_delete_window)
 					App::instance()->quit();
 				break;
 		}

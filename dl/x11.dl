@@ -42,3 +42,4 @@ typedef int (*___XLookupString___)(XKeyEvent *, char *, int, KeySym *, XComposeS
 typedef void (*___XSetWMNormalHints___)(Display *, Window, XSizeHints *);
 typedef Atom (*___XInternAtom___)(Display *, _Xconst char *, Bool);
 typedef Status (*___XSetWMProtocols___)(Display *, Window, Atom *, int);
+typedef int (*___XChangeProperty___)(Display *, Window, Atom, Atom, int, int, _Xconst unsigned char *, int);

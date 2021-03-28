@@ -73,6 +73,7 @@ private:
 		XCloseDisplay(display);
 	}
 	Window create(int width, int height, const char *title) {
+		bool undecorated = getenv("FRT_X11_UNDECORATED");
 		Window root = DefaultRootWindow(display);
 		XSetWindowAttributes swa;
 		window = XCreateWindow(display, root, 0, 0,
@@ -84,9 +85,19 @@ private:
 		sh.max_width = width;
 		sh.max_height = height;
 		sh.flags = PMinSize | PMaxSize;
+		if (undecorated) {
+			sh.x = 0;
+			sh.y = 0;
+			sh.flags |= PPosition;
+		}
 		XSetWMNormalHints(display, window, &sh);
 		XMapWindow(display, window);
 		XStoreName(display, window, title);
+		if (undecorated) {
+			Atom motif_wm_hints = XInternAtom(display, "_MOTIF_WM_HINTS", False);
+			long hints[5] = { 2, 0, 0, 0, 0 };
+			XChangeProperty(display, window, motif_wm_hints, motif_wm_hints, 32, PropModeReplace, (unsigned char *)hints, 5);
+		}
 		XFlush(display);
 		return window;
 	}
