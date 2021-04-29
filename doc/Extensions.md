@@ -31,6 +31,7 @@ to stdout:
 	  multisample
 	  disable_meta_keys
 	  blacklist_video_bcm
+	  exit_on_shiftenter
 
 The performance monitor data has been added because I have found that a
 non-optimized build of godot/frt is much slower than an optimized build,
@@ -93,3 +94,8 @@ Unless you can test extensively, it is probably safer to blacklist the bcm
 driver when releasing 3D games using Godot 3.x.
 The game will run normally when running with other drivers, but will exit
 suggesting to switch to the vc4 driver when running with the bcm driver.
+
+### Exit the game when pressing Shift+Enter
+
+Provides a universal way to terminate the process that matches the default
+key configuration in RetroPie.

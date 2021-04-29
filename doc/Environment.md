@@ -12,6 +12,14 @@ Or like this:
 
 In most cases, you shouldn't need to set environment variables to use FRT.
 
+## `FRT_X11_UNDECORATED`
+
+Ask the window manager not to decorate the window, and force its position
+to be at 0,0.
+
+Work around the lack of fullscreen support in the X11 module. Intended to be
+used together with --resolution (or -r for Godot 2).
+
 ## `FRT_KEYBOARD_ID` and `FRT_MOUSE_ID`
 
 If FRT fails to select the correct device for your keyboard and/or your mouse,
