@@ -47,6 +47,7 @@ mouse is not.
 
 ## User Info
 
+- [ReleaseNotes](doc/ReleaseNotes.md)
 - [Usage](doc/Usage.md)
 - [Environment](doc/Environment.md)
 - [Extensions](doc/Extensions.md)
