@@ -1,0 +1,37 @@
+#! /usr/bin/env python
+
+# SCSub
+#
+# FRT - A Godot platform targeting single board computers
+# Copyright (c) 2017-2021  Emanuele Fornara
+# SPDX-License-Identifier: MIT
+#
+
+Import('env')
+
+import sys
+dl_path = './dl'
+sys.path.append(dl_path)
+import procdl
+sys.path.remove(dl_path)
+
+env.Append(BUILDERS={'DLH': env.Builder(action=procdl.build_h_action, suffix='.gen.h', src_suffix='.dl')})
+env.Append(BUILDERS={'DLCPP': env.Builder(action=procdl.build_cc_action, suffix='.gen.cc', src_suffix='.dl')})
+
+for dl in Glob('dl/*.dl'):
+	env.DLH(str(dl))
+	env.DLCPP(str(dl))
+for libname in ['gles2', 'gles3']:
+	env.Depends('platform_config.h', 'dl/' + libname + '.gen.h')
+
+frt_env = env.Clone()
+frt_env.ParseConfig('pkg-config sdl2 --cflags --libs')
+
+common_sources = [ "frt_utils.cc" ]
+
+import version
+if version.major == 2:
+	frt_env.Append(CCFLAGS=['-std=c++98'])
+	version_sources = ['frt_godot2.cc', 'dl/gles2.gen.cc']
+
+prog = frt_env.add_program('#bin/godot', common_sources + version_sources)
