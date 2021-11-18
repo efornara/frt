@@ -13,37 +13,77 @@ def get_opts():
 	return [
 		('use_llvm', 'Use llvm compiler', 'no'),
 		('use_lto', 'Use link time optimization', 'no'),
+		('frt_arch', 'Architecture (no/arm32v6/arm32v7/arm64v8)', 'no'),
+		('frt_cross', 'Cross compilation (<triple>/auto/no)', 'no'),
 	]
 
 def get_flags():
 	return [
 	]
 
-def configure(env):
-	env.Append(CPPPATH=['#platform/frt'])
-	if (env["use_llvm"] == "yes"):
-		env["CC"] = "clang"
-		env["CXX"] = "clang++"
-		env["LD"] = "clang++"
+def configure_compiler(env):
+	if (env['use_llvm'] == 'yes'):
+		env['CC'] = 'clang'
+		env['CXX'] = 'clang++'
+		env['LD'] = 'clang++'
+	else:
+		print('Newer GCC compilers not supported in Godot 2. Handle with care.')
 
-	if (env["use_lto"] == "yes"):
-		# TODO: gcc?
-		env.Append(CCFLAGS=['-flto=thin'])
-		env.Append(LINKFLAGS=['-fuse-ld=lld', '-flto=thin'])
-		env['AR'] = 'llvm-ar'
-		env['RANLIB'] = 'llvm-ranlib'
-
-	if platform.machine() != "x86_64":
+def configure_arch(env):
+	if env['frt_arch'] == 'arm32v6':
+		env.Append(CCFLAGS=['-march=armv6', '-mfpu=vfp', '-mfloat-abi=hard'])
+		env.extra_suffix += '.arm32v6'
+	elif env['frt_arch'] == 'arm32v7':
 		env.Append(CCFLAGS=['-march=armv7-a', '-mfpu=neon-vfpv4', '-mfloat-abi=hard'])
+		env.extra_suffix += '.arm32v7'
+	elif env['frt_arch'] == 'arm64v8':
+		env.Append(CCFLAGS=['-march=armv8-a'])
+		env.extra_suffix += '.arm64v8'
 
-	if (env["target"] == "release"):
+def configure_cross(env):
+	if env['frt_cross'] == 'no':
+		return
+	if (env['use_llvm'] == 'no'):
+		print('Cross compilation only tested on clang for now...')
+		return
+	if env['frt_cross'] == 'auto':
+		triple = {
+			'arm32v7': 'arm-linux-gnueabihf',
+			'arm64v8': 'aarch64-linux-gnu',
+		}[env['frt_arch']]
+	else:
+		triple = env['frt_cross']
+	env.Append(CCFLAGS=['-target', triple])
+	env.Append(LINKFLAGS=['-target', triple])
+
+def configure_lto(env):
+	if env['use_lto'] == 'no':
+		return
+	if (env['use_llvm'] == 'no'):
+		print('LTO only tested on clang for now...')
+		return
+	env.Append(CCFLAGS=['-flto=thin'])
+	env.Append(LINKFLAGS=['-fuse-ld=lld', '-flto=thin'])
+	env['AR'] = 'llvm-ar'
+	env['RANLIB'] = 'llvm-ranlib'
+
+def configure_glsl_builders(env):
+	import methods
+	env.Append(BUILDERS={'GLSL120': env.Builder(action=methods.build_legacygl_headers, suffix='glsl.gen.h', src_suffix='.glsl')})
+	env.Append(BUILDERS={'GLSL': env.Builder(action=methods.build_glsl_headers, suffix='glsl.gen.h', src_suffix='.glsl')})
+	env.Append(BUILDERS={'GLSL120GLES': env.Builder(action=methods.build_gles2_headers, suffix='glsl.gen.h', src_suffix='.glsl')})
+
+def configure_target(env):
+	if (env['target'] == 'release'):
 		env.Append(CCFLAGS=['-O2', '-ffast-math', '-fomit-frame-pointer'])
-	elif (env["target"] == "release_debug"):
+	elif (env['target'] == 'release_debug'):
 		env.Append(CCFLAGS=['-O2', '-ffast-math', '-DDEBUG_ENABLED'])
-	elif (env["target"] == "debug"):
+	elif (env['target'] == 'debug'):
 		env.Append(CCFLAGS=['-g2', '-DDEBUG_ENABLED', '-DDEBUG_MEMORY_ENABLED'])
 
-	env.Append(CCFLAGS=['-D_REENTRANT']) # sdl2
+def configure_deps(env):
+	# TODO: triple-pkg-config - everything static, sdl2 overridden anyway
+	env.Append(CCFLAGS=['-D_REENTRANT']) # sdl2 - TODO: really needed?
 	if (env['builtin_openssl'] == 'no'):
 		env.ParseConfig('pkg-config openssl --cflags --libs')
 	if (env['builtin_libwebp'] == 'no'):
@@ -60,10 +100,23 @@ def configure(env):
 		env.ParseConfig('pkg-config opus opusfile --cflags --libs')
 	if (env['builtin_libogg'] == 'no'):
 		env.ParseConfig('pkg-config ogg --cflags --libs')
+
+def configure_misc(env):
+	env.Append(CPPPATH=['#platform/frt'])
 	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED'])
-	env.Append(CPPFLAGS=['-DFRT_ENABLED', '-DFRT_GODOT_VERSION=2', '-D_REENTRANT'])
+	env.Append(CPPFLAGS=['-DFRT_ENABLED', '-DFRT_GODOT_VERSION=2'])
 	env.Append(LIBS=['dl', 'pthread', 'z'])
-	if (env["CXX"] == "clang++"):
+	if (env['CXX'] == 'clang++'):
 		env.Append(CPPFLAGS=['-DTYPED_METHOD_BIND'])
-		env["CC"] = "clang"
-		env["LD"] = "clang++"
+		env['CC'] = 'clang'
+		env['LD'] = 'clang++'
+
+def configure(env):
+	configure_compiler(env)
+	configure_arch(env)
+	configure_cross(env)
+	configure_lto(env)
+	configure_glsl_builders(env)
+	configure_target(env)
+	configure_deps(env)
+	configure_misc(env)
