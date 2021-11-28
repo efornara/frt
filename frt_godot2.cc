@@ -179,8 +179,7 @@ public:
 			fatal("SDL_CreateWindow failed.");
 		context_ = SDL_GL_CreateContext(window_);
 		SDL_GL_MakeCurrent(window_, context_);
-		// TODO: use SDL2 instead of dl
-		frt_load_gles2("libGLESv2.so");
+		frt_resolve_symbols_gles2(SDL_GL_GetProcAddress);
 	}
 	void cleanup() {
 		SDL_DestroyWindow(window_);

@@ -110,7 +110,7 @@ def configure_misc(env):
 	env.Append(CPPPATH=['#platform/frt'])
 	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED'])
 	env.Append(CPPFLAGS=['-DFRT_ENABLED', '-DFRT_GODOT_VERSION=2'])
-	env.Append(LIBS=['dl', 'pthread', 'z'])
+	env.Append(LIBS=['pthread', 'z'])
 	if env['CXX'] == 'clang++':
 		env.Append(CPPFLAGS=['-DTYPED_METHOD_BIND'])
 		env['CC'] = 'clang'

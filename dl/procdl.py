@@ -63,7 +63,8 @@ def build_h(dl, h):
 		out('extern FRT_FN_' + ls + ' frt_fn_' + ls + ';')
 	out()
 	out('#endif')
-	out('extern bool frt_load_' + libname + '(const char *filename);')
+	out('typedef void *(*FRT_FN_' + libname + '_GetProcAddress)(const char *name);')
+	out('extern void frt_resolve_symbols_' + libname + '(FRT_FN_' + libname + '_GetProcAddress get_proc_address);')
 	f.close()
 
 def build_cc(dl, cc):
@@ -78,28 +79,16 @@ def build_cc(dl, cc):
 	for s in symbols:
 		ls = libname + '_' + s
 		resolutions += '\tfrt_fn_' + ls + ' = (FRT_FN_' + ls + ')'
-		resolutions += 'dlsym(lib, "' + s + '");\n'
+		resolutions += 'get_proc_address("' + s + '");\n'
 	f.write("""\
 #include "%(libname)s.gen.h"
 
 #include <stdio.h>
 
-#include <dlfcn.h>
-
-static void *lib = 0;
-
 %(assignments)s
 
-bool frt_load_%(libname)s(const char *filename) {
-	if (lib)
-		return true;
-	lib = dlopen(filename, RTLD_LAZY);
-	if (!lib) {
-		fprintf(stderr, "frt: dlopen failed for '%%s'.\\n", filename);
-		return false;
-	}
+void frt_resolve_symbols_%(libname)s(FRT_FN_%(libname)s_GetProcAddress get_proc_address) {
 %(resolutions)s
-	return true;
 }
 """ % {
 		'libname': libname,
