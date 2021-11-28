@@ -7,6 +7,83 @@
 
 namespace frt {
 
+struct SDL2SampleProducer {
+	virtual void produce_samples(int n_of_frames, int32_t *frames) = 0;
+	virtual ~SDL2SampleProducer();
+};
+
+SDL2SampleProducer::~SDL2SampleProducer() {
+}
+
+void audio_callback(void *userdata, Uint8 *stream, int len);
+
+class SDL2Audio {
+private:
+	SDL2SampleProducer *producer_;
+	Mutex *mutex_;
+	int32_t *samples_;
+	int n_of_samples_;
+public:
+	SDL2Audio(SDL2SampleProducer *producer) : producer_(producer) {
+		mutex_ = 0;
+	}
+	Error init(int mix_rate, int latency) {
+		SDL_AudioSpec desired, obtained;
+		memset(&desired, 0, sizeof(desired));
+		desired.freq = mix_rate;
+		desired.format = AUDIO_S16;
+		desired.channels = 2;
+		desired.samples = closest_power_of_2(latency * mix_rate / 1000);
+		desired.callback = audio_callback;
+		desired.userdata = this;
+		if (!SDL_OpenAudio(&desired, &obtained)) {
+			mutex_ = Mutex::create();
+			n_of_samples_ = obtained.channels * obtained.samples;
+			samples_ = new int32_t[n_of_samples_];
+			return OK;
+		} else {
+			return ERR_CANT_OPEN; // TODO: warn?
+		}
+	}
+	void start() {
+		SDL_PauseAudio(SDL_FALSE);
+	}
+	void lock() {
+		mutex_->lock();
+	}
+	void unlock() {
+		mutex_->unlock();
+	}
+	void finish() {
+		SDL_PauseAudio(SDL_TRUE);
+		SDL_LockAudio();
+		// calling of sdl2 callback not expected after pause+lock
+		memdelete(mutex_);
+		mutex_ = 0;
+		delete[] samples_;
+		samples_ = 0;
+		SDL_UnlockAudio();
+		SDL_CloseAudio();
+	}
+	void fill_buffer(unsigned char *data, int length) {
+		int n_of_samples = length / sizeof(int16_t);
+		if (n_of_samples > n_of_samples_) // just in case, it shouldn't happen
+			n_of_samples = n_of_samples_;
+		const int channels = 2;
+		mutex_->lock();
+		producer_->produce_samples(n_of_samples / channels, samples_);
+		mutex_->unlock();
+		int16_t *data16 = (int16_t *)data; // assume alignment is fine
+		for (int i = 0; i < n_of_samples; i++)
+			data16[i] = samples_[i] >> 16;
+	}
+};
+
+void audio_callback(void *userdata, Uint8 *stream, int len) {
+	SDL2Audio *audio = (SDL2Audio *)userdata;
+	audio->fill_buffer(stream, len);
+}
+
 struct KeyMap {
 	int sdl2_code;
 	int gd_code;
@@ -173,8 +250,7 @@ public:
 				key_event(ev);
 				break;
 			case SDL_QUIT:
-				//handler_->handle_quit_event(); // audio bug
-				exit(1);
+				handler_->handle_quit_event();
 				break;
 			}
 		}

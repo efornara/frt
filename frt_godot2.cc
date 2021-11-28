@@ -9,8 +9,13 @@
 #include "dl/gles2.gen.h"
 
 #include "os/os.h"
+#include "os/mutex.h"
 #include "os/input.h"
 #include "os/keyboard.h"
+
+#include "frt_utils.h"
+#include "sdl2_adapter.h"
+
 #include "drivers/unix/os_unix.h"
 #include "drivers/gl_context/context_gl.h"
 #include "servers/visual_server.h"
@@ -19,7 +24,6 @@
 #include "servers/physics_server.h"
 #include "servers/audio/audio_server_sw.h"
 #include "servers/audio/sample_manager_sw.h"
-#include "servers/audio/audio_driver_dummy.h"
 #include "servers/spatial_sound/spatial_sound_server_sw.h"
 #include "servers/spatial_sound_2d/spatial_sound_2d_server_sw.h"
 #include "servers/physics/physics_server_sw.h"
@@ -32,10 +36,49 @@
 #include "main/input_default.h"
 #include "print_string.h"
 
-#include "frt_utils.h"
-#include "sdl2_adapter.h"
-
 namespace frt {
+
+class AudioDriverSDL2 : public AudioDriverSW, public SDL2SampleProducer {
+private:
+	SDL2Audio audio_;
+	int mix_rate_;
+	OutputFormat output_format_;
+public:
+	AudioDriverSDL2() : audio_(this) {
+	}
+public: // AudioDriverSW
+	const char *get_name() const {
+		return "SDL2";
+	}
+	Error init() {
+		mix_rate_ = GLOBAL_DEF("audio/mix_rate", 44100);
+		output_format_ = OUTPUT_STEREO;
+		const int latency = GLOBAL_DEF("audio/output_latency", 25);
+		return audio_.init(mix_rate_, latency);
+	}
+	int get_mix_rate() const {
+		return mix_rate_;
+	}
+	OutputFormat get_output_format() const {
+		return output_format_;
+	}
+	void start() {
+		audio_.start();
+	}
+	void lock() {
+		audio_.lock();
+	}
+	void unlock() {
+		audio_.unlock();
+	}
+	void finish() {
+		audio_.finish();
+	}
+public: // SDL2SampleProducer
+	void produce_samples(int n_of_frames, int32_t *frames) {
+		audio_server_process(n_of_frames, frames);
+	}
+};
 
 class Godot2_OS : public OS_Unix, public SDL2EventHandler {
 private:
@@ -56,16 +99,16 @@ private:
 		memdelete(visual_server_);
 		memdelete(rasterizer_);
 	}
-	AudioDriverDummy driver_dummy_;
+	AudioDriverSDL2 audio_driver_;
 	AudioServerSW *audio_server_;
 	SampleManagerMallocSW *sample_manager_;
 	SpatialSoundServerSW *spatial_sound_server_;
 	SpatialSound2DServerSW *spatial_sound_2d_server_;
 	void init_audio() {
-		const int audio_driver = 0;
-		AudioDriverManagerSW::add_driver(&driver_dummy_);
-		AudioDriverManagerSW::get_driver(audio_driver)->set_singleton();
-		if (AudioDriverManagerSW::get_driver(audio_driver)->init() != OK)
+		const int driver_id = 0;
+		AudioDriverManagerSW::add_driver(&audio_driver_);
+		AudioDriverManagerSW::get_driver(driver_id)->set_singleton();
+		if (AudioDriverManagerSW::get_driver(driver_id)->init() != OK)
 			fatal("audio driver failed to initialize.");
 		sample_manager_ = memnew(SampleManagerMallocSW);
 		audio_server_ = memnew(AudioServerSW(sample_manager_));
@@ -76,13 +119,13 @@ private:
 		spatial_sound_2d_server_->init();
 	}
 	void cleanup_audio() {
-		const int audio_driver = 0;
 		spatial_sound_server_->finish();
 		memdelete(spatial_sound_server_);
 		spatial_sound_2d_server_->finish();
 		memdelete(spatial_sound_2d_server_);
-		memdelete(audio_server_);
 		memdelete(sample_manager_);
+		audio_server_->finish();
+		memdelete(audio_server_);
 	}
 	PhysicsServer *physics_server_;
 	Physics2DServer *physics_2d_server_;
