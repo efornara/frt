@@ -180,6 +180,7 @@ struct KeyMap {
 
 struct SDL2EventHandler {
 	virtual ~SDL2EventHandler();
+	virtual void handle_resize_event(int width, int height) = 0;
 	virtual void handle_key_event(int gd_code, bool pressed) = 0;
 	virtual void handle_quit_event() = 0;
 };
@@ -193,6 +194,11 @@ private:
 	SDL_GLContext context_;
 	SDL2EventHandler *handler_;
 	InputModifierState st_;
+	void resize_event(const SDL_Event &ev) {
+		int width, height;
+		SDL_GL_GetDrawableSize(window_, &width, &height);
+		handler_->handle_resize_event(width, height);
+	}
 	void key_event(const SDL_Event &ev) {
 		st_.shift = ev.key.keysym.mod & KMOD_SHIFT;
 		st_.alt = ev.key.keysym.mod & KMOD_ALT;
@@ -215,14 +221,21 @@ public:
 		st_.control = false;
 		st_.meta = false;
 	}
-	void init(int width, int height) {
+	void init(int width, int height, bool resizable, bool borderless, bool always_on_top) {
 		if (SDL_Init(SDL_INIT_VIDEO) < 0)
 			fatal("SDL_Init failed.");
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-		if (!(window_ = SDL_CreateWindow("frt2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI)))
+		int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+		if (resizable)
+			flags |= SDL_WINDOW_RESIZABLE;
+		if (borderless)
+			flags |= SDL_WINDOW_BORDERLESS;
+		if (always_on_top)
+			flags |= SDL_WINDOW_ALWAYS_ON_TOP;
+		if (!(window_ = SDL_CreateWindow("frt2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags)))
 			fatal("SDL_CreateWindow failed.");
 		context_ = SDL_GL_CreateContext(window_);
 		SDL_GL_MakeCurrent(window_, context_);
@@ -245,6 +258,10 @@ public:
 		SDL_Event ev;
 		while (SDL_PollEvent(&ev)) {
 			switch (ev.type) {
+			case SDL_WINDOWEVENT:
+				if (ev.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+					resize_event(ev);
+				break;
 			case SDL_KEYUP:
 			case SDL_KEYDOWN:
 				key_event(ev);
@@ -257,6 +274,51 @@ public:
 	}
 	void get_modifier_state(InputModifierState &state) const {
 		state = st_;
+	}
+	void set_title(const String &title) {
+		SDL_SetWindowTitle(window_, title.utf8().get_data());
+	}
+	void set_pos(int x, int h) {
+		SDL_SetWindowPosition(window_, x, h);
+	}
+	void get_pos(int *x, int *h) const {
+		SDL_GetWindowPosition(window_, x, h);
+	}
+	void set_size(int width, int height) {
+		SDL_SetWindowSize(window_, width, height);
+	}
+	void get_size(int *width, int *height) const {
+		SDL_GetWindowSize(window_, width, height);
+	}
+	void set_fullscreen(bool enable) {
+		SDL_SetWindowFullscreen(window_, enable ? 1 : 0);
+	}
+	bool is_fullscreen() const {
+		return SDL_GetWindowFlags(window_) & SDL_WINDOW_FULLSCREEN;
+	}
+	void set_always_on_top(bool enable) {
+		// NOT IMPLEMENTED
+	}
+	bool is_always_on_top() const {
+		return SDL_GetWindowFlags(window_) & SDL_WINDOW_ALWAYS_ON_TOP;
+	}
+	void set_maximized(bool enable) {
+		if (enable)
+			SDL_MaximizeWindow(window_);
+		else
+			SDL_RestoreWindow(window_);
+	}
+	bool is_maximized() const {
+		return SDL_GetWindowFlags(window_) & SDL_WINDOW_MAXIMIZED;
+	}
+	void set_minimized(bool enable) {
+		if (enable)
+			SDL_MinimizeWindow(window_);
+		else
+			SDL_RestoreWindow(window_);
+	}
+	bool is_minimized() const {
+		return SDL_GetWindowFlags(window_) & SDL_WINDOW_MINIMIZED;
 	}
 };
 

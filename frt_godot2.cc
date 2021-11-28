@@ -165,7 +165,7 @@ public:
 	}
 	void initialize(const VideoMode &desired, int video_driver, int audio_driver) {
 		video_mode_ = desired;
-		os_.init(video_mode_.width, video_mode_.height);
+		os_.init(video_mode_.width, video_mode_.height, video_mode_.resizable, video_mode_.borderless_window, video_mode_.always_on_top);
 		init_video();
 		init_audio();
 		init_physics();
@@ -195,6 +195,7 @@ public:
 		return 0;
 	}
 	void set_window_title(const String &title) {
+		os_.set_title(title);
 	}
 	void set_video_mode(const VideoMode &video_mode, int screen) {
 	}
@@ -205,6 +206,43 @@ public:
 	}
 	Size2 get_window_size() const {
 		return Size2(video_mode_.width, video_mode_.height);
+	}
+	void set_window_size(const Size2 &size) {
+		os_.set_size(size.width, size.height);
+	}
+	Point2 get_window_position() const {
+		int x, y;
+		os_.get_pos(&x, &y);
+		return Point2(x, y);
+	}
+	void set_window_position(const Point2 &position) {
+		os_.set_pos(position.x, position.y);
+	}
+	void set_window_fullscreen(bool enable) {
+		os_.set_fullscreen(enable);
+		video_mode_.fullscreen = enable;
+	}
+	bool is_window_fullscreen() const {
+		return os_.is_fullscreen();
+	}
+	void set_window_always_on_top(bool enable) {
+		os_.set_always_on_top(enable);
+		video_mode_.always_on_top = enable;
+	}
+	bool is_window_always_on_top() const {
+		return os_.is_always_on_top();
+	}
+	void set_window_maximized(bool enable) {
+		os_.set_maximized(enable);
+	}
+	bool is_window_maximized() const {
+		return os_.is_maximized();
+	}
+	void set_window_minimized(bool enable) {
+		os_.set_minimized(enable);
+	}
+	bool is_window_minimized() const {
+		return os_.is_minimized();
 	}
 	MainLoop *get_main_loop() const {
 		return main_loop_;
@@ -224,6 +262,10 @@ public:
 	}
 	void swap_buffers() {
 		os_.swap_buffers();
+	}
+	void handle_resize_event(int width, int height) {
+		video_mode_.width = width;
+		video_mode_.height = height;
 	}
 	void handle_key_event(int gd_code, bool pressed) {
 		InputEvent event;
