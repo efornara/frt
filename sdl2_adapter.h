@@ -202,6 +202,7 @@ private:
 	SDL2EventHandler *handler_;
 	InputModifierState st_;
 	SDL_Joystick *js_[MAX_JOYSTICKS];
+	bool exit_shortcuts_;
 	void resize_event(const SDL_Event &ev) {
 		int width, height;
 		SDL_GL_GetDrawableSize(window_, &width, &height);
@@ -215,6 +216,8 @@ private:
 		if (ev.key.repeat)
 			return;
 		bool pressed = ev.key.state == SDL_PRESSED;
+		if (exit_shortcuts_ && st_.alt && pressed && ev.key.keysym.sym == SDLK_KP_ENTER)
+			fatal("exit_shortcut (alt+enter), disable setting FRT_NO_EXIT_SHORTCUTS");
 		for (int i = 0; keymap[i].sdl2_code; i++) {
 			if (keymap[i].sdl2_code == ev.key.keysym.sym) {
 				handler_->handle_key_event(keymap[i].gd_code, pressed);
@@ -309,6 +312,8 @@ private:
 				return;
 			int button = ev.jbutton.button;
 			bool pressed = ev.jbutton.state == SDL_PRESSED;
+			if (exit_shortcuts_ && button == 6 && pressed)
+				fatal("exit_shortcut (joystick button #6), disable setting FRT_NO_EXIT_SHORTCUTS");
 			handler_->handle_js_button_event(id, button, pressed);
 			} break;
 		case SDL_JOYDEVICEADDED: {
@@ -338,6 +343,7 @@ public:
 		st_.control = false;
 		st_.meta = false;
 		memset(js_, 0, sizeof(js_));
+		exit_shortcuts_ = !getenv("FRT_NO_EXIT_SHORTCUTS");
 	}
 	void init(int width, int height, bool resizable, bool borderless, bool always_on_top) {
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
