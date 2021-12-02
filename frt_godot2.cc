@@ -142,8 +142,16 @@ private:
 		memdelete(physics_server_);
 	}
 	InputDefault *input_;
+	MouseMode mouse_mode_;
+	Point2 mouse_pos_;
+	Point2 mouse_last_pos_;
+	int mouse_state_;
 	void init_input() {
 		input_ = memnew(InputDefault);
+		mouse_mode_ = MOUSE_MODE_VISIBLE;
+		mouse_pos_ = Point2(-1, -1);
+		mouse_last_pos_ = Point2(-1, -1);
+		mouse_state_ = 0;
 	}
 	void cleanup_input() {
 		memdelete(input_);
@@ -174,6 +182,7 @@ public:
 	}
 	void set_main_loop(MainLoop *main_loop) {
 		main_loop_ = main_loop;
+		input_->set_main_loop(main_loop);
 	}
 	void delete_main_loop() {
 		if (main_loop_)
@@ -189,10 +198,16 @@ public:
 		os_.cleanup();
 	}
 	Point2 get_mouse_pos() const {
-		return Point2();
+		return mouse_pos_;
 	}
 	int get_mouse_button_state() const {
-		return 0;
+		return mouse_state_;
+	}
+	void set_mouse_mode(MouseMode mode) {
+		mouse_mode_ = mode;
+	}
+	MouseMode get_mouse_mode() const {
+		return mouse_mode_;
 	}
 	void set_window_title(const String &title) {
 		os_.set_title(title);
@@ -277,6 +292,52 @@ public:
 		event.key.scancode = gd_code;
 		event.key.unicode = 0;
 		event.key.echo = 0;
+		input_->parse_input_event(event);
+	}
+	void handle_mouse_motion_event(int x, int y) {
+		mouse_pos_.x = x;
+		mouse_pos_.y = y;
+		InputEvent event;
+		event.ID = ++event_id_;
+		event.type = InputEvent::MOUSE_MOTION;
+		event.device = 0;
+		os_.get_modifier_state(event.mouse_motion.mod);
+		event.mouse_motion.button_mask = mouse_state_;
+		event.mouse_motion.x = mouse_pos_.x;
+		event.mouse_motion.y = mouse_pos_.y;
+		input_->set_mouse_pos(mouse_pos_);
+		event.mouse_motion.global_x = mouse_pos_.x;
+		event.mouse_motion.global_y = mouse_pos_.y;
+		event.mouse_motion.speed_x = input_->get_mouse_speed().x;
+		event.mouse_motion.speed_y = input_->get_mouse_speed().y;
+		if (mouse_last_pos_.x == -1 && mouse_last_pos_.y == -1) {
+			event.mouse_motion.relative_x = 0;
+			event.mouse_motion.relative_y = 0;
+		} else {
+			event.mouse_motion.relative_x = mouse_pos_.x - mouse_last_pos_.x;
+			event.mouse_motion.relative_y = mouse_pos_.y - mouse_last_pos_.y;
+		}
+		mouse_last_pos_ = mouse_pos_;
+		input_->parse_input_event(event);
+	}
+	void handle_mouse_button_event(int button, bool pressed) {
+		int bit = (1 << (button - 1));
+		if (pressed)
+			mouse_state_ |= bit;
+		else
+			mouse_state_ &= ~bit;
+		InputEvent event;
+		event.ID = ++event_id_;
+		event.type = InputEvent::MOUSE_BUTTON;
+		event.device = 0;
+		os_.get_modifier_state(event.mouse_button.mod);
+		event.mouse_button.button_mask = mouse_state_;
+		event.mouse_button.x = mouse_pos_.x;
+		event.mouse_button.y = mouse_pos_.y;
+		event.mouse_button.global_x = mouse_pos_.x;
+		event.mouse_button.global_y = mouse_pos_.y;
+		event.mouse_button.button_index = button;
+		event.mouse_button.pressed = pressed;
 		input_->parse_input_event(event);
 	}
 	void handle_js_status_event(int id, bool connected, String name, String guid) {

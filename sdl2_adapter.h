@@ -182,6 +182,8 @@ struct SDL2EventHandler {
 	virtual ~SDL2EventHandler();
 	virtual void handle_resize_event(int width, int height) = 0;
 	virtual void handle_key_event(int gd_code, bool pressed) = 0;
+	virtual void handle_mouse_motion_event(int x, int y) = 0;
+	virtual void handle_mouse_button_event(int button, bool pressed) = 0;
 	virtual void handle_js_status_event(int id, bool connected, String name, String guid) = 0;
 	virtual void handle_js_button_event(int id, int button, bool pressed) = 0;
 	virtual void handle_js_axis_event(int id, int axis, float value) = 0;
@@ -218,6 +220,36 @@ private:
 				handler_->handle_key_event(keymap[i].gd_code, pressed);
 				return;
 			}
+		}
+	}
+	void mouse_event(const SDL_Event &ev) {
+		int button;
+		if (ev.type == SDL_MOUSEMOTION) {
+			handler_->handle_mouse_motion_event(ev.motion.x, ev.motion.y);
+		} else if (ev.type == SDL_MOUSEWHEEL) {
+			if (ev.wheel.y > 0)
+				button = BUTTON_WHEEL_UP;
+			else if (ev.wheel.y < 0)
+				button = BUTTON_WHEEL_DOWN;
+			else
+				return;
+			handler_->handle_mouse_button_event(button, true);
+			handler_->handle_mouse_button_event(button, false);
+		} else { // SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONDOWN
+			switch (ev.button.button) {
+			case SDL_BUTTON_LEFT:
+				button = BUTTON_LEFT;
+				break;
+			case SDL_BUTTON_MIDDLE:
+				button = BUTTON_MIDDLE;
+				break;
+			case SDL_BUTTON_RIGHT:
+				button = BUTTON_RIGHT;
+				break;
+			default:
+				return;
+			}
+			handler_->handle_mouse_button_event(button, ev.button.state == SDL_PRESSED);
 		}
 	}
 	int get_js_id(int inst_id) {
@@ -352,6 +384,11 @@ public:
 			case SDL_KEYDOWN:
 				key_event(ev);
 				break;
+			case SDL_MOUSEMOTION:
+			case SDL_MOUSEWHEEL:
+			case SDL_MOUSEBUTTONUP:
+			case SDL_MOUSEBUTTONDOWN:
+				mouse_event(ev);
 			case SDL_JOYAXISMOTION:
 			case SDL_JOYHATMOTION:
 			case SDL_JOYBUTTONDOWN:
