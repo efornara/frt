@@ -108,8 +108,8 @@ def configure_deps(env):
 
 def configure_misc(env):
 	env.Append(CPPPATH=['#platform/frt'])
-	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED'])
-	env.Append(CPPFLAGS=['-DFRT_ENABLED', '-DFRT_GODOT_VERSION=2'])
+	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED', '-DJOYDEV_ENABLED'])
+	env.Append(CPPFLAGS=['-DFRT_ENABLED'])
 	env.Append(LIBS=['pthread', 'z'])
 	if env['CXX'] == 'clang++':
 		env.Append(CPPFLAGS=['-DTYPED_METHOD_BIND'])

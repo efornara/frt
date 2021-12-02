@@ -12,6 +12,7 @@
 #include "os/mutex.h"
 #include "os/input.h"
 #include "os/keyboard.h"
+#include "main/input_default.h"
 
 #include "frt_utils.h"
 #include "sdl2_adapter.h"
@@ -33,7 +34,6 @@
 #include "drivers/gles2/rasterizer_gles2.h"
 #include "drivers/pulseaudio/audio_driver_pulseaudio.h"
 #include "main/main.h"
-#include "main/input_default.h"
 #include "print_string.h"
 
 namespace frt {
@@ -278,6 +278,19 @@ public:
 		event.key.unicode = 0;
 		event.key.echo = 0;
 		input_->parse_input_event(event);
+	}
+	void handle_js_status_event(int id, bool connected, String name, String guid) {
+		input_->joy_connection_changed(id, connected, name, guid);
+	}
+	void handle_js_button_event(int id, int button, bool pressed) {
+		event_id_ = input_->joy_button(event_id_, id, button, pressed ? 1 : 0);
+	}
+	void handle_js_axis_event(int id, int axis, float value) {
+		InputDefault::JoyAxis v = {-1, value}; // TODO: check if OK
+		event_id_ = input_->joy_axis(event_id_, id, axis, v);
+	}
+	void handle_js_hat_event(int id, int value) {
+		event_id_ = input_->joy_hat(event_id_, id, value);
 	}
 	void handle_quit_event() {
 		quit_ = true;

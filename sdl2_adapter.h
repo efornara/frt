@@ -182,6 +182,10 @@ struct SDL2EventHandler {
 	virtual ~SDL2EventHandler();
 	virtual void handle_resize_event(int width, int height) = 0;
 	virtual void handle_key_event(int gd_code, bool pressed) = 0;
+	virtual void handle_js_status_event(int id, bool connected, String name, String guid) = 0;
+	virtual void handle_js_button_event(int id, int button, bool pressed) = 0;
+	virtual void handle_js_axis_event(int id, int axis, float value) = 0;
+	virtual void handle_js_hat_event(int id, int value) = 0;
 	virtual void handle_quit_event() = 0;
 };
 
@@ -190,10 +194,12 @@ SDL2EventHandler::~SDL2EventHandler() {
 
 class SDL2OS {
 private:
+	static const int MAX_JOYSTICKS = 16;
 	SDL_Window *window_;
 	SDL_GLContext context_;
 	SDL2EventHandler *handler_;
 	InputModifierState st_;
+	SDL_Joystick *js_[MAX_JOYSTICKS];
 	void resize_event(const SDL_Event &ev) {
 		int width, height;
 		SDL_GL_GetDrawableSize(window_, &width, &height);
@@ -214,15 +220,95 @@ private:
 			}
 		}
 	}
+	int get_js_id(int inst_id) {
+		SDL_Joystick *js = SDL_JoystickFromInstanceID(inst_id);
+		for (int id = 0; id < MAX_JOYSTICKS; id++)
+			if (js_[id] == js)
+				return id;
+		return -1;
+	}
+	void js_event(const SDL_Event &ev) {
+		int id;
+		switch (ev.type) {
+		case SDL_JOYAXISMOTION: {
+			if ((id = get_js_id(ev.jaxis.which)) < 0)
+				return;
+			int axis = ev.jaxis.axis;
+			float value = ev.jaxis.value / 32768.0;
+			handler_->handle_js_axis_event(id, axis, value);
+			} break;
+		case SDL_JOYHATMOTION: {
+			if ((id = get_js_id(ev.jhat.which)) < 0)
+				return;
+			if (ev.jhat.hat != 0)
+				return;
+			int value = 0;
+			switch (ev.jhat.value) {
+			case SDL_HAT_LEFT:
+				value = InputDefault::HAT_MASK_LEFT;
+				break;
+			case SDL_HAT_LEFTUP:
+				value = InputDefault::HAT_MASK_LEFT | InputDefault::HAT_MASK_UP;
+				break;
+			case SDL_HAT_UP:
+				value = InputDefault::HAT_MASK_UP;
+				break;
+			case SDL_HAT_RIGHTUP:
+				value = InputDefault::HAT_MASK_RIGHT | InputDefault::HAT_MASK_UP;
+				break;
+			case SDL_HAT_RIGHT:
+				value = InputDefault::HAT_MASK_RIGHT;
+				break;
+			case SDL_HAT_RIGHTDOWN:
+				value = InputDefault::HAT_MASK_RIGHT | InputDefault::HAT_MASK_DOWN;
+				break;
+			case SDL_HAT_DOWN:
+				value = InputDefault::HAT_MASK_DOWN;
+				break;
+			case SDL_HAT_LEFTDOWN:
+				value = InputDefault::HAT_MASK_LEFT | InputDefault::HAT_MASK_DOWN;
+				break;
+			}
+			handler_->handle_js_hat_event(id, value);
+			} break;
+		case SDL_JOYBUTTONDOWN:
+		case SDL_JOYBUTTONUP: {
+			if ((id = get_js_id(ev.jbutton.which)) < 0)
+				return;
+			int button = ev.jbutton.button;
+			bool pressed = ev.jbutton.state == SDL_PRESSED;
+			handler_->handle_js_button_event(id, button, pressed);
+			} break;
+		case SDL_JOYDEVICEADDED: {
+			int id = ev.jdevice.which;
+			if (id >= MAX_JOYSTICKS)
+				return;
+			String name = SDL_JoystickNameForIndex(id);
+			char buf[64];
+			SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(id), buf, sizeof(buf));
+			String guid = buf;
+			handler_->handle_js_status_event(id, true, name, guid);
+			js_[id] = SDL_JoystickOpen(id);
+			} break;
+		case SDL_JOYDEVICEREMOVED: {
+			if ((id = get_js_id(ev.jdevice.which)) < 0)
+				return;
+			SDL_JoystickClose(js_[id]);
+			js_[id] = 0;
+			handler_->handle_js_status_event(id, false, "", "");
+			} break;
+		}
+	}
 public:
 	SDL2OS(SDL2EventHandler *handler) : handler_(handler) {
 		st_.shift = false;
 		st_.alt = false;
 		st_.control = false;
 		st_.meta = false;
+		memset(js_, 0, sizeof(js_));
 	}
 	void init(int width, int height, bool resizable, bool borderless, bool always_on_top) {
-		if (SDL_Init(SDL_INIT_VIDEO) < 0)
+		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
 			fatal("SDL_Init failed.");
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -265,6 +351,14 @@ public:
 			case SDL_KEYUP:
 			case SDL_KEYDOWN:
 				key_event(ev);
+				break;
+			case SDL_JOYAXISMOTION:
+			case SDL_JOYHATMOTION:
+			case SDL_JOYBUTTONDOWN:
+			case SDL_JOYBUTTONUP:
+			case SDL_JOYDEVICEADDED:
+			case SDL_JOYDEVICEREMOVED:
+				js_event(ev);
 				break;
 			case SDL_QUIT:
 				handler_->handle_quit_event();
