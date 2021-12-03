@@ -27,11 +27,11 @@ for libname in ['gles2', 'gles3']:
 frt_env = env.Clone()
 frt_env.ParseConfig('pkg-config sdl2 --cflags --libs')
 
-common_sources = [ "frt_utils.cc" ]
+common_sources = [ 'frt_exe.cc', 'frt.cc' ]
 
 import version
 if version.major == 2:
 	frt_env.Append(CCFLAGS=['-std=c++98'])
 	version_sources = ['frt_godot2.cc', 'dl/gles2.gen.cc']
 
-prog = frt_env.add_program('#bin/godot', common_sources + version_sources)
+prog = frt_env.add_program('#bin/frt', common_sources + version_sources)

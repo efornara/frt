@@ -14,7 +14,7 @@
 #include "os/keyboard.h"
 #include "main/input_default.h"
 
-#include "frt_utils.h"
+#include "frt.h"
 #include "sdl2_adapter.h"
 
 #include "drivers/unix/os_unix.h"
@@ -368,7 +368,9 @@ public:
 
 } // namespace frt
 
-extern "C" int frt_main(int argc, char *argv[]) {
+#include "frt_lib.h"
+
+extern "C" int frt_godot_main(int argc, char *argv[]) {
 	frt::Godot2_OS os;
 	Error err = Main::setup(argv[0], argc - 1, &argv[1]);
 	if (err != OK)
@@ -377,8 +379,4 @@ extern "C" int frt_main(int argc, char *argv[]) {
 		os.run();
 	Main::cleanup();
 	return os.get_exit_code();
-}
-
-int main(int argc, char *argv[]) {
-	frt_main(argc, argv);
 }

@@ -217,7 +217,7 @@ private:
 			return;
 		bool pressed = ev.key.state == SDL_PRESSED;
 		if (exit_shortcuts_ && st_.alt && pressed && ev.key.keysym.sym == SDLK_KP_ENTER)
-			fatal("exit_shortcut (alt+enter), disable setting FRT_NO_EXIT_SHORTCUTS");
+			fatal("exit_shortcut (alt+enter), disable by setting FRT_NO_EXIT_SHORTCUTS");
 		for (int i = 0; keymap[i].sdl2_code; i++) {
 			if (keymap[i].sdl2_code == ev.key.keysym.sym) {
 				handler_->handle_key_event(keymap[i].gd_code, pressed);
@@ -269,7 +269,7 @@ private:
 			if ((id = get_js_id(ev.jaxis.which)) < 0)
 				return;
 			int axis = ev.jaxis.axis;
-			float value = ev.jaxis.value / 32768.0;
+			float value = (float)ev.jaxis.value / 32768.0f;
 			handler_->handle_js_axis_event(id, axis, value);
 			} break;
 		case SDL_JOYHATMOTION: {
@@ -313,7 +313,7 @@ private:
 			int button = ev.jbutton.button;
 			bool pressed = ev.jbutton.state == SDL_PRESSED;
 			if (exit_shortcuts_ && button == 6 && pressed)
-				fatal("exit_shortcut (joystick button #6), disable setting FRT_NO_EXIT_SHORTCUTS");
+				fatal("exit_shortcut (joystick button #6), disable by setting FRT_NO_EXIT_SHORTCUTS");
 			handler_->handle_js_button_event(id, button, pressed);
 			} break;
 		case SDL_JOYDEVICEADDED: {
@@ -395,6 +395,7 @@ public:
 			case SDL_MOUSEBUTTONUP:
 			case SDL_MOUSEBUTTONDOWN:
 				mouse_event(ev);
+				break;
 			case SDL_JOYAXISMOTION:
 			case SDL_JOYHATMOTION:
 			case SDL_JOYBUTTONDOWN:

@@ -1,11 +1,11 @@
-// frt_utils.cc
+// frt.cc
 /*
   FRT - A Godot platform targeting single board computers
   Copyright (c) 2017-2021  Emanuele Fornara
   SPDX-License-Identifier: MIT
  */
 
-#include "frt_utils.h"
+#include "frt.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,3 +35,8 @@ void fatal(const char *format, ...) {
 }
 
 } // namespace frt
+
+#include "frt_lib.h"
+
+extern "C" void frt_parse_frt_args(int argc, char *argv[]) {
+}

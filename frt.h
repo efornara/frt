@@ -1,4 +1,4 @@
-// frt_utils.h
+// frt.h
 /*
   FRT - A Godot platform targeting single board computers
   Copyright (c) 2017-2021  Emanuele Fornara
