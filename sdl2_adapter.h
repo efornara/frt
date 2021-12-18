@@ -369,6 +369,12 @@ public:
 	bool is_always_on_top() const {
 		return SDL_GetWindowFlags(window_) & SDL_WINDOW_ALWAYS_ON_TOP;
 	}
+	void set_resizable(bool enable) {
+		SDL_SetWindowResizable(window_, enable ? SDL_TRUE : SDL_FALSE);
+	}
+	bool is_resizable() const {
+		return SDL_GetWindowFlags(window_) & SDL_WINDOW_RESIZABLE;
+	}
 	void set_maximized(bool enable) {
 		if (enable)
 			SDL_MaximizeWindow(window_);

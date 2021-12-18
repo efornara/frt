@@ -227,8 +227,10 @@ public:
 	Size2 get_window_size() const {
 		return Size2(video_mode_.width, video_mode_.height);
 	}
-	void set_window_size(const Size2 &size) {
+	void set_window_size(const Size2 size) {
 		os_.set_size(size.width, size.height);
+		video_mode_.width = size.x;
+		video_mode_.height = size.y;
 	}
 	Point2 get_window_position() const {
 		int x, y;
@@ -251,6 +253,12 @@ public:
 	}
 	bool is_window_always_on_top() const {
 		return os_.is_always_on_top();
+	}
+	void set_window_resizable(bool enable) {
+		os_.set_resizable(enable);
+	}
+	bool is_window_resizable() const {
+		return os_.is_resizable();
 	}
 	void set_window_maximized(bool enable) {
 		os_.set_maximized(enable);
