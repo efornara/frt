@@ -294,10 +294,8 @@ public:
 		video_mode_.width = size.x;
 		video_mode_.height = size.y;
 	}
-	void handle_key_event(int sdl2_code, bool pressed) {
+	void handle_key_event(int sdl2_code, int unicode, bool pressed) {
 		int code = map_key_sdl2_code(sdl2_code);
-		if (!code)
-			return;
 		InputEvent event;
 		event.ID = ++event_id_;
 		event.type = InputEvent::KEY;
@@ -305,7 +303,7 @@ public:
 		fill_modifier_state(event.key.mod);
 		event.key.pressed = pressed;
 		event.key.scancode = code;
-		event.key.unicode = 0;
+		event.key.unicode = unicode;
 		event.key.echo = 0;
 		input_->parse_input_event(event);
 	}

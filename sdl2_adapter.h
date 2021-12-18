@@ -5,6 +5,26 @@
   SPDX-License-Identifier: MIT
  */
 
+/*
+
+  KNOWN ISSUES:
+
+  Unicode
+
+  Keyboard/Text SDL2 events don't map very well to Godot input events.
+  If a SDL2 keypress event might need to be "translated", that event is saved
+  and passed to Godot only when a translation is received.
+  This is incomplete and likely to be a source of bugs. Ctrl+... combinations
+  for example don't seem to generate a translation. Multiple keypresses
+  are also going to have a wrong unicode traslation.
+  Still, this implementation seems a good compromise: simple enough,
+  yet functional enough.
+  The 2D platformer feels responsive (even when adding WASD input mappings
+  and pressing multiple keys), and the editor is usable for basic code editing
+  (tested with US and IT keymaps).
+
+ */
+
 #include <SDL.h>
 #include "dl/gles2.gen.h"
 
@@ -114,7 +134,7 @@ enum MouseMode {
 struct EventHandler {
 	virtual ~EventHandler();
 	virtual void handle_resize_event(ivec2 size) = 0;
-	virtual void handle_key_event(int sdl2_code, bool pressed) = 0;
+	virtual void handle_key_event(int sdl2_code, int unicode, bool pressed) = 0;
 	virtual void handle_mouse_motion_event(ivec2 pos, ivec2 dpos) = 0;
 	virtual void handle_mouse_button_event(int button, bool pressed, bool doubleclick) = 0;
 	virtual void handle_js_status_event(int id, bool connected, const char *name, const char *guid) = 0;
@@ -138,11 +158,14 @@ struct InputModifierState {
 class OS_FRT {
 private:
 	static const int MAX_JOYSTICKS = 16;
+	static const int REQUEST_UNICODE = -1;
 	SDL_Window *window_;
 	SDL_GLContext context_;
 	EventHandler *handler_;
 	InputModifierState st_;
 	MouseMode mouse_mode_;
+	SDL_KeyboardEvent key_ev_;
+	int key_unicode_;
 	SDL_Joystick *js_[MAX_JOYSTICKS];
 	bool exit_shortcuts_;
 	void resize_event(const SDL_Event &ev) {
@@ -150,18 +173,43 @@ private:
 		SDL_GL_GetDrawableSize(window_, &size.x, &size.y);
 		handler_->handle_resize_event(size);
 	}
-	void key_event(const SDL_Event &ev) {
-		st_.shift = ev.key.keysym.mod & KMOD_SHIFT;
-		st_.alt = ev.key.keysym.mod & KMOD_ALT;
-		st_.control = ev.key.keysym.mod & KMOD_CTRL;
-		st_.meta = ev.key.keysym.mod & KMOD_GUI;
-		if (ev.key.repeat)
+	int utf8_to_unicode(const char *s) {
+		if ((s[0] & 0x80) == 0)
+			return s[0];
+		else if ((s[0] & 0xe0) == 0xc0)
+			return ((s[0] & 0x1f) << 6) | (s[1] & 0x3f);
+		else if ((s[0] & 0xf0) == 0xe0)
+			return ((s[0] & 0x0f) << 12) | ((s[1] & 0x3f) << 6) | (s[2] & 0x3f);
+		else
+			return 0;
+	}
+	void text_event(const SDL_TextInputEvent &text) {
+		if (key_unicode_ != REQUEST_UNICODE)
 			return;
-		bool pressed = ev.key.state == SDL_PRESSED;
-		if (exit_shortcuts_ && st_.alt && pressed && ev.key.keysym.sym == SDLK_KP_ENTER)
+		key_unicode_ = utf8_to_unicode(text.text);
+		int sdl2_code = key_ev_.keysym.sym;
+		handler_->handle_key_event(sdl2_code, key_unicode_, true);
+	}
+	bool require_unicode(int c) {
+		return (c >= 0x20 && c < 0x80) || (c >= 0xa0 && c < 0xff);
+	}
+	void key_event(const SDL_KeyboardEvent &key) {
+		st_.shift = key.keysym.mod & KMOD_SHIFT;
+		st_.alt = key.keysym.mod & KMOD_ALT;
+		st_.control = key.keysym.mod & KMOD_CTRL;
+		st_.meta = key.keysym.mod & KMOD_GUI;
+		bool pressed = key.state == SDL_PRESSED;
+		int sdl2_code = key.keysym.sym;
+		if (exit_shortcuts_ && st_.alt && pressed && sdl2_code == SDLK_KP_ENTER)
 			fatal("exit_shortcut (alt+enter), disable by setting FRT_NO_EXIT_SHORTCUTS");
-		int sdl2_code = ev.key.keysym.sym;
-		handler_->handle_key_event(sdl2_code, pressed);
+		if (pressed && !key.repeat && require_unicode(sdl2_code)) {
+			key_ev_ = key;
+			key_unicode_ = REQUEST_UNICODE;
+			return;
+		}
+		handler_->handle_key_event(sdl2_code, key_unicode_, pressed);
+		if (!pressed)
+			key_unicode_ = 0;
 	}
 	void mouse_event(const SDL_Event &ev) {
 		int os_button;
@@ -278,6 +326,7 @@ private:
 public:
 	OS_FRT(EventHandler *handler) : handler_(handler) {
 		mouse_mode_ = MouseVisible;
+		key_unicode_ = 0;
 		memset(js_, 0, sizeof(js_));
 		exit_shortcuts_ = !getenv("FRT_NO_EXIT_SHORTCUTS");
 	}
@@ -322,9 +371,12 @@ public:
 				if (ev.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
 					resize_event(ev);
 				break;
+			case SDL_TEXTINPUT:
+				text_event(ev.text);
+				break;
 			case SDL_KEYUP:
 			case SDL_KEYDOWN:
-				key_event(ev);
+				key_event(ev.key);
 				break;
 			case SDL_MOUSEMOTION:
 			case SDL_MOUSEWHEEL:
