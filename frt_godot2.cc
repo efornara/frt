@@ -9,13 +9,13 @@
 
 #include "sdl2_adapter.h"
 
+#include "os/os.h"
 #include "os/input.h"
 #include "os/keyboard.h"
 #include "main/input_default.h"
 
 #include "sdl2_godot_mapping.h"
 
-#include "os/os.h"
 #include "drivers/unix/os_unix.h"
 #include "drivers/gl_context/context_gl.h"
 #include "servers/visual_server.h"
@@ -142,13 +142,11 @@ private:
 		memdelete(physics_server_);
 	}
 	InputDefault *input_;
-	MouseMode mouse_mode_;
 	Point2 mouse_pos_;
 	Point2 mouse_last_pos_;
 	int mouse_state_;
 	void init_input() {
 		input_ = memnew(InputDefault);
-		mouse_mode_ = MOUSE_MODE_VISIBLE;
 		mouse_pos_ = Point2(-1, -1);
 		mouse_last_pos_ = Point2(-1, -1);
 		mouse_state_ = 0;
@@ -210,11 +208,11 @@ public:
 	int get_mouse_button_state() const {
 		return mouse_state_;
 	}
-	void set_mouse_mode(MouseMode mode) {
-		mouse_mode_ = mode;
+	void set_mouse_mode(OS::MouseMode mode) {
+		os_.set_mouse_mode(map_mouse_mode(mode));
 	}
-	MouseMode get_mouse_mode() const {
-		return mouse_mode_;
+	OS::MouseMode get_mouse_mode() const {
+		return map_mouse_os_mode(os_.get_mouse_mode());
 	}
 	void set_window_title(const String &title) {
 		os_.set_title(title.utf8().get_data());

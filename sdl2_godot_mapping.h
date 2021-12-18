@@ -20,8 +20,33 @@ int map_mouse_os_button(int os_button) {
 	case WheelDown:
 		return BUTTON_WHEEL_DOWN;
 	default:
-		fatal("unexpected mouse_button_event: %d", os_button);
+		fatal("unexpected mouse button: %d", os_button);
 		// NOT_REACHED
+	}
+}
+
+OS::MouseMode map_mouse_os_mode(MouseMode os_mode) {
+	switch (os_mode) {
+	case MouseVisible:
+		return OS::MOUSE_MODE_VISIBLE;
+	case MouseHidden:
+		return OS::MOUSE_MODE_HIDDEN;
+	case MouseCaptured:
+		return OS::MOUSE_MODE_CAPTURED;
+	default:
+		fatal("unexpected mouse mode: %d", os_mode);
+		// NOT_REACHED
+	}
+}
+
+MouseMode map_mouse_mode(OS::MouseMode mode) {
+	switch (mode) {
+	case OS::MOUSE_MODE_VISIBLE:
+		return MouseVisible;
+	case OS::MOUSE_MODE_HIDDEN:
+		return MouseHidden;
+	case OS::MOUSE_MODE_CAPTURED:
+		return MouseCaptured;
 	}
 }
 

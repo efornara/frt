@@ -100,6 +100,12 @@ enum MouseButton {
 	WheelDown = 5
 };
 
+enum MouseMode {
+	MouseVisible,
+	MouseHidden,
+	MouseCaptured
+};
+
 struct EventHandler {
 	virtual ~EventHandler();
 	virtual void handle_resize_event(int width, int height) = 0;
@@ -131,6 +137,7 @@ private:
 	SDL_GLContext context_;
 	EventHandler *handler_;
 	InputModifierState st_;
+	MouseMode mouse_mode_;
 	SDL_Joystick *js_[MAX_JOYSTICKS];
 	bool exit_shortcuts_;
 	void resize_event(const SDL_Event &ev) {
@@ -263,6 +270,7 @@ private:
 	}
 public:
 	OS_FRT(EventHandler *handler) : handler_(handler) {
+		mouse_mode_ = MouseVisible;
 		memset(js_, 0, sizeof(js_));
 		exit_shortcuts_ = !getenv("FRT_NO_EXIT_SHORTCUTS");
 	}
@@ -378,6 +386,26 @@ public:
 	}
 	bool is_minimized() const {
 		return SDL_GetWindowFlags(window_) & SDL_WINDOW_MINIMIZED;
+	}
+	void set_mouse_mode(MouseMode mouse_mode) {
+		switch (mouse_mode) {
+		case MouseVisible:
+			SDL_CaptureMouse(SDL_FALSE);
+			SDL_ShowCursor(1);
+			break;
+		case MouseHidden:
+			SDL_CaptureMouse(SDL_FALSE);
+			SDL_ShowCursor(0);
+			break;
+		case MouseCaptured:
+			SDL_ShowCursor(0);
+			SDL_CaptureMouse(SDL_TRUE);
+			break;
+		}
+		mouse_mode_ = mouse_mode;
+	}
+	MouseMode get_mouse_mode() const {
+		return mouse_mode_;
 	}
 };
 
