@@ -85,6 +85,11 @@ void audio_callback(void *userdata, Uint8 *stream, int len) {
 	audio->fill_buffer(stream, len);
 }
 
+struct ivec2 {
+	int x;
+	int y;
+};
+
 enum HatMask {
 	HatUp = 1,
 	HatRight = 2,
@@ -108,10 +113,10 @@ enum MouseMode {
 
 struct EventHandler {
 	virtual ~EventHandler();
-	virtual void handle_resize_event(int width, int height) = 0;
+	virtual void handle_resize_event(ivec2 size) = 0;
 	virtual void handle_key_event(int sdl2_code, bool pressed) = 0;
-	virtual void handle_mouse_motion_event(int x, int y) = 0;
-	virtual void handle_mouse_button_event(int button, bool pressed) = 0;
+	virtual void handle_mouse_motion_event(ivec2 pos, ivec2 dpos) = 0;
+	virtual void handle_mouse_button_event(int button, bool pressed, bool doubleclick) = 0;
 	virtual void handle_js_status_event(int id, bool connected, const char *name, const char *guid) = 0;
 	virtual void handle_js_button_event(int id, int button, bool pressed) = 0;
 	virtual void handle_js_axis_event(int id, int axis, float value) = 0;
@@ -141,9 +146,9 @@ private:
 	SDL_Joystick *js_[MAX_JOYSTICKS];
 	bool exit_shortcuts_;
 	void resize_event(const SDL_Event &ev) {
-		int width, height;
-		SDL_GL_GetDrawableSize(window_, &width, &height);
-		handler_->handle_resize_event(width, height);
+		ivec2 size;
+		SDL_GL_GetDrawableSize(window_, &size.x, &size.y);
+		handler_->handle_resize_event(size);
 	}
 	void key_event(const SDL_Event &ev) {
 		st_.shift = ev.key.keysym.mod & KMOD_SHIFT;
@@ -161,7 +166,9 @@ private:
 	void mouse_event(const SDL_Event &ev) {
 		int os_button;
 		if (ev.type == SDL_MOUSEMOTION) {
-			handler_->handle_mouse_motion_event(ev.motion.x, ev.motion.y);
+			ivec2 pos = { ev.motion.x, ev.motion.y };
+			ivec2 dpos = { ev.motion.xrel, ev.motion.yrel };
+			handler_->handle_mouse_motion_event(pos, dpos);
 		} else if (ev.type == SDL_MOUSEWHEEL) {
 			if (ev.wheel.y > 0)
 				os_button = WheelUp;
@@ -169,8 +176,8 @@ private:
 				os_button = WheelDown;
 			else
 				return;
-			handler_->handle_mouse_button_event(os_button, true);
-			handler_->handle_mouse_button_event(os_button, false);
+			handler_->handle_mouse_button_event(os_button, true, false);
+			handler_->handle_mouse_button_event(os_button, false, false);
 		} else { // SDL_MOUSEBUTTONUP, SDL_MOUSEBUTTONDOWN
 			switch (ev.button.button) {
 			case SDL_BUTTON_LEFT:
@@ -185,7 +192,7 @@ private:
 			default:
 				return;
 			}
-			handler_->handle_mouse_button_event(os_button, ev.button.state == SDL_PRESSED);
+			handler_->handle_mouse_button_event(os_button, ev.button.state == SDL_PRESSED, ev.button.clicks > 1);
 		}
 	}
 	int get_js_id(int inst_id) {
@@ -345,17 +352,21 @@ public:
 	void set_title(const char *title) {
 		SDL_SetWindowTitle(window_, title);
 	}
-	void set_pos(int x, int h) {
-		SDL_SetWindowPosition(window_, x, h);
+	void set_pos(ivec2 pos) {
+		SDL_SetWindowPosition(window_, pos.x, pos.y);
 	}
-	void get_pos(int *x, int *h) const {
-		SDL_GetWindowPosition(window_, x, h);
+	ivec2 get_pos() const {
+		ivec2 pos;
+		SDL_GetWindowPosition(window_, &pos.x, &pos.y);
+		return pos;
 	}
-	void set_size(int width, int height) {
-		SDL_SetWindowSize(window_, width, height);
+	void set_size(ivec2 size) {
+		SDL_SetWindowSize(window_, size.x, size.y);
 	}
-	void get_size(int *width, int *height) const {
-		SDL_GetWindowSize(window_, width, height);
+	ivec2 get_size() const {
+		ivec2 size;
+		SDL_GetWindowSize(window_, &size.x, &size.y);
+		return size;
 	}
 	void set_fullscreen(bool enable) {
 		SDL_SetWindowFullscreen(window_, enable ? 1 : 0);

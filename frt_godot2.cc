@@ -143,12 +143,10 @@ private:
 	}
 	InputDefault *input_;
 	Point2 mouse_pos_;
-	Point2 mouse_last_pos_;
 	int mouse_state_;
 	void init_input() {
 		input_ = memnew(InputDefault);
 		mouse_pos_ = Point2(-1, -1);
-		mouse_last_pos_ = Point2(-1, -1);
 		mouse_state_ = 0;
 	}
 	void cleanup_input() {
@@ -228,17 +226,18 @@ public:
 		return Size2(video_mode_.width, video_mode_.height);
 	}
 	void set_window_size(const Size2 size) {
-		os_.set_size(size.width, size.height);
-		video_mode_.width = size.x;
-		video_mode_.height = size.y;
+		ivec2 os_size = { size.width, size.height };
+		os_.set_size(os_size);
+		video_mode_.width = os_size.x;
+		video_mode_.height = os_size.y;
 	}
 	Point2 get_window_position() const {
-		int x, y;
-		os_.get_pos(&x, &y);
-		return Point2(x, y);
+		ivec2 pos = os_.get_pos();
+		return Point2(pos.x, pos.y);
 	}
-	void set_window_position(const Point2 &position) {
-		os_.set_pos(position.x, position.y);
+	void set_window_position(const Point2 &pos) {
+		ivec2 os_pos = { pos.width, pos.height };
+		os_.set_pos(os_pos);
 	}
 	void set_window_fullscreen(bool enable) {
 		os_.set_fullscreen(enable);
@@ -291,9 +290,9 @@ public:
 	void swap_buffers() {
 		os_.swap_buffers();
 	}
-	void handle_resize_event(int width, int height) {
-		video_mode_.width = width;
-		video_mode_.height = height;
+	void handle_resize_event(ivec2 size) {
+		video_mode_.width = size.x;
+		video_mode_.height = size.y;
 	}
 	void handle_key_event(int sdl2_code, bool pressed) {
 		int code = map_key_sdl2_code(sdl2_code);
@@ -310,9 +309,9 @@ public:
 		event.key.echo = 0;
 		input_->parse_input_event(event);
 	}
-	void handle_mouse_motion_event(int x, int y) {
-		mouse_pos_.x = x;
-		mouse_pos_.y = y;
+	void handle_mouse_motion_event(ivec2 pos, ivec2 dpos) {
+		mouse_pos_.x = pos.x;
+		mouse_pos_.y = pos.y;
 		InputEvent event;
 		event.ID = ++event_id_;
 		event.type = InputEvent::MOUSE_MOTION;
@@ -326,17 +325,11 @@ public:
 		event.mouse_motion.global_y = mouse_pos_.y;
 		event.mouse_motion.speed_x = input_->get_mouse_speed().x;
 		event.mouse_motion.speed_y = input_->get_mouse_speed().y;
-		if (mouse_last_pos_.x == -1 && mouse_last_pos_.y == -1) {
-			event.mouse_motion.relative_x = 0;
-			event.mouse_motion.relative_y = 0;
-		} else {
-			event.mouse_motion.relative_x = mouse_pos_.x - mouse_last_pos_.x;
-			event.mouse_motion.relative_y = mouse_pos_.y - mouse_last_pos_.y;
-		}
-		mouse_last_pos_ = mouse_pos_;
+		event.mouse_motion.relative_x = dpos.x;
+		event.mouse_motion.relative_y = dpos.y;
 		input_->parse_input_event(event);
 	}
-	void handle_mouse_button_event(int os_button, bool pressed) {
+	void handle_mouse_button_event(int os_button, bool pressed, bool doubleclick) {
 		int button = map_mouse_os_button(os_button);
 		int bit = (1 << (button - 1));
 		if (pressed)
@@ -354,6 +347,7 @@ public:
 		event.mouse_button.global_x = mouse_pos_.x;
 		event.mouse_button.global_y = mouse_pos_.y;
 		event.mouse_button.button_index = button;
+		event.mouse_button.doubleclick = doubleclick;
 		event.mouse_button.pressed = pressed;
 		input_->parse_input_event(event);
 	}
