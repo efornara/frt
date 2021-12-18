@@ -5,18 +5,17 @@
   SPDX-License-Identifier: MIT
  */
 
-#include <SDL.h>
-#include "dl/gles2.gen.h"
+#include "frt.h"
 
-#include "os/os.h"
-#include "os/mutex.h"
+#include "sdl2_adapter.h"
+
 #include "os/input.h"
 #include "os/keyboard.h"
 #include "main/input_default.h"
 
-#include "frt.h"
-#include "sdl2_adapter.h"
+#include "sdl2_godot_mapping.h"
 
+#include "os/os.h"
 #include "drivers/unix/os_unix.h"
 #include "drivers/gl_context/context_gl.h"
 #include "servers/visual_server.h"
@@ -38,9 +37,9 @@
 
 namespace frt {
 
-class AudioDriverSDL2 : public AudioDriverSW, public SDL2SampleProducer {
+class AudioDriverSDL2 : public AudioDriverSW, public SampleProducer {
 private:
-	SDL2Audio audio_;
+	Audio audio_;
 	int mix_rate_;
 	OutputFormat output_format_;
 public:
@@ -54,7 +53,8 @@ public: // AudioDriverSW
 		mix_rate_ = GLOBAL_DEF("audio/mix_rate", 44100);
 		output_format_ = OUTPUT_STEREO;
 		const int latency = GLOBAL_DEF("audio/output_latency", 25);
-		return audio_.init(mix_rate_, latency);
+		const int samples = closest_power_of_2(latency * mix_rate_ / 1000);
+		return audio_.init(mix_rate_, samples) ? OK : ERR_CANT_OPEN;
 	}
 	int get_mix_rate() const {
 		return mix_rate_;
@@ -74,18 +74,18 @@ public: // AudioDriverSW
 	void finish() {
 		audio_.finish();
 	}
-public: // SDL2SampleProducer
+public: // SampleProducer
 	void produce_samples(int n_of_frames, int32_t *frames) {
 		audio_server_process(n_of_frames, frames);
 	}
 };
 
-class Godot2_OS : public OS_Unix, public SDL2EventHandler {
+class Godot2_OS : public OS_Unix, public EventHandler {
 private:
 	MainLoop *main_loop_;
 	VideoMode video_mode_;
 	bool quit_;
-	SDL2OS os_;
+	OS_FRT os_;
 	RasterizerGLES2 *rasterizer_;
 	VisualServer *visual_server_;
 	int event_id_;
@@ -156,6 +156,13 @@ private:
 	void cleanup_input() {
 		memdelete(input_);
 	}
+	void fill_modifier_state(::InputModifierState &st) {
+		const InputModifierState *os_st = os_.get_modifier_state();
+		st.shift = os_st->shift;
+		st.alt = os_st->alt;
+		st.control = os_st->control;
+		st.meta = os_st->meta;
+	}
 public:
 	Godot2_OS() : os_(this) {
 		main_loop_ = 0;
@@ -210,7 +217,7 @@ public:
 		return mouse_mode_;
 	}
 	void set_window_title(const String &title) {
-		os_.set_title(title);
+		os_.set_title(title.utf8().get_data());
 	}
 	void set_video_mode(const VideoMode &video_mode, int screen) {
 	}
@@ -282,14 +289,17 @@ public:
 		video_mode_.width = width;
 		video_mode_.height = height;
 	}
-	void handle_key_event(int gd_code, bool pressed) {
+	void handle_key_event(int sdl2_code, bool pressed) {
+		int code = map_key_sdl2_code(sdl2_code);
+		if (!code)
+			return;
 		InputEvent event;
 		event.ID = ++event_id_;
 		event.type = InputEvent::KEY;
 		event.device = 0;
-		os_.get_modifier_state(event.key.mod);
+		fill_modifier_state(event.key.mod);
 		event.key.pressed = pressed;
-		event.key.scancode = gd_code;
+		event.key.scancode = code;
 		event.key.unicode = 0;
 		event.key.echo = 0;
 		input_->parse_input_event(event);
@@ -301,7 +311,7 @@ public:
 		event.ID = ++event_id_;
 		event.type = InputEvent::MOUSE_MOTION;
 		event.device = 0;
-		os_.get_modifier_state(event.mouse_motion.mod);
+		fill_modifier_state(event.mouse_motion.mod);
 		event.mouse_motion.button_mask = mouse_state_;
 		event.mouse_motion.x = mouse_pos_.x;
 		event.mouse_motion.y = mouse_pos_.y;
@@ -320,7 +330,8 @@ public:
 		mouse_last_pos_ = mouse_pos_;
 		input_->parse_input_event(event);
 	}
-	void handle_mouse_button_event(int button, bool pressed) {
+	void handle_mouse_button_event(int os_button, bool pressed) {
+		int button = map_mouse_os_button(os_button);
 		int bit = (1 << (button - 1));
 		if (pressed)
 			mouse_state_ |= bit;
@@ -330,7 +341,7 @@ public:
 		event.ID = ++event_id_;
 		event.type = InputEvent::MOUSE_BUTTON;
 		event.device = 0;
-		os_.get_modifier_state(event.mouse_button.mod);
+		fill_modifier_state(event.mouse_button.mod);
 		event.mouse_button.button_mask = mouse_state_;
 		event.mouse_button.x = mouse_pos_.x;
 		event.mouse_button.y = mouse_pos_.y;
@@ -340,7 +351,7 @@ public:
 		event.mouse_button.pressed = pressed;
 		input_->parse_input_event(event);
 	}
-	void handle_js_status_event(int id, bool connected, String name, String guid) {
+	void handle_js_status_event(int id, bool connected, const char *name, const char *guid) {
 		input_->joy_connection_changed(id, connected, name, guid);
 	}
 	void handle_js_button_event(int id, int button, bool pressed) {
@@ -350,8 +361,9 @@ public:
 		InputDefault::JoyAxis v = {-1, value}; // TODO: check if OK
 		event_id_ = input_->joy_axis(event_id_, id, axis, v);
 	}
-	void handle_js_hat_event(int id, int value) {
-		event_id_ = input_->joy_hat(event_id_, id, value);
+	void handle_js_hat_event(int id, int os_mask) {
+		int mask = map_hat_os_mask(os_mask);
+		event_id_ = input_->joy_hat(event_id_, id, mask);
 	}
 	void handle_quit_event() {
 		quit_ = true;
