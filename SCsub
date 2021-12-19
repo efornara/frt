@@ -31,7 +31,17 @@ common_sources = [ 'frt_exe.cc', 'frt.cc' ]
 
 import version
 if version.major == 2:
-	frt_env.Append(CCFLAGS=['-std=c++98'])
 	version_sources = ['frt_godot2.cc', 'dl/gles2.gen.cc']
+elif version.major == 3:
+	version_sources = ['frt_godot3.cc', 'dl/gles2.gen.cc', 'dl/gles3.gen.cc']
 
-prog = frt_env.add_program('#bin/frt', common_sources + version_sources)
+std = env['frt_std']
+if std == 'auto':
+	std = {
+		2: 'c++98',
+		3: 'c++14',
+	}[version.major]
+if std != 'no':
+	frt_env.Append(CCFLAGS=['-std=' + std])
+
+prog = frt_env.add_program('#bin/godot', common_sources + version_sources)

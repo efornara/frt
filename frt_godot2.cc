@@ -6,18 +6,12 @@
  */
 
 #include "frt.h"
-
 #include "sdl2_adapter.h"
-
-#include "os/os.h"
-#include "os/input.h"
-#include "os/keyboard.h"
-#include "main/input_default.h"
-
 #include "sdl2_godot_mapping.h"
+#include "dl/gles2.gen.h"
 
+#include "core/print_string.h"
 #include "drivers/unix/os_unix.h"
-#include "drivers/gl_context/context_gl.h"
 #include "servers/visual_server.h"
 #include "servers/visual/visual_server_wrap_mt.h"
 #include "servers/visual/rasterizer.h"
@@ -31,9 +25,7 @@
 #include "servers/physics_2d/physics_2d_server_wrap_mt.h"
 #include "servers/visual/visual_server_raster.h"
 #include "drivers/gles2/rasterizer_gles2.h"
-#include "drivers/pulseaudio/audio_driver_pulseaudio.h"
 #include "main/main.h"
-#include "print_string.h"
 
 namespace frt {
 
@@ -46,36 +38,36 @@ public:
 	AudioDriverSDL2() : audio_(this) {
 	}
 public: // AudioDriverSW
-	const char *get_name() const {
+	const char *get_name() const FRT_OVERRIDE {
 		return "SDL2";
 	}
-	Error init() {
+	Error init() FRT_OVERRIDE {
 		mix_rate_ = GLOBAL_DEF("audio/mix_rate", 44100);
 		output_format_ = OUTPUT_STEREO;
 		const int latency = GLOBAL_DEF("audio/output_latency", 25);
 		const int samples = closest_power_of_2(latency * mix_rate_ / 1000);
 		return audio_.init(mix_rate_, samples) ? OK : ERR_CANT_OPEN;
 	}
-	int get_mix_rate() const {
+	int get_mix_rate() const FRT_OVERRIDE {
 		return mix_rate_;
 	}
-	OutputFormat get_output_format() const {
+	OutputFormat get_output_format() const FRT_OVERRIDE {
 		return output_format_;
 	}
-	void start() {
+	void start() FRT_OVERRIDE {
 		audio_.start();
 	}
-	void lock() {
+	void lock() FRT_OVERRIDE {
 		audio_.lock();
 	}
-	void unlock() {
+	void unlock() FRT_OVERRIDE {
 		audio_.unlock();
 	}
-	void finish() {
+	void finish() FRT_OVERRIDE {
 		audio_.finish();
 	}
 public: // SampleProducer
-	void produce_samples(int n_of_frames, int32_t *frames) {
+	void produce_samples(int n_of_frames, int32_t *frames) FRT_OVERRIDE {
 		audio_server_process(n_of_frames, frames);
 	}
 };
@@ -165,34 +157,44 @@ public:
 		quit_ = false;
 		event_id_ = 0;
 	}
-	int get_video_driver_count() const {
+	void run() {
+		if (main_loop_) {
+			main_loop_->init();
+			while (!quit_ && !Main::iteration())
+				os_.dispatch_events();
+			main_loop_->finish();
+		}
+	}
+public: // OS
+	int get_video_driver_count() const FRT_OVERRIDE {
 		return 1;
 	}
-	const char *get_video_driver_name(int driver) const {
+	const char *get_video_driver_name(int driver) const FRT_OVERRIDE {
 		return "GLES2";
 	}
-	VideoMode get_default_video_mode() const {
+	VideoMode get_default_video_mode() const FRT_OVERRIDE {
 		return OS::VideoMode(960, 540, false);
 	}
-	void initialize(const VideoMode &desired, int video_driver, int audio_driver) {
+	void initialize(const VideoMode &desired, int video_driver, int audio_driver) FRT_OVERRIDE {
 		video_mode_ = desired;
 		os_.init(video_mode_.width, video_mode_.height, video_mode_.resizable, video_mode_.borderless_window, video_mode_.always_on_top);
+		frt_resolve_symbols_gles2(get_proc_address);
 		init_video();
 		init_audio();
 		init_physics();
 		init_input();
 		_ensure_data_dir();
 	}
-	void set_main_loop(MainLoop *main_loop) {
+	void set_main_loop(MainLoop *main_loop) FRT_OVERRIDE {
 		main_loop_ = main_loop;
 		input_->set_main_loop(main_loop);
 	}
-	void delete_main_loop() {
+	void delete_main_loop() FRT_OVERRIDE {
 		if (main_loop_)
 			memdelete(main_loop_);
 		main_loop_ = 0;
 	}
-	void finalize() {
+	void finalize() FRT_OVERRIDE {
 		delete_main_loop();
 		cleanup_input();
 		cleanup_physics();
@@ -200,101 +202,102 @@ public:
 		cleanup_video();
 		os_.cleanup();
 	}
-	Point2 get_mouse_pos() const {
+	Point2 get_mouse_pos() const FRT_OVERRIDE {
 		return mouse_pos_;
 	}
-	int get_mouse_button_state() const {
+	int get_mouse_button_state() const FRT_OVERRIDE {
 		return mouse_state_;
 	}
-	void set_mouse_mode(OS::MouseMode mode) {
+	void set_mouse_mode(OS::MouseMode mode) FRT_OVERRIDE {
 		os_.set_mouse_mode(map_mouse_mode(mode));
 	}
-	OS::MouseMode get_mouse_mode() const {
+	OS::MouseMode get_mouse_mode() const FRT_OVERRIDE {
 		return map_mouse_os_mode(os_.get_mouse_mode());
 	}
-	void set_window_title(const String &title) {
+	void set_window_title(const String &title) FRT_OVERRIDE {
 		os_.set_title(title.utf8().get_data());
 	}
-	void set_video_mode(const VideoMode &video_mode, int screen) {
+	void set_video_mode(const VideoMode &video_mode, int screen) FRT_OVERRIDE {
 	}
-	VideoMode get_video_mode(int screen = 0) const {
+	VideoMode get_video_mode(int screen = 0) const FRT_OVERRIDE {
 		return video_mode_;
 	}
-	void get_fullscreen_mode_list(List<VideoMode> *list, int screen) const {
+	void get_fullscreen_mode_list(List<VideoMode> *list, int screen) const FRT_OVERRIDE {
 	}
-	Size2 get_window_size() const {
+	Size2 get_window_size() const FRT_OVERRIDE {
 		return Size2(video_mode_.width, video_mode_.height);
 	}
-	void set_window_size(const Size2 size) {
-		ivec2 os_size = { size.width, size.height };
+	void set_window_size(const Size2 size) FRT_OVERRIDE {
+		ivec2 os_size = { (int)size.width, (int)size.height };
 		os_.set_size(os_size);
 		video_mode_.width = os_size.x;
 		video_mode_.height = os_size.y;
 	}
-	Point2 get_window_position() const {
+	Point2 get_window_position() const FRT_OVERRIDE {
 		ivec2 pos = os_.get_pos();
 		return Point2(pos.x, pos.y);
 	}
-	void set_window_position(const Point2 &pos) {
-		ivec2 os_pos = { pos.width, pos.height };
+	void set_window_position(const Point2 &pos) FRT_OVERRIDE {
+		ivec2 os_pos = { (int)pos.width, (int)pos.height };
 		os_.set_pos(os_pos);
 	}
-	void set_window_fullscreen(bool enable) {
+	void set_window_fullscreen(bool enable) FRT_OVERRIDE {
 		os_.set_fullscreen(enable);
 		video_mode_.fullscreen = enable;
 	}
-	bool is_window_fullscreen() const {
+	bool is_window_fullscreen() const FRT_OVERRIDE {
 		return os_.is_fullscreen();
 	}
-	void set_window_always_on_top(bool enable) {
+	void set_window_always_on_top(bool enable) FRT_OVERRIDE {
 		os_.set_always_on_top(enable);
 		video_mode_.always_on_top = enable;
 	}
-	bool is_window_always_on_top() const {
+	bool is_window_always_on_top() const FRT_OVERRIDE {
 		return os_.is_always_on_top();
 	}
-	void set_window_resizable(bool enable) {
+	void set_window_resizable(bool enable) FRT_OVERRIDE {
 		os_.set_resizable(enable);
 	}
-	bool is_window_resizable() const {
+	bool is_window_resizable() const FRT_OVERRIDE {
 		return os_.is_resizable();
 	}
-	void set_window_maximized(bool enable) {
+	void set_window_maximized(bool enable) FRT_OVERRIDE {
 		os_.set_maximized(enable);
 	}
-	bool is_window_maximized() const {
+	bool is_window_maximized() const FRT_OVERRIDE {
 		return os_.is_maximized();
 	}
-	void set_window_minimized(bool enable) {
+	void set_window_minimized(bool enable) FRT_OVERRIDE {
 		os_.set_minimized(enable);
 	}
-	bool is_window_minimized() const {
+	bool is_window_minimized() const FRT_OVERRIDE {
 		return os_.is_minimized();
 	}
-	MainLoop *get_main_loop() const {
+	MainLoop *get_main_loop() const FRT_OVERRIDE {
 		return main_loop_;
 	}
-	bool can_draw() const {
+	bool can_draw() const FRT_OVERRIDE {
 		return true;
 	}
-	void set_cursor_shape(CursorShape shape) {
+	void set_cursor_shape(CursorShape shape) FRT_OVERRIDE {
 	}
-	void set_custom_mouse_cursor(const RES &cursor, CursorShape shape, const Vector2 &hotspot) {
+	void set_custom_mouse_cursor(const RES &cursor, CursorShape shape, const Vector2 &hotspot) FRT_OVERRIDE {
 	}
-	void make_rendering_thread() {
+	void make_rendering_thread() FRT_OVERRIDE {
 		os_.make_current();
 	}
-	void release_rendering_thread() {
+	void release_rendering_thread() FRT_OVERRIDE {
 		os_.release_current();
 	}
-	void swap_buffers() {
+	void swap_buffers() FRT_OVERRIDE {
 		os_.swap_buffers();
 	}
-	void handle_resize_event(ivec2 size) {
+public: // EventHandler
+	void handle_resize_event(ivec2 size) FRT_OVERRIDE {
 		video_mode_.width = size.x;
 		video_mode_.height = size.y;
 	}
-	void handle_key_event(int sdl2_code, int unicode, bool pressed) {
+	void handle_key_event(int sdl2_code, int unicode, bool pressed) FRT_OVERRIDE {
 		int code = map_key_sdl2_code(sdl2_code);
 		InputEvent event;
 		event.ID = ++event_id_;
@@ -307,7 +310,7 @@ public:
 		event.key.echo = 0;
 		input_->parse_input_event(event);
 	}
-	void handle_mouse_motion_event(ivec2 pos, ivec2 dpos) {
+	void handle_mouse_motion_event(ivec2 pos, ivec2 dpos) FRT_OVERRIDE {
 		mouse_pos_.x = pos.x;
 		mouse_pos_.y = pos.y;
 		InputEvent event;
@@ -327,7 +330,7 @@ public:
 		event.mouse_motion.relative_y = dpos.y;
 		input_->parse_input_event(event);
 	}
-	void handle_mouse_button_event(int os_button, bool pressed, bool doubleclick) {
+	void handle_mouse_button_event(int os_button, bool pressed, bool doubleclick) FRT_OVERRIDE {
 		int button = map_mouse_os_button(os_button);
 		int bit = (1 << (button - 1));
 		if (pressed)
@@ -349,30 +352,22 @@ public:
 		event.mouse_button.pressed = pressed;
 		input_->parse_input_event(event);
 	}
-	void handle_js_status_event(int id, bool connected, const char *name, const char *guid) {
+	void handle_js_status_event(int id, bool connected, const char *name, const char *guid) FRT_OVERRIDE {
 		input_->joy_connection_changed(id, connected, name, guid);
 	}
-	void handle_js_button_event(int id, int button, bool pressed) {
+	void handle_js_button_event(int id, int button, bool pressed) FRT_OVERRIDE {
 		event_id_ = input_->joy_button(event_id_, id, button, pressed ? 1 : 0);
 	}
-	void handle_js_axis_event(int id, int axis, float value) {
+	void handle_js_axis_event(int id, int axis, float value) FRT_OVERRIDE {
 		InputDefault::JoyAxis v = {-1, value}; // TODO: check if OK
 		event_id_ = input_->joy_axis(event_id_, id, axis, v);
 	}
-	void handle_js_hat_event(int id, int os_mask) {
+	void handle_js_hat_event(int id, int os_mask) FRT_OVERRIDE {
 		int mask = map_hat_os_mask(os_mask);
 		event_id_ = input_->joy_hat(event_id_, id, mask);
 	}
-	void handle_quit_event() {
+	void handle_quit_event() FRT_OVERRIDE {
 		quit_ = true;
-	}
-	void run() {
-		if (main_loop_) {
-			main_loop_->init();
-			while (!quit_ && !Main::iteration())
-				os_.dispatch_events();
-			main_loop_->finish();
-		}
 	}
 };
 

@@ -26,9 +26,10 @@
  */
 
 #include <SDL.h>
-#include "dl/gles2.gen.h"
 
 namespace frt {
+
+void *(*get_proc_address)(const char *) = SDL_GL_GetProcAddress;
 
 struct SampleProducer {
 	virtual void produce_samples(int n_of_frames, int32_t *frames) = 0;
@@ -348,7 +349,6 @@ public:
 			fatal("SDL_CreateWindow failed.");
 		context_ = SDL_GL_CreateContext(window_);
 		SDL_GL_MakeCurrent(window_, context_);
-		frt_resolve_symbols_gles2(SDL_GL_GetProcAddress);
 	}
 	void cleanup() {
 		SDL_DestroyWindow(window_);

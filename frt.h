@@ -5,9 +5,19 @@
   SPDX-License-Identifier: MIT
  */
 
+#if __cplusplus >= 201103L
+#define FRT_OVERRIDE override
+#else
+#define FRT_OVERRIDE
+#endif
+
 namespace frt {
 
 void warn(const char *format, ...);
+
+#if __cplusplus >= 201103L
+[[ noreturn ]]
+#endif
 void fatal(const char *format, ...);
 
 } // namespace frt

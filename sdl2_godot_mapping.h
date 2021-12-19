@@ -5,6 +5,15 @@
   SPDX-License-Identifier: MIT
  */
 
+#include "core/version.h"
+
+#define FRT_GODOT_VERSION ((((VERSION_MAJOR * 0x100) + VERSION_MINOR) * 0x100) + VERSION_PATCH)
+
+#include "core/os/os.h"
+#include "core/os/input.h"
+#include "core/os/keyboard.h"
+#include "main/input_default.h"
+
 namespace frt {
 
 int map_mouse_os_button(int os_button) {
@@ -21,7 +30,6 @@ int map_mouse_os_button(int os_button) {
 		return BUTTON_WHEEL_DOWN;
 	default:
 		fatal("unexpected mouse button: %d", os_button);
-		// NOT_REACHED
 	}
 }
 
@@ -35,7 +43,6 @@ OS::MouseMode map_mouse_os_mode(MouseMode os_mode) {
 		return OS::MOUSE_MODE_CAPTURED;
 	default:
 		fatal("unexpected mouse mode: %d", os_mode);
-		// NOT_REACHED
 	}
 }
 
@@ -46,7 +53,12 @@ MouseMode map_mouse_mode(OS::MouseMode mode) {
 	case OS::MOUSE_MODE_HIDDEN:
 		return MouseHidden;
 	case OS::MOUSE_MODE_CAPTURED:
+#if FRT_GODOT_VERSION >= 0x30000
+	case OS::MOUSE_MODE_CONFINED:
+#endif
 		return MouseCaptured;
+	default: // NOT REACHED
+		return MouseVisible;
 	}
 }
 
@@ -128,7 +140,11 @@ struct KeyMap {
 	{ SDLK_END, KEY_END },
 	{ SDLK_PAGEUP, KEY_PAGEUP },
 	{ SDLK_PAGEDOWN, KEY_PAGEDOWN },
+#if FRT_GODOT_VERSION >= 0x30000
+	{ SDLK_RETURN, KEY_ENTER },
+#else
 	{ SDLK_RETURN, KEY_RETURN },
+#endif
 	{ SDLK_ESCAPE, KEY_ESCAPE },
 	{ SDLK_LCTRL, KEY_CONTROL },
 	{ SDLK_RCTRL, KEY_CONTROL },

@@ -9,6 +9,9 @@ import version
 if version.major == 2:
 	from detect_godot2 import *
 	version_handled = True
+elif version.major == 3:
+	from detect_godot3 import *
+	version_handled = True
 else:
 	version_handled = False
 
@@ -19,6 +22,7 @@ def is_active():
 	return True
 
 def can_build():
+	import os
 	if os.name != "posix":
 		return False
 	if not version_handled:
