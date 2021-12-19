@@ -91,7 +91,7 @@ def configure_misc(env):
 	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED', '-DGLES_ENABLED', '-DJOYDEV_ENABLED'])
 	env.Append(CPPFLAGS=['-DFRT_ENABLED'])
 	env.Append(CFLAGS=['-std=gnu11']) # for libwebp (maybe more in the future)
-	env.Append(LIBS=['pthread', 'z'])
+	env.Append(LIBS=['pthread', 'z', 'dl'])
 	if env['CXX'] == 'clang++':
 		env['CC'] = 'clang'
 		env['LD'] = 'clang++'
