@@ -1,4 +1,5 @@
 #! /bin/sh
+set -e
 
 # FRT - A Godot platform targeting single board computers
 # Copyright (c) 2017-2019  Emanuele Fornara
@@ -29,103 +30,52 @@ die() {
 }
 
 usage() {
-	die "usage: release.sh [--pulse] arch tag..."
+	die "usage: release.sh arch tag..."
 }
 
 print_header() {
-	echo "Building frt:$fver tag:$tag arch:$arch suffix:[$suffix]..."
+	echo "Building frt:$fver tag:$tag arch:$arch..."
 }
 
 release() {
 	local bin
 	[ -d releases ] || return
-	bin=releases/frt_${fver}_${tag}_${arch}${suffix}.bin
-	cp tag_$tag/bin/godot.frt.opt$suffix.$arch $bin
-	strip $bin
+	bin=releases/frt_${fver}_${tag}_${arch}.bin
+	cp tag_$tag/bin/godot.frt.opt$extrasuffix.$arch $bin
+	$stripcmd $bin
 }
 
-build_common="platform=frt target=release -j 4"
+build_common="platform=frt tools=no target=release -j 4"
 
-build_21() {
+build() {
 	local patch
 	print_header
-	if [ $arch = arm64 ] ; then patch="CCFLAGS=-DNO_THREADS" ; fi
-	( cd tag_$tag ; scons frt_arch=$arch \
-		builtin_zlib=no \
-		builtin_freetype=no \
-		module_openssl_enabled=no \
-		$pulse \
+	if [ $arch = arm64v8 -a $fver = 216 ] ; then patch="CCFLAGS=-DNO_THREADS" ; fi
+	( cd tag_$tag ; nice scons frt_arch=$arch \
+		$archopts \
+		$gveropts \
 		$patch \
 	$build_common )
 	release
 }
 
-build_30() {
-	print_header
-	( cd tag_$tag ; scons frt_arch=$arch \
-		builtin_zlib=no \
-		builtin_freetype=yes \
-		module_openssl_enabled=no \
-		module_webm_enabled=no \
-		$pulse \
-	$build_common )
-	release
-}
-
-build_31() {
-	print_header
-	( cd tag_$tag ; scons frt_arch=$arch \
-		warnings=no \
-		builtin_zlib=no \
-		builtin_freetype=yes \
-		builtin_mbedtls=no \
-		builtin_libwebsockets=no \
-		module_mbedtls_enabled=no \
-		module_websocket_enabled=no \
-		module_webm_enabled=no \
-		$pulse \
-	$build_common )
-	release
-}
-
-build_33() {
-	print_header
-	( cd tag_$tag ; scons frt_arch=$arch \
-		warnings=no \
-		builtin_zlib=no \
-		builtin_freetype=yes \
-		builtin_mbedtls=no \
-		builtin_libwebsockets=no \
-		module_mbedtls_enabled=no \
-		module_websocket_enabled=no \
-		module_webm_enabled=no \
-		$pulse \
-	$build_common )
-	release
-}
-
-build_32() {
-	echo "WARNING: 3.2.x deprecated upstream"
-	build_33
-}
-
 [ $# -gt 1 ] || usage
 
-if [ $1 = "--pulse" ] ; then
-	pulse="pulseaudio=yes extra_suffix=pulse"
-	suffix=".pulse"
-	shift
-else
-	pulse="pulseaudio=no"
-	suffix=""
-fi
-
-[ $# -gt 1 ] || usage
-
-varch=$1
-case $varch in
-	pi|pi1|pi2|pi3|pc|arm64) ;;
-	*) die "release.sh: invalid arch: $varch."
+arch=$1
+case $arch in
+	arm32v6)
+		stripcmd="arm-linux-gnueabihf-strip"
+		archopts="frt_cross=no"
+		;;
+	arm32v7)
+		stripcmd="arm-linux-gnueabihf-strip"
+		archopts="frt_cross=auto"
+		;;
+	arm64v8)
+		stripcmd="aarch64-linux-gnu-strip"
+		archopts="frt_cross=auto"
+		;;
+	*) die "release.sh: invalid arch: $arch."
 esac
 shift
 
@@ -140,19 +90,20 @@ while [ $# -gt 0 ] ; do
 			[ -f $frth ] || die "release.sh: $frth not found."
 			gver=`echo $tag | cut -b -2`
 			case $gver in
-				21|30|31|32|33) ;;
+				2*)
+					gveropts="use_llvm=yes"
+					extrasuffix=".llvm"
+					;;
+				3*)
+					gveropts="use_llvm=no module_webm_enabled=no"
+					extrasuffix=""
+					;;
 				*) die "release.sh: unsupported godot version: $gver."
 			esac
 			fver=`grep FRT_VERSION $frth \
 				| grep -o '".*"' \
 				| sed 's/[\."]//g'`
-			case $varch in
-				pi)
-					arch=pi1 ; build_$gver
-					arch=pi2 ; build_$gver
-					;;
-				*) arch=$varch build_$gver
-			esac
+			build
 			;;
 		*) die "release.sh: invalid tag $tag."
 	esac
