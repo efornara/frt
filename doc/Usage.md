@@ -17,51 +17,8 @@ they work on a Pi, *provided that you switch to the new GL driver*.
 If this limitation is acceptable to you, there is no reason to use FRT.
 Also, the X11 platform supports the X11 environment far better than FRT.
 
-There are two reasons to use FRT:
-
-1. You want to publish your game and you don't want to force your users
-to switch to the new GL driver.
-
-2. You want to support other single board computers. The Pi
-is the exception here: a person was hired to write an OpenGL desktop driver
-for its SOC. Other boards usually adapt an OpenGL ES driver designed for
-Android, and this is usually exposed to games via EGL/ES.
-
-If you develop using the X11 platform and plan to release with FRT,
-keep in mind that the two underlying drivers (vc4 and bcm) perform
-differently. FRT detects at run-time which one to load, but you might
-want to test with both of them anyway.
-
-### Godot: 3.1 vs 2.1
-
-Here is my personal opinion.
-
-If you develop a 2D game on your PC and you only care about new generation
-Pis (2/3), you should probably use Godot 3.1. It is slightly
-slower than Godot 2.1, but, as an example, the 2D platform is capped
-at 60 fps in both on a (non-overclocked) Pi 3B+.
-Godot 3.1 is nicer to use and the community has largely migrated to Godot 3.
-
-However, you might want to consider Godot 2.1 in some cases:
-
-1. You want to develop a game on the Pi itself.
-While the Godot 2.1 *editor* seems to be useable on a modern Pi
-(3B+ with vc4), the Godot 3.1 *editor* doesn't seem to be.
-It works, but I wouldn't want to actually write a game with it.
-UPDATE: Compiling with the latest compilers (e.g. gcc 8 or clang 8), and
-, if possible, enabling lto, might help to make the 3.1 editor useable.
-
-2. You target slow boards (e.g. Pi 1 / Zero).
-
-3. You want to develop a 3D game.
-
-For the last two points, it is probably better to write a minimal prototype
-of your game in both Godot 2.1 / 3.1 and measure the performance you are
-getting.
-
-Also note that Godot 3.1 is not as tested as Godot 2.1 on the Pi,
-and some issues might come up. For example, particles are known not to work:
-[#27407](https://github.com/godotengine/godot/issues/27407).
+Nowadays, the main reason to use FRT is to run Godot on a KMS/DRM-based
+distro like RetroPie.
 
 ## Exporting a game
 
@@ -88,29 +45,19 @@ frt\_*frt-version*\_*godot-version*\_*arch-tag*.bin
 
 For example:
 
-frt\_093\_302v1\_pi2.bin
+frt\_110\_342\_arm32v7.bin
 
-is FRT 0.9.3 compiled against Godot 3.0-gles2, version 3.0.2-gles2-v1. It is
-compiled for fairly recent ARM-based 32-bit boards.
+is FRT 1.1.0 compiled against Godot 3.4.2-stable. It is compiled for
+a 32-bit distro.
 
-Here is a description of the architecture tags:
+The architecture tags have been changed in FRT 1.1.0. The change of
+naming reflects different compilation flags being used.
 
-- *pi1* and *pi2*. The pi1 versions are compatible with the Pi Zero and the
-  first generation of Pis. If you plan to publish your game and the
-  game is simple enough, you should probably use these versions even if you
-  have a faster Pi. If your game is too heavy to run on an older
-  Pi, you might as well use the pi2 versions. These versions are the
-  most tested. They should work on other boards too, and, beside on
-  Pis, they have also been tested on a A10-based board.
+- *arm32v6* and *arm32v7*. For 32-bit distros. Most users would want arm32v7.
+  The arm32v6 versions are provided to support older Pis.
 
-- *arm64*. These versions should work on generic 64-bits Linux distributions.
-  Note that, on this architecture, Godot 2.1 is compiled with
-  `CCFLAGS=-DNO_THREADS`. They have been tested on a Pi 3B+
-  running [Gentoo 64-bit](https://github.com/sakaki-/gentoo-on-rpi3-64bit)
-  (vc4 driver).
-
-An older version of FRT (0.9.3) also came compiled for *arm7hf*.
-Its use is now discouraged. Use pi1 or pi2 instead.
+- *arm64v8*. For 64-bit distros. I hardly test them myself, but they are
+  increasingly popular, so they are quite tested by users.
 
 ## Demos
 
@@ -168,15 +115,3 @@ For a (quite heavy) 3D demo you can try:
 Please note that the above Intel GPU can only render a few frames per seconds
 of this demo. It might be helpful to add an option like `--resolution 320x240`
 to the command line.
-
-### Godot 3.0? For OpenGL ES 2.0?
-
-Godot 3.0 is not supposed to run on a on OpenGL ES 2.0 class device.
-
-I backported a limited, old version of the 3.1 GLES2 renderer to Godot 3.0
-(3.0-gles2). See here:
-[GLES2.md](https://github.com/efornara/godot/tree/3.0-gles2/GLES2.md).
-
-Since Godot 3.1 has now been released and it officially supports
-OpenGL ES 2.0, users still using 3.0-gles2 are advised to migrate to
-Godot 3.1 or later.
