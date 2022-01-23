@@ -3,7 +3,7 @@
 # compile.sh
 #
 # FRT - A Godot platform targeting single board computers
-# Copyright (c) 2017-2021  Emanuele Fornara
+# Copyright (c) 2017-2022  Emanuele Fornara
 # SPDX-License-Identifier: MIT
 #
 
