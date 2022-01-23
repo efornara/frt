@@ -1,4 +1,5 @@
 #! /bin/sh
+set -e
 
 # compile.sh
 #
@@ -6,8 +7,6 @@
 # Copyright (c) 2017-2022  Emanuele Fornara
 # SPDX-License-Identifier: MIT
 #
-
-set -e
 
 # just an example
 
