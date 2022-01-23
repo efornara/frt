@@ -149,9 +149,11 @@ public: // OS
 	int get_video_driver_count() const FRT_OVERRIDE {
 		return 2;
 	}
+#if FRT_GODOT_VERSION >= 0x30100
 	int get_current_video_driver() const FRT_OVERRIDE {
 		return video_driver_;
 	}
+#endif
 	const char *get_video_driver_name(int driver) const FRT_OVERRIDE {
 		return driver == VIDEO_DRIVER_GLES3 ? "GLES3" : "GLES2";
 	}
@@ -311,7 +313,9 @@ public: // EventHandler
 		fill_modifier_state(key);
 		key->set_pressed(pressed);
 		key->set_scancode(code);
+#if FRT_GODOT_VERSION >= 0x30400
 		key->set_physical_scancode(code); // TODO
+#endif
 		key->set_unicode(unicode);
 		key->set_echo(false);
 		input_->parse_input_event(key);
