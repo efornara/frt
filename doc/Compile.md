@@ -17,10 +17,7 @@ or:
 
 <https://downloads.tuxfamily.org/godotengine>
 
-_NOTE: At the moment, only Godot 2 is implemented and only Godot 2.1.6-stable
-has been tested._
-
-Here it is assumed that the top directory of the Godot source is `~/godot`.
+Here it is assumed that the top directory of the Godot source is ~/godot.
 
 Go to the platform directory and clone this repository:
 
@@ -35,3 +32,46 @@ From the main directory, you now have a new platform available:
 
 _NOTE: If you only have access to a recent version of gcc (i.e. 6 or later),
 you can only compile Godot 2 by using debug as a target._
+
+## Cross compilation, crossbuild and release.sh
+
+As an example, here are the steps needed to build some binaries on
+a PC using docker. Even if you don't use docker, my crossbuild images
+or the official script, these instructions, the Dockerfiles and the
+script should have all the info that you need.
+
+Create the docker images:
+
+	$ git clone https://github.com/efornara/crossbuild
+	$ cd crossbuild/docker
+	$ ./build.sh base
+	[...]
+	$ ./build.sh arm32v7
+	[...]
+	$ ./docker.sh arm32v7
+	root@.....:/# su - builder
+	builder@.....:$
+
+You should be able to su to your user (builder in my case) and find your
+home directory.
+
+You might have everything you need in the container, but I usually
+open another terminal and work outside the container, except for
+compiling.
+
+The release.sh script needs the current directory to look like this:
+
+	$ ls ~/somewhere
+	releases/ tag_216/ tag_342/
+
+A directory where to copy the binaries (releases/) and every godot
+version in its own directory named according to its "tag" version
+and with frt already inside platform (see above).
+
+From within the container, type:
+
+	$ cd ~/somewhere
+	$ ./tag_216/platform/frt/release.sh arm32v7 tag_*
+
+If everything goes well, after a while you should have your binaries
+ready in ~/somewhere/releases.
