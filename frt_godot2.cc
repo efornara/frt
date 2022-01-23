@@ -177,7 +177,7 @@ public: // OS
 	}
 	void initialize(const VideoMode &desired, int video_driver, int audio_driver) FRT_OVERRIDE {
 		video_mode_ = desired;
-		os_.init(video_mode_.width, video_mode_.height, video_mode_.resizable, video_mode_.borderless_window, video_mode_.always_on_top);
+		os_.init(API_OpenGL_ES2, video_mode_.width, video_mode_.height, video_mode_.resizable, video_mode_.borderless_window, video_mode_.always_on_top);
 		frt_resolve_symbols_gles2(get_proc_address);
 		init_video();
 		init_audio();

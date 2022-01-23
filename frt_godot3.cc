@@ -186,7 +186,8 @@ public: // OS
 	Error initialize(const VideoMode &desired, int video_driver, int audio_driver) FRT_OVERRIDE {
 		video_mode_ = desired;
 		video_driver_ = video_driver;
-		os_.init(video_mode_.width, video_mode_.height, video_mode_.resizable, video_mode_.borderless_window, video_mode_.always_on_top);
+		const GraphicsAPI api = video_driver == VIDEO_DRIVER_GLES2 ? API_OpenGL_ES2 : API_OpenGL_ES3;
+		os_.init(api, video_mode_.width, video_mode_.height, video_mode_.resizable, video_mode_.borderless_window, video_mode_.always_on_top);
 		init_video();
 		init_audio(audio_driver);
 		init_input();

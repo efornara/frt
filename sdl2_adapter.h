@@ -156,6 +156,11 @@ struct InputModifierState {
 	InputModifierState() : shift(false), alt(false), control(false), meta(false) {}
 };
 
+enum GraphicsAPI {
+	API_OpenGL_ES2,
+	API_OpenGL_ES3
+};
+
 class OS_FRT {
 private:
 	static const int MAX_JOYSTICKS = 16;
@@ -331,12 +336,12 @@ public:
 		memset(js_, 0, sizeof(js_));
 		exit_shortcuts_ = !getenv("FRT_NO_EXIT_SHORTCUTS");
 	}
-	void init(int width, int height, bool resizable, bool borderless, bool always_on_top) {
+	void init(GraphicsAPI api, int width, int height, bool resizable, bool borderless, bool always_on_top) {
 		setenv("SDL_VIDEO_RPI_OPTIONS", "gravity=center,scale=letterbox,background=1", 0);
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
 			fatal("SDL_Init failed.");
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, api == API_OpenGL_ES2 ? 2 : 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 		int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
