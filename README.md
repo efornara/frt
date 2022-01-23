@@ -35,6 +35,32 @@ a script with a command that looks something like this:
 There are some guides and posts around describing the process for FRT 1.0.
 The process is pretty much the same for FRT 2.0.
 
+### Which version?
+
+FRT binary releases follow the following naming convention:
+
+frt\_*frt-version*\_*godot-version*\_*arch-tag*.bin
+
+For example:
+
+frt\_200\_342\_arm32v7.bin
+
+is FRT 2.0.0 compiled against Godot 3.4.2-stable. It is compiled for
+a 32-bit distro. While:
+
+frt\_200\_342\_arm64v8.bin
+
+is compiled for a 64-bit distro.
+The arm32v6 ones are there mainly to support older Pis.
+
+My policy is to publish binaries for the latest release from upstream
+plus 2.1.6 and the ones that were/are in debian stable (currenty 3.0.6
+and 3.2.3). You are encouraged to compile any version you need yourself.
+See [Compile](doc/Compile.md) for more info.
+
+Ideally the codebase should be able to support building against any
+upstream stable version since 2.1.6, but this is rarely tested.
+
 ## SDL2
 
 Starting from version 2.0, FRT uses and dynamically links the SDL2 library,
