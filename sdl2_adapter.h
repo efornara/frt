@@ -332,6 +332,7 @@ public:
 		exit_shortcuts_ = !getenv("FRT_NO_EXIT_SHORTCUTS");
 	}
 	void init(int width, int height, bool resizable, bool borderless, bool always_on_top) {
+		setenv("SDL_VIDEO_RPI_OPTIONS", "gravity=center,scale=letterbox,background=1", 0);
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
 			fatal("SDL_Init failed.");
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
