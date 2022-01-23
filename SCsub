@@ -25,7 +25,7 @@ for libname in ['gles2', 'gles3']:
 	env.Depends('platform_config.h', 'dl/' + libname + '.gen.h')
 
 frt_env = env.Clone()
-frt_env.ParseConfig('pkg-config sdl2 --cflags --libs')
+frt_env.ParseConfig(env['FRT_PKG_CONFIG'] + ' sdl2 --cflags --libs')
 
 common_sources = [ 'frt_exe.cc', 'frt.cc' ]
 

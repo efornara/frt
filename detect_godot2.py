@@ -58,6 +58,7 @@ def configure_arch(env):
 
 def configure_cross(env):
 	if env['frt_cross'] == 'no':
+		env['FRT_PKG_CONFIG'] = 'pkg-config'
 		return
 	if env['frt_cross'] == 'auto':
 		triple = {
@@ -72,6 +73,7 @@ def configure_cross(env):
 	else:
 		env['CC'] = triple + '-gcc'
 		env['CXX'] = triple + '-g++'
+	env['FRT_PKG_CONFIG'] = triple + '-pkg-config'
 
 def configure_glsl_builders(env):
 	import methods
@@ -86,26 +88,6 @@ def configure_target(env):
 		env.Append(CCFLAGS=['-O2', '-ffast-math', '-DDEBUG_ENABLED'])
 	elif env['target'] == 'debug':
 		env.Append(CCFLAGS=['-g2', '-DDEBUG_ENABLED', '-DDEBUG_MEMORY_ENABLED'])
-
-def configure_deps(env):
-	# TODO: triple-pkg-config - everything static, sdl2 overridden anyway
-	env.Append(CCFLAGS=['-D_REENTRANT']) # sdl2 - TODO: really needed?
-	if env['builtin_openssl'] == 'no':
-		env.ParseConfig('pkg-config openssl --cflags --libs')
-	if env['builtin_libwebp'] == 'no':
-		env.ParseConfig('pkg-config libwebp --cflags --libs')
-	if env['builtin_freetype'] == 'no':
-		env.ParseConfig('pkg-config freetype2 --cflags --libs')
-	if env['builtin_libpng'] == 'no':
-		env.ParseConfig('pkg-config libpng --cflags --libs')
-	if env['builtin_libtheora'] == 'no':
-		env.ParseConfig('pkg-config theora theoradec --cflags --libs')
-	if env['builtin_libvorbis'] == 'no':
-		env.ParseConfig('pkg-config vorbis vorbisfile --cflags --libs')
-	if env['builtin_opus'] == 'no':
-		env.ParseConfig('pkg-config opus opusfile --cflags --libs')
-	if env['builtin_libogg'] == 'no':
-		env.ParseConfig('pkg-config ogg --cflags --libs')
 
 def configure_misc(env):
 	env.Append(CPPPATH=['#platform/frt'])
@@ -126,5 +108,4 @@ def configure(env):
 	configure_cross(env)
 	configure_glsl_builders(env)
 	configure_target(env)
-	configure_deps(env)
 	configure_misc(env)

@@ -5,6 +5,8 @@
   SPDX-License-Identifier: MIT
  */
 
+#define FRT_VERSION "2.0.0"
+
 #if __cplusplus >= 201103L
 #define FRT_OVERRIDE override
 #else

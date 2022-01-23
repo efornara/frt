@@ -28,7 +28,4 @@ def can_build():
 	if not version_handled:
 		print("Error: Godot version not handled by FRT. Aborting.")
 		return False
-	if os.system("pkg-config --exists sdl2") != 0:
-		print("Error: SDL2 not found. Aborting.")
-		return False
 	return True

@@ -8,14 +8,16 @@
 import os
 import sys
 import platform
+import version
 
 # TODO factor out common bits
 
 def get_opts():
+	from SCons.Variables import BoolVariable
 	return [
-		('use_llvm', 'Use llvm compiler', False),
-		('use_lto', 'Use link time optimization', False),
-		('use_static_cpp', 'Link libgcc and libstdc++ statically', False),
+		BoolVariable('use_llvm', 'Use llvm compiler', False),
+		BoolVariable('use_lto', 'Use link time optimization', False),
+		BoolVariable('use_static_cpp', 'Link libgcc and libstdc++ statically', False),
 		('frt_std', 'C++ standard for frt itself (no/auto/c++98/...)', 'auto'),
 		('frt_arch', 'Architecture (no/arm32v6/arm32v7/arm64v8)', 'no'),
 		('frt_cross', 'Cross compilation (no/auto/<triple>)', 'no'),
@@ -58,6 +60,7 @@ def configure_arch(env):
 
 def configure_cross(env):
 	if env['frt_cross'] == 'no':
+		env['FRT_PKG_CONFIG'] = 'pkg-config'
 		return
 	if env['frt_cross'] == 'auto':
 		triple = {
@@ -72,6 +75,7 @@ def configure_cross(env):
 	else:
 		env['CC'] = triple + '-gcc'
 		env['CXX'] = triple + '-g++'
+	env['FRT_PKG_CONFIG'] = triple + '-pkg-config'
 
 def configure_target(env):
 	if env['target'] == 'release':
@@ -81,17 +85,14 @@ def configure_target(env):
 	elif env['target'] == 'debug':
 		env.Append(CCFLAGS=['-g2'])
 
-def configure_deps(env):
-	# TODO: triple-pkg-config - everything static, sdl2 overridden anyway
-	env.Append(CCFLAGS=['-D_REENTRANT']) # sdl2 - TODO: really needed?
-	# all build-in
-
 def configure_misc(env):
 	env.Append(CPPPATH=['#platform/frt'])
 	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED', '-DGLES_ENABLED', '-DJOYDEV_ENABLED'])
 	env.Append(CPPFLAGS=['-DFRT_ENABLED'])
 	env.Append(CFLAGS=['-std=gnu11']) # for libwebp (maybe more in the future)
 	env.Append(LIBS=['pthread', 'z', 'dl'])
+	if env['frt_arch'] == 'arm32v6' and version.minor >= 4: # TODO find out exact combination
+		env.Append(LIBS=['atomic'])
 	if env['CXX'] == 'clang++':
 		env['CC'] = 'clang'
 		env['LD'] = 'clang++'
@@ -102,5 +103,4 @@ def configure(env):
 	configure_arch(env)
 	configure_cross(env)
 	configure_target(env)
-	configure_deps(env)
 	configure_misc(env)
