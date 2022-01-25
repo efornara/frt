@@ -29,7 +29,7 @@ release() {
 	$stripcmd $bin
 }
 
-build_common="platform=frt tools=no target=release -j 4"
+build_common="platform=frt tools=no target=release use_static_cpp=yes -j 4"
 
 build() {
 	local patch

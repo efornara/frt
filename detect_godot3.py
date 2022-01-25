@@ -96,6 +96,8 @@ def configure_misc(env):
 	if env['CXX'] == 'clang++':
 		env['CC'] = 'clang'
 		env['LD'] = 'clang++'
+	if env['use_static_cpp']:
+		env.Append(LINKFLAGS=['-static-libgcc', '-static-libstdc++'])
 
 def configure(env):
 	configure_compiler(env)
