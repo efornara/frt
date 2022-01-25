@@ -292,6 +292,12 @@ public: // OS
 	void swap_buffers() FRT_OVERRIDE {
 		os_.swap_buffers();
 	}
+	void set_use_vsync(bool enable) FRT_OVERRIDE {
+		os_.set_use_vsync(enable);
+	}
+	bool is_vsync_enabled() const FRT_OVERRIDE {
+		return os_.is_vsync_enabled();
+	}
 public: // EventHandler
 	void handle_resize_event(ivec2 size) FRT_OVERRIDE {
 		video_mode_.width = size.x;

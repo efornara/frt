@@ -188,6 +188,7 @@ public: // OS
 		video_driver_ = video_driver;
 		const GraphicsAPI api = video_driver == VIDEO_DRIVER_GLES2 ? API_OpenGL_ES2 : API_OpenGL_ES3;
 		os_.init(api, video_mode_.width, video_mode_.height, video_mode_.resizable, video_mode_.borderless_window, video_mode_.always_on_top);
+		_set_use_vsync(video_mode_.use_vsync);
 		init_video();
 		init_audio(audio_driver);
 		init_input();
@@ -301,6 +302,9 @@ public: // OS
 	}
 	void swap_buffers() FRT_OVERRIDE {
 		os_.swap_buffers();
+	}
+	void _set_use_vsync(bool enable) FRT_OVERRIDE {
+		os_.set_use_vsync(enable);
 	}
 public: // EventHandler
 	void handle_resize_event(ivec2 size) FRT_OVERRIDE {

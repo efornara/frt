@@ -369,6 +369,12 @@ public:
 	void swap_buffers() {
 		SDL_GL_SwapWindow(window_);
 	}
+	void set_use_vsync(bool enable) {
+		SDL_GL_SetSwapInterval(enable ? 1 : 0);
+	}
+	bool is_vsync_enabled() const {
+		return SDL_GL_GetSwapInterval() != 0;
+	}
 	void dispatch_events() {
 		SDL_Event ev;
 		while (SDL_PollEvent(&ev)) {
