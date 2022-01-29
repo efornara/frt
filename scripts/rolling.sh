@@ -8,34 +8,41 @@ set -e
 # SPDX-License-Identifier: MIT
 #
 
+if [ $# -ge 2 -a "$1" = '-t' ] ; then
+	tag=$2
+	shift 2
+else
+	tag=342
+fi
+
 build_216_98() {
-	echo 'Building Godot 2.1.6 (C++ 98)'
+	echo 'Building 216 (C++ 98)'
 	cd tag_216
 	nice scons platform=frt tools=no target=release use_llvm=yes frt_std=c++98 -j 3
 	cd ..
 }
 
 build_216_14() {
-	echo 'Building Godot 2.1.6 (C++ 14)'
+	echo 'Building 216 (C++ 14)'
 	cd tag_216
 	nice scons platform=frt tools=no target=release use_llvm=yes frt_std=c++14 -j 3
 	cd ..
 }
 
 build_latest() {
-	echo 'Building Godot 3.4.2 (C++ 20)'
-	cd tag_342
+	echo "Building ${tag} (C++ 20)"
+	cd tag_${tag}
 	nice scons platform=frt tools=no target=release use_static_cpp=yes frt_std=c++20 -j 3
 	cd ..
-	strip tag_342/bin/godot.frt.opt
-	cp tag_342/bin/godot.frt.opt releases/frt_342_amd64.bin
+	strip tag_${tag}/bin/godot.frt.opt
+	cp tag_${tag}/bin/godot.frt.opt releases/frt_${tag}_amd64.bin
 }
 
 pack() {
-	echo 'Packing Godot 3.4.2'
+	echo "Packing ${tag}"
 	cd releases
-	gzip --keep --force frt_342_amd64.bin
-	ls -l frt_342_amd64.bin.gz
+	gzip --keep --force frt_${tag}_amd64.bin
+	ls -l frt_${tag}_amd64.bin.gz
 	cd ..
 }
 
