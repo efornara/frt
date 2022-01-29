@@ -433,10 +433,10 @@ public:
 		return size;
 	}
 	void set_fullscreen(bool enable) {
-		SDL_SetWindowFullscreen(window_, enable ? 1 : 0);
+		SDL_SetWindowFullscreen(window_, enable ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0); // TODO: hint
 	}
 	bool is_fullscreen() const {
-		return SDL_GetWindowFlags(window_) & SDL_WINDOW_FULLSCREEN;
+		return SDL_GetWindowFlags(window_) & SDL_WINDOW_FULLSCREEN_DESKTOP;
 	}
 	void set_always_on_top(bool enable) {
 		// NOT IMPLEMENTED
