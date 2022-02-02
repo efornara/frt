@@ -365,7 +365,7 @@ public: // EventHandler
 		event_id_ = input_->joy_button(event_id_, id, button, pressed ? 1 : 0);
 	}
 	void handle_js_axis_event(int id, int axis, float value) FRT_OVERRIDE {
-		InputDefault::JoyAxis v = {-1, value}; // TODO: check if OK
+		InputDefault::JoyAxis v = { -1, value };
 		event_id_ = input_->joy_axis(event_id_, id, axis, v);
 	}
 	void handle_js_hat_event(int id, int os_mask) FRT_OVERRIDE {

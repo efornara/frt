@@ -369,8 +369,12 @@ public: // EventHandler
 		input_->joy_button(id, button, pressed ? 1 : 0);
 	}
 	void handle_js_axis_event(int id, int axis, float value) FRT_OVERRIDE {
-		InputDefault::JoyAxis v = {-1, value}; // TODO: check if OK
+#if FRT_GODOT_VERSION >= 0x30500
+		input_->set_joy_axis(id, axis, value);
+#else
+		InputDefault::JoyAxis v = { -1, value };
 		input_->joy_axis(id, axis, v);
+#endif
 	}
 	void handle_js_hat_event(int id, int os_mask) FRT_OVERRIDE {
 		int mask = map_hat_os_mask(os_mask);
