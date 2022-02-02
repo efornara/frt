@@ -151,7 +151,7 @@ public: // OS
 	int get_video_driver_count() const FRT_OVERRIDE {
 		return 2;
 	}
-#if FRT_GODOT_VERSION >= 0x30100
+#if FRT_GODOT_VERSION >= 30100
 	int get_current_video_driver() const FRT_OVERRIDE {
 		return video_driver_;
 	}
@@ -194,7 +194,7 @@ public: // OS
 		init_video();
 		init_audio(audio_driver);
 		init_input();
-#if FRT_GODOT_VERSION < 0x30300
+#if FRT_GODOT_VERSION < 30300
 		_ensure_user_data_dir();
 #endif
 		return OK;
@@ -320,7 +320,7 @@ public: // EventHandler
 		fill_modifier_state(key);
 		key->set_pressed(pressed);
 		key->set_scancode(code);
-#if FRT_GODOT_VERSION >= 0x30400
+#if FRT_GODOT_VERSION >= 30400
 		key->set_physical_scancode(code); // TODO
 #endif
 		key->set_unicode(unicode);
@@ -369,7 +369,7 @@ public: // EventHandler
 		input_->joy_button(id, button, pressed ? 1 : 0);
 	}
 	void handle_js_axis_event(int id, int axis, float value) FRT_OVERRIDE {
-#if FRT_GODOT_VERSION >= 0x30500
+#if FRT_GODOT_VERSION >= 30500
 		input_->set_joy_axis(id, axis, value);
 #else
 		InputDefault::JoyAxis v = { -1, value };

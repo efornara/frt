@@ -7,7 +7,7 @@
 
 #include "core/version.h"
 
-#define FRT_GODOT_VERSION ((((VERSION_MAJOR * 0x100) + VERSION_MINOR) * 0x100) + VERSION_PATCH)
+#define FRT_GODOT_VERSION ((((VERSION_MAJOR * 100) + VERSION_MINOR) * 100) + VERSION_PATCH)
 
 #include "core/os/os.h"
 #include "core/os/input.h"
@@ -53,7 +53,7 @@ MouseMode map_mouse_mode(OS::MouseMode mode) {
 	case OS::MOUSE_MODE_HIDDEN:
 		return MouseHidden;
 	case OS::MOUSE_MODE_CAPTURED:
-#if FRT_GODOT_VERSION >= 0x30000
+#if FRT_GODOT_VERSION >= 30000
 	case OS::MOUSE_MODE_CONFINED:
 #endif
 		return MouseCaptured;
@@ -140,7 +140,7 @@ struct KeyMap {
 	{ SDLK_END, KEY_END },
 	{ SDLK_PAGEUP, KEY_PAGEUP },
 	{ SDLK_PAGEDOWN, KEY_PAGEDOWN },
-#if FRT_GODOT_VERSION >= 0x30000
+#if FRT_GODOT_VERSION >= 30000
 	{ SDLK_RETURN, KEY_ENTER },
 #else
 	{ SDLK_RETURN, KEY_RETURN },
