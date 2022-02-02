@@ -65,6 +65,7 @@ shift
 
 [ -d releases ] || die "release.sh: no releases directory."
 
+export BUILD_NAME=frt
 while [ $# -gt 0 ] ; do
 	case $1 in
 		tag_*)

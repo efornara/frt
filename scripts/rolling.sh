@@ -46,6 +46,7 @@ pack() {
 	cd ..
 }
 
+export BUILD_NAME=frt
 case "$1" in
 	298)
 		build_216_98
