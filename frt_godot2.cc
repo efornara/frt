@@ -375,6 +375,8 @@ public: // EventHandler
 	void handle_quit_event() FRT_OVERRIDE {
 		quit_ = true;
 	}
+	void handle_flush_events() FRT_OVERRIDE {
+	}
 };
 
 } // namespace frt

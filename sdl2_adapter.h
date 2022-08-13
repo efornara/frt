@@ -143,6 +143,7 @@ struct EventHandler {
 	virtual void handle_js_axis_event(int id, int axis, float value) = 0;
 	virtual void handle_js_hat_event(int id, int mask) = 0;
 	virtual void handle_quit_event() = 0;
+	virtual void handle_flush_events() = 0;
 };
 
 EventHandler::~EventHandler() {
@@ -409,6 +410,7 @@ public:
 				break;
 			}
 		}
+		handler_->handle_flush_events();
 	}
 	const InputModifierState *get_modifier_state() const {
 		return &st_;

@@ -12,7 +12,7 @@ if [ $# -ge 2 -a "$1" = '-t' ] ; then
 	tag=$2
 	shift 2
 else
-	tag=343
+	tag=350
 fi
 
 build_216_98() {
