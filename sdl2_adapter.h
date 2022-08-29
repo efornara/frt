@@ -340,7 +340,7 @@ public:
 	void init(GraphicsAPI api, int width, int height, bool resizable, bool borderless, bool always_on_top) {
 		setenv("SDL_VIDEO_RPI_OPTIONS", "gravity=center,scale=letterbox,background=1", 0);
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
-			fatal("SDL_Init failed.");
+			fatal("SDL_Init failed: %s.", SDL_GetError());
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, api == API_OpenGL_ES2 ? 2 : 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
@@ -353,7 +353,7 @@ public:
 		if (always_on_top)
 			flags |= SDL_WINDOW_ALWAYS_ON_TOP;
 		if (!(window_ = SDL_CreateWindow("frt2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags)))
-			fatal("SDL_CreateWindow failed.");
+			fatal("SDL_CreateWindow failed: %s.", SDL_GetError());
 		context_ = SDL_GL_CreateContext(window_);
 		SDL_GL_MakeCurrent(window_, context_);
 	}
