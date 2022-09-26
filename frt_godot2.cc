@@ -298,6 +298,14 @@ public: // OS
 	bool is_vsync_enabled() const FRT_OVERRIDE {
 		return os_.is_vsync_enabled();
 	}
+	void set_icon(const Image &icon) FRT_OVERRIDE {
+		if (icon.empty())
+			return;
+		Image i = icon;
+		i.convert(Image::FORMAT_RGBA);
+		DVector<uint8_t>::Read r = i.get_data().read();
+		os_.set_icon(i.get_width(), i.get_height(), r.ptr());
+	}
 public: // EventHandler
 	void handle_resize_event(ivec2 size) FRT_OVERRIDE {
 		video_mode_.width = size.x;

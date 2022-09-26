@@ -418,6 +418,16 @@ public:
 	void set_title(const char *title) {
 		SDL_SetWindowTitle(window_, title);
 	}
+	void set_icon(int width, int height, const unsigned char *data) {
+		SDL_Surface *icon = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_ABGR8888);
+		if (!icon)
+			return;
+		SDL_LockSurface(icon);
+		memcpy(icon->pixels, data, width * height * 4);
+		SDL_UnlockSurface(icon);
+		SDL_SetWindowIcon(window_, icon);
+		SDL_FreeSurface(icon);
+	}
 	void set_pos(ivec2 pos) {
 		SDL_SetWindowPosition(window_, pos.x, pos.y);
 	}
