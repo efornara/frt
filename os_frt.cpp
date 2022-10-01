@@ -765,6 +765,9 @@ public:
 			joystick->process_joypads();
 #endif
 #endif
+#if (VERSION_MAJOR == 3) && (VERSION_MINOR >= 4)
+			input->flush_buffered_events();
+#endif
 			if (Main::iteration() == true)
 				break;
 			if (perfmon.is_valid())
