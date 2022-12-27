@@ -34,12 +34,15 @@ if version.major == 2:
 	version_sources = ['frt_godot2.cc', 'dl/gles2.gen.cc']
 elif version.major == 3:
 	version_sources = ['frt_godot3.cc', 'dl/gles2.gen.cc', 'dl/gles3.gen.cc']
+elif version.major == 4:
+	version_sources = ['frt_godot4.cc', 'dl/gles3.gen.cc']
 
 std = env['frt_std']
 if std == 'auto':
 	std = {
 		2: 'c++98',
 		3: 'c++14',
+		4: 'c++17',
 	}[version.major]
 if std != 'no':
 	frt_env.Append(CCFLAGS=['-std=' + std])

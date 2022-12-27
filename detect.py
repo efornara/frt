@@ -12,6 +12,9 @@ if version.major == 2:
 elif version.major == 3:
 	from detect_godot3 import *
 	version_handled = True
+elif version.major == 4:
+	from detect_godot4 import *
+	version_handled = True
 else:
 	version_handled = False
 

@@ -9,3 +9,4 @@
 
 #define GLES2_INCLUDE_H "gles2_egl.h"
 #define GLES3_INCLUDE_H "dl/gles3.gen.h"
+#define OPENGL_INCLUDE_H "dl/gles3.gen.h"

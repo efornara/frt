@@ -253,3 +253,4 @@ typedef void (*___glInvalidateSubFramebuffer___)(GLenum target, GLsizei numAttac
 typedef void (*___glTexStorage2D___)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height);
 typedef void (*___glTexStorage3D___)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth);
 typedef void (*___glGetInternalformativ___)(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint *params);
+typedef void (*___glFramebufferTextureMultiviewOVR___)(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint baseViewIndex, GLsizei numViews);
