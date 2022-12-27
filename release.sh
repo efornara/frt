@@ -59,6 +59,10 @@ case $arch in
 		stripcmd="aarch64-linux-gnu-strip"
 		archopts="frt_cross=auto"
 		;;
+	x86_64)
+		stripcmd="x86_64-linux-gnu-strip"
+		archopts="frt_cross=auto"
+		;;
 	*) die "release.sh: invalid arch: $arch."
 esac
 shift
