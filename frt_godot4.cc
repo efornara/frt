@@ -7,6 +7,7 @@
 
 #include "frt.h"
 #include "sdl2_adapter.h"
+#include "sdl2_godot_mapping.h"
 
 #include "servers/display_server.h"
 #ifdef VULKAN_ENABLED
@@ -21,6 +22,10 @@
 
 namespace frt {
 
+// global pointers for create functions and callables
+struct OSEventHandler *os_event_handler_ = nullptr;
+class Godot4_DisplayServer *display_server_ = nullptr;
+
 struct OSEventHandler {
 	virtual ~OSEventHandler();
 	virtual void handle_quit_event() = 0;
@@ -29,20 +34,37 @@ struct OSEventHandler {
 OSEventHandler::~OSEventHandler() {
 }
 
-OSEventHandler *os_event_handler = nullptr; // TODO: is it possible to pass context to create?
-
 class Godot4_DisplayServer : public DisplayServer, public EventHandler {
 private:
 	OS_FRT os_;
-	OSEventHandler *os_event_handler_ = os_event_handler;
+	Callable input_event_callback_;
 	ObjectID instance_id_;
-public:
+	Input *input_ = nullptr;
+	void fill_modifier_state(Ref<InputEventWithModifiers> st) {
+		const InputModifierState *os_st = os_.get_modifier_state();
+		st->set_shift_pressed(os_st->shift);
+		st->set_alt_pressed(os_st->alt);
+		st->set_ctrl_pressed(os_st->control);
+		st->set_meta_pressed(os_st->meta);
+	}
+public: // DisplayServer (implicit)
 	Godot4_DisplayServer(const String &rendering_driver, WindowMode mode, VSyncMode vsync_mode, uint32_t flags, const Vector2i *position, const Vector2i &resolution, Error &error) : os_(this) {
 		os_.init(API_OpenGL_ES3, resolution.width, resolution.height, false, false, false);
 		window_set_vsync_mode(vsync_mode, MAIN_WINDOW_ID);
 		frt_resolve_symbols_gles3(get_proc_address);
 		RasterizerGLES3::make_current();
+		input_ = Input::get_singleton();
+		input_->set_event_dispatch_function(dispatch_events_func);
 		error = OK;
+	}
+	void dispatch_events(const Ref<InputEvent> &event) {
+		if (!input_event_callback_.is_valid())
+			return;
+		Variant arg0 = event;
+		const Variant *args[] = { &arg0 };
+		Variant ret;
+		Callable::CallError err;
+		input_event_callback_.callp(args, 1, ret, err);
 	}
 	static Vector<String> get_rendering_drivers_func() {
 		Vector<String> res;
@@ -54,11 +76,14 @@ public:
 #endif
 		return res;
 	}
+	static void dispatch_events_func(const Ref<InputEvent> &event) {
+		display_server_->dispatch_events(event);
+	}
 	static DisplayServer *create_func(const String &rendering_driver, WindowMode mode, VSyncMode vsync_mode, uint32_t flags, const Vector2i *position, const Vector2i &resolution, Error &error) {
-		DisplayServer *display_server = memnew(Godot4_DisplayServer(rendering_driver, mode, vsync_mode, flags, position, resolution, error));
+		display_server_ = memnew(Godot4_DisplayServer(rendering_driver, mode, vsync_mode, flags, position, resolution, error));
 		if (error != OK)
 			warn("display server creation failed.");
-		return display_server;
+		return display_server_;
 	}
 	static void register_display_server() {
 		register_create_function("frt", create_func, get_rendering_drivers_func);
@@ -113,6 +138,7 @@ public: // DisplayServer
 	void window_set_window_event_callback(const Callable &callable, WindowID window) override {
 	}
 	void window_set_input_event_callback(const Callable &callable, WindowID window) override {
+		input_event_callback_ = callable;
 	}
 	void window_set_input_text_callback(const Callable &callable, WindowID window) override {
 	}
@@ -214,16 +240,17 @@ public: // EventHandler
 	void handle_resize_event(ivec2 size) override {
 	}
 	void handle_key_event(int sdl2_code, int unicode, bool pressed) override {
-		if (pressed)
-			return;
-		switch (sdl2_code) {
-		case SDLK_ESCAPE:
-			os_event_handler_->handle_quit_event();
-			break;
-		case SDLK_v:
-			os_.set_use_vsync(!os_.is_vsync_enabled());
-			break;
-		}
+		Key code = (Key)map_key_sdl2_code(sdl2_code);
+		Ref<InputEventKey> key;
+		key.instantiate();
+		fill_modifier_state(key);
+		key->set_window_id(MAIN_WINDOW_ID);
+		key->set_pressed(pressed);
+		key->set_keycode(code);
+		key->set_physical_keycode(code);
+		key->set_unicode(unicode);
+		key->set_echo(false);
+		input_->parse_input_event(key);
 	}
 	void handle_mouse_motion_event(ivec2 pos, ivec2 dpos) override {
 	}
@@ -241,7 +268,7 @@ public: // EventHandler
 		os_event_handler_->handle_quit_event();
 	}
 	void handle_flush_events() override {
-		Input::get_singleton()->flush_buffered_events();
+		input_->flush_buffered_events();
 	}
 };
 
@@ -251,14 +278,14 @@ private:
 	bool quit_ = false;
 public:
 	Godot4_OS() {
-		os_event_handler = this;
+		os_event_handler_ = this;
 		Godot4_DisplayServer::register_display_server();
 	}
 	void run() {
 		if (main_loop_) {
 			main_loop_->initialize();
 			while (!quit_ && !Main::iteration())
-				DisplayServer::get_singleton()->process_events();
+				DisplayServer::get_singleton()->process_events(); // no display_server_ because it could be running headless
 			main_loop_->finalize();
 		}
 	}

@@ -10,12 +10,21 @@
 #define FRT_GODOT_VERSION ((((VERSION_MAJOR * 100) + VERSION_MINOR) * 100) + VERSION_PATCH)
 
 #include "core/os/os.h"
+#if FRT_GODOT_VERSION < 40000
 #include "core/os/input.h"
-#include "core/os/keyboard.h"
 #include "main/input_default.h"
+#endif
+#include "core/os/keyboard.h"
+
+#if FRT_GODOT_VERSION >= 40000
+#define KEYGD(x) (int)Key::x
+#else
+#define KEYGD(x) KEY_ ## x
+#endif
 
 namespace frt {
 
+#if FRT_GODOT_VERSION < 40000
 int map_mouse_os_button(int os_button) {
 	switch (os_button) {
 	case ButtonLeft:
@@ -74,6 +83,7 @@ int map_hat_os_mask(int os_mask) {
 		mask |= InputDefault::HAT_MASK_LEFT;
 	return mask;
 }
+#endif
 
 struct KeyMap {
 	int sdl2_code;
@@ -116,60 +126,69 @@ struct KeyMap {
 	{ SDLK_7, '7' },
 	{ SDLK_8, '8' },
 	{ SDLK_9, '9' },
-	{ SDLK_F1, KEY_F1 },
-	{ SDLK_F2, KEY_F2 },
-	{ SDLK_F3, KEY_F3 },
-	{ SDLK_F4, KEY_F4 },
-	{ SDLK_F5, KEY_F5 },
-	{ SDLK_F6, KEY_F6 },
-	{ SDLK_F7, KEY_F7 },
-	{ SDLK_F8, KEY_F8 },
-	{ SDLK_F9, KEY_F9 },
-	{ SDLK_F10, KEY_F10 },
-	{ SDLK_F11, KEY_F11 },
-	{ SDLK_F12, KEY_F12 },
-	{ SDLK_UP, KEY_UP },
-	{ SDLK_DOWN, KEY_DOWN },
-	{ SDLK_LEFT, KEY_LEFT },
-	{ SDLK_RIGHT, KEY_RIGHT },
-	{ SDLK_TAB, KEY_TAB },
-	{ SDLK_BACKSPACE, KEY_BACKSPACE },
-	{ SDLK_INSERT, KEY_INSERT },
-	{ SDLK_DELETE, KEY_DELETE },
-	{ SDLK_HOME, KEY_HOME },
-	{ SDLK_END, KEY_END },
-	{ SDLK_PAGEUP, KEY_PAGEUP },
-	{ SDLK_PAGEDOWN, KEY_PAGEDOWN },
-#if FRT_GODOT_VERSION >= 30000
-	{ SDLK_RETURN, KEY_ENTER },
+	{ SDLK_F1, KEYGD(F1) },
+	{ SDLK_F2, KEYGD(F2) },
+	{ SDLK_F3, KEYGD(F3) },
+	{ SDLK_F4, KEYGD(F4) },
+	{ SDLK_F5, KEYGD(F5) },
+	{ SDLK_F6, KEYGD(F6) },
+	{ SDLK_F7, KEYGD(F7) },
+	{ SDLK_F8, KEYGD(F8) },
+	{ SDLK_F9, KEYGD(F9) },
+	{ SDLK_F10, KEYGD(F10) },
+	{ SDLK_F11, KEYGD(F11) },
+	{ SDLK_F12, KEYGD(F12) },
+	{ SDLK_UP, KEYGD(UP) },
+	{ SDLK_DOWN, KEYGD(DOWN) },
+	{ SDLK_LEFT, KEYGD(LEFT) },
+	{ SDLK_RIGHT, KEYGD(RIGHT) },
+	{ SDLK_TAB, KEYGD(TAB) },
+	{ SDLK_BACKSPACE, KEYGD(BACKSPACE) },
+	{ SDLK_INSERT, KEYGD(INSERT) },
+#if FRT_GODOT_VERSION >= 40000
+	{ SDLK_DELETE, KEYGD(KEY_DELETE) },
 #else
-	{ SDLK_RETURN, KEY_RETURN },
+	{ SDLK_DELETE, KEYGD(DELETE) },
 #endif
-	{ SDLK_ESCAPE, KEY_ESCAPE },
-	{ SDLK_LCTRL, KEY_CONTROL },
-	{ SDLK_RCTRL, KEY_CONTROL },
-	{ SDLK_LALT, KEY_ALT },
-	{ SDLK_RALT, KEY_ALT },
-	{ SDLK_LSHIFT, KEY_SHIFT },
-	{ SDLK_RSHIFT, KEY_SHIFT },
-	{ SDLK_LGUI, KEY_META },
-	{ SDLK_RGUI, KEY_META },
-	{ SDLK_KP_0, KEY_KP_0 },
-	{ SDLK_KP_1, KEY_KP_1 },
-	{ SDLK_KP_2, KEY_KP_2 },
-	{ SDLK_KP_3, KEY_KP_3 },
-	{ SDLK_KP_4, KEY_KP_4 },
-	{ SDLK_KP_5, KEY_KP_5 },
-	{ SDLK_KP_6, KEY_KP_6 },
-	{ SDLK_KP_7, KEY_KP_7 },
-	{ SDLK_KP_8, KEY_KP_8 },
-	{ SDLK_KP_9, KEY_KP_9 },
-	{ SDLK_KP_MULTIPLY, KEY_KP_MULTIPLY },
-	{ SDLK_KP_MINUS, KEY_KP_SUBTRACT },
-	{ SDLK_KP_PLUS, KEY_KP_ADD },
-	{ SDLK_KP_PERIOD, KEY_KP_PERIOD },
-	{ SDLK_KP_ENTER, KEY_KP_ENTER },
-	{ SDLK_KP_DIVIDE, KEY_KP_DIVIDE },
+	{ SDLK_HOME, KEYGD(HOME) },
+	{ SDLK_END, KEYGD(END) },
+	{ SDLK_PAGEUP, KEYGD(PAGEUP) },
+	{ SDLK_PAGEDOWN, KEYGD(PAGEDOWN) },
+#if FRT_GODOT_VERSION >= 30000
+	{ SDLK_RETURN, KEYGD(ENTER) },
+#else
+	{ SDLK_RETURN, KEYGD(RETURN) },
+#endif
+	{ SDLK_ESCAPE, KEYGD(ESCAPE) },
+#if FRT_GODOT_VERSION >= 40000
+	{ SDLK_LCTRL, KEYGD(CTRL) },
+	{ SDLK_RCTRL, KEYGD(CTRL) },
+#else
+	{ SDLK_LCTRL, KEYGD(CONTROL) },
+	{ SDLK_RCTRL, KEYGD(CONTROL) },
+#endif
+	{ SDLK_LALT, KEYGD(ALT) },
+	{ SDLK_RALT, KEYGD(ALT) },
+	{ SDLK_LSHIFT, KEYGD(SHIFT) },
+	{ SDLK_RSHIFT, KEYGD(SHIFT) },
+	{ SDLK_LGUI, KEYGD(META) },
+	{ SDLK_RGUI, KEYGD(META) },
+	{ SDLK_KP_0, KEYGD(KP_0) },
+	{ SDLK_KP_1, KEYGD(KP_1) },
+	{ SDLK_KP_2, KEYGD(KP_2) },
+	{ SDLK_KP_3, KEYGD(KP_3) },
+	{ SDLK_KP_4, KEYGD(KP_4) },
+	{ SDLK_KP_5, KEYGD(KP_5) },
+	{ SDLK_KP_6, KEYGD(KP_6) },
+	{ SDLK_KP_7, KEYGD(KP_7) },
+	{ SDLK_KP_8, KEYGD(KP_8) },
+	{ SDLK_KP_9, KEYGD(KP_9) },
+	{ SDLK_KP_MULTIPLY, KEYGD(KP_MULTIPLY) },
+	{ SDLK_KP_MINUS, KEYGD(KP_SUBTRACT) },
+	{ SDLK_KP_PLUS, KEYGD(KP_ADD) },
+	{ SDLK_KP_PERIOD, KEYGD(KP_PERIOD) },
+	{ SDLK_KP_ENTER, KEYGD(KP_ENTER) },
+	{ SDLK_KP_DIVIDE, KEYGD(KP_DIVIDE) },
 	{ 0, 0 },
 };
 
@@ -182,3 +201,5 @@ int map_key_sdl2_code(int sdl2_code) {
 }
 
 } // namespace frt
+
+#undef KEYGD
