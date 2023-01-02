@@ -9,10 +9,10 @@
 #include "sdl2_adapter.h"
 
 #include "servers/display_server.h"
-#if defined(VULKAN_ENABLED)
-#include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
+#ifdef VULKAN_ENABLED
+//#include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
 #endif
-#if defined(GLES3_ENABLED)
+#ifdef GLES3_ENABLED
 #include "drivers/gles3/rasterizer_gles3.h"
 #endif
 
@@ -29,15 +29,15 @@ struct OSEventHandler {
 OSEventHandler::~OSEventHandler() {
 }
 
-OSEventHandler *os_event_handler{nullptr}; // TODO: is it possible to pass context to create?
+OSEventHandler *os_event_handler = nullptr; // TODO: is it possible to pass context to create?
 
 class Godot4_DisplayServer : public DisplayServer, public EventHandler {
 private:
 	OS_FRT os_;
-	OSEventHandler *os_event_handler_{os_event_handler};
-	ObjectID instance_id_{};
+	OSEventHandler *os_event_handler_ = os_event_handler;
+	ObjectID instance_id_;
 public:
-	Godot4_DisplayServer(const String &rendering_driver, WindowMode mode, VSyncMode vsync_mode, uint32_t flags, const Vector2i *position, const Vector2i &resolution, Error &error) : os_{this} {
+	Godot4_DisplayServer(const String &rendering_driver, WindowMode mode, VSyncMode vsync_mode, uint32_t flags, const Vector2i *position, const Vector2i &resolution, Error &error) : os_(this) {
 		os_.init(API_OpenGL_ES3, resolution.width, resolution.height, false, false, false);
 		window_set_vsync_mode(vsync_mode, MAIN_WINDOW_ID);
 		frt_resolve_symbols_gles3(get_proc_address);
@@ -45,7 +45,7 @@ public:
 		error = OK;
 	}
 	static Vector<String> get_rendering_drivers_func() {
-		Vector<String> res{};
+		Vector<String> res;
 #ifdef VULKAN_ENABLED
 //		res.push_back("vulkan");
 #endif
@@ -80,13 +80,13 @@ public: // DisplayServer
 		return 1;
 	}
 	Point2i screen_get_position(int screen) const override {
-		return Point2i{};
+		return Point2i();
 	}
 	Size2i screen_get_size(int screen) const override {
-		return Size2i{1280, 720};
+		return Size2i(1280, 720);
 	}
 	Rect2i screen_get_usable_rect(int screen) const override {
-		return Rect2i{Point2i{}, Size2i{1280, 720}};
+		return Rect2i(Point2i(), Size2i(1280, 720));
 	}
 	int screen_get_dpi(int screen) const override {
 		return 72;
@@ -95,7 +95,7 @@ public: // DisplayServer
 		return 60.0f;
 	}
 	Vector<WindowID> get_window_list() const override {
-		Vector<WindowID> res{};
+		Vector<WindowID> res;
 		res.push_back(MAIN_WINDOW_ID);
 		return res;
 	}
@@ -128,11 +128,11 @@ public: // DisplayServer
 	}
 	Point2i window_get_position(WindowID window) const override {
 		ivec2 pos = os_.get_pos();
-		return Point2i{pos.x, pos.y};
+		return Point2i(pos.x, pos.y);
 	}
 	Point2i window_get_position_with_decorations(WindowID window) const override {
 		ivec2 pos = os_.get_pos();
-		return Point2i{pos.x, pos.y};
+		return Point2i(pos.x, pos.y);
 	}
 	void window_set_position(const Point2i &position, WindowID window) override {
 		ivec2 os_pos = { position.width, position.height };
@@ -143,24 +143,24 @@ public: // DisplayServer
 	void window_set_max_size(const Size2i size, WindowID window) override {
 	}
 	Size2i window_get_max_size(WindowID window) const override {
-		return Size2i{};
+		return Size2i();
 	}
 	void window_set_min_size(const Size2i size, WindowID window) override {
 	}
 	Size2i window_get_min_size(WindowID window) const override {
-		return Size2i{};
+		return Size2i();
 	}
 	void window_set_size(const Size2i size, WindowID window) override {
 		ivec2 os_size = { size.width, size.height };
 		os_.set_size(os_size);
 	}
 	Size2i window_get_size(WindowID window) const override {
-		ivec2 os_size{os_.get_size()};
-		return Size2i{os_size.x, os_size.y};
+		ivec2 os_size = os_.get_size();
+		return Size2i(os_size.x, os_size.y);
 	}
 	Size2i window_get_size_with_decorations(WindowID window) const override {
-		ivec2 os_size{os_.get_size()};
-		return Size2i{os_size.x, os_size.y};
+		ivec2 os_size = os_.get_size();
+		return Size2i(os_size.x, os_size.y);
 	}
 	void window_set_mode(WindowMode mode, WindowID window) override {
 	}
@@ -247,8 +247,8 @@ public: // EventHandler
 
 class Godot4_OS : public OS_Unix, public OSEventHandler {
 private:
-	MainLoop *main_loop_{nullptr};
-	bool quit_{false};
+	MainLoop *main_loop_ = nullptr;
+	bool quit_ = false;
 public:
 	Godot4_OS() {
 		os_event_handler = this;
@@ -296,7 +296,7 @@ public: // OSEventHandler
 #include "frt_lib.h"
 
 extern "C" int frt_godot_main(int argc, char *argv[]) {
-	frt::Godot4_OS os{};
+	frt::Godot4_OS os;
 	Error err = Main::setup(argv[0], argc - 1, &argv[1]);
 	if (err != OK)
 		return 255;
