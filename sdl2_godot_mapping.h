@@ -13,57 +13,62 @@
 #if FRT_GODOT_VERSION < 40000
 #include "core/os/input.h"
 #include "main/input_default.h"
+#else
+#include "servers/display_server.h"
 #endif
 #include "core/os/keyboard.h"
 
 #if FRT_GODOT_VERSION >= 40000
 #define KEYGD(x) (int)Key::x
+#define BTNGD(x) (int)::MouseButton::x
+#define MMCGD DisplayServer
 #else
 #define KEYGD(x) KEY_ ## x
+#define BTNGD(x) BUTTON_ ## x
+#define MMCGD OS
 #endif
 
 namespace frt {
 
-#if FRT_GODOT_VERSION < 40000
 int map_mouse_os_button(int os_button) {
 	switch (os_button) {
 	case ButtonLeft:
-		return BUTTON_LEFT;
+		return BTNGD(LEFT);
 	case ButtonRight:
-		return BUTTON_RIGHT;
+		return BTNGD(RIGHT);
 	case ButtonMiddle:
-		return BUTTON_MIDDLE;
+		return BTNGD(MIDDLE);
 	case WheelUp:
-		return BUTTON_WHEEL_UP;
+		return BTNGD(WHEEL_UP);
 	case WheelDown:
-		return BUTTON_WHEEL_DOWN;
+		return BTNGD(WHEEL_DOWN);
 	default:
 		fatal("unexpected mouse button: %d", os_button);
 	}
 }
 
-OS::MouseMode map_mouse_os_mode(MouseMode os_mode) {
+MMCGD::MouseMode map_mouse_os_mode(MouseMode os_mode) {
 	switch (os_mode) {
 	case MouseVisible:
-		return OS::MOUSE_MODE_VISIBLE;
+		return MMCGD::MOUSE_MODE_VISIBLE;
 	case MouseHidden:
-		return OS::MOUSE_MODE_HIDDEN;
+		return MMCGD::MOUSE_MODE_HIDDEN;
 	case MouseCaptured:
-		return OS::MOUSE_MODE_CAPTURED;
+		return MMCGD::MOUSE_MODE_CAPTURED;
 	default:
 		fatal("unexpected mouse mode: %d", os_mode);
 	}
 }
 
-MouseMode map_mouse_mode(OS::MouseMode mode) {
+MouseMode map_mouse_mode(MMCGD::MouseMode mode) {
 	switch (mode) {
-	case OS::MOUSE_MODE_VISIBLE:
+	case MMCGD::MOUSE_MODE_VISIBLE:
 		return MouseVisible;
-	case OS::MOUSE_MODE_HIDDEN:
+	case MMCGD::MOUSE_MODE_HIDDEN:
 		return MouseHidden;
-	case OS::MOUSE_MODE_CAPTURED:
+	case MMCGD::MOUSE_MODE_CAPTURED:
 #if FRT_GODOT_VERSION >= 30000
-	case OS::MOUSE_MODE_CONFINED:
+	case MMCGD::MOUSE_MODE_CONFINED:
 #endif
 		return MouseCaptured;
 	default: // NOT REACHED
@@ -71,6 +76,7 @@ MouseMode map_mouse_mode(OS::MouseMode mode) {
 	}
 }
 
+#if FRT_GODOT_VERSION < 40000
 int map_hat_os_mask(int os_mask) {
 	int mask = 0;
 	if (os_mask & HatUp)
@@ -203,3 +209,5 @@ int map_key_sdl2_code(int sdl2_code) {
 } // namespace frt
 
 #undef KEYGD
+#undef BTNGD
+#undef MMCGD

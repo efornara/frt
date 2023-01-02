@@ -9,7 +9,6 @@
 #include "sdl2_adapter.h"
 #include "sdl2_godot_mapping.h"
 
-#include "servers/display_server.h"
 #ifdef VULKAN_ENABLED
 //#include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
 #endif
@@ -40,6 +39,8 @@ private:
 	Callable input_event_callback_;
 	ObjectID instance_id_;
 	Input *input_ = nullptr;
+	Point2i mouse_pos_ = Point2i(-1, -1);
+	int mouse_state_ = 0;
 	void fill_modifier_state(Ref<InputEventWithModifiers> st) {
 		const InputModifierState *os_st = os_.get_modifier_state();
 		st->set_shift_pressed(os_st->shift);
@@ -91,6 +92,7 @@ public: // DisplayServer (implicit)
 public: // DisplayServer
 	bool has_feature(Feature feature) const override {
 		switch (feature) {
+		case FEATURE_MOUSE:
 		case FEATURE_ICON:
 		case FEATURE_SWAP_BUFFERS:
 			return true;
@@ -143,6 +145,18 @@ public: // DisplayServer
 	void window_set_input_text_callback(const Callable &callable, WindowID window) override {
 	}
 	void window_set_drop_files_callback(const Callable &callable, WindowID window) override {
+	}
+	Point2i mouse_get_position() const override {
+		return mouse_pos_;
+	}
+	::MouseButton mouse_get_button_state() const override {
+		return (::MouseButton)mouse_state_;
+	}
+	void mouse_set_mode(MouseMode mode) override {
+		os_.set_mouse_mode(map_mouse_mode(mode));
+	}
+	MouseMode mouse_get_mode() const override {
+		return map_mouse_os_mode(os_.get_mouse_mode());
 	}
 	void window_set_title(const String &title, WindowID window) override {
 		os_.set_title(title.utf8().get_data());
@@ -253,8 +267,42 @@ public: // EventHandler
 		input_->parse_input_event(key);
 	}
 	void handle_mouse_motion_event(ivec2 pos, ivec2 dpos) override {
+		mouse_pos_.x = pos.x;
+		mouse_pos_.y = pos.y;
+		Ref<InputEventMouseMotion> mouse_motion;
+		mouse_motion.instantiate();
+		fill_modifier_state(mouse_motion);
+		mouse_motion->set_window_id(MAIN_WINDOW_ID);
+		Point2i posi(pos.x, pos.y);
+		mouse_motion->set_button_mask((::MouseButton)mouse_state_);
+		mouse_motion->set_position(posi);
+		mouse_motion->set_global_position(mouse_motion->get_position());
+		input_->set_mouse_position(posi);
+		mouse_motion->set_velocity(input_->get_last_mouse_velocity());
+		Point2i reli(dpos.x, dpos.y);
+		mouse_motion->set_relative(reli);
+		input_->parse_input_event(mouse_motion);
 	}
-	void handle_mouse_button_event(int button, bool pressed, bool doubleclick) override {
+	void handle_mouse_button_event(int os_button, bool pressed, bool doubleclick) FRT_OVERRIDE {
+		int button = map_mouse_os_button(os_button);
+		int bit = (1 << (button - 1));
+		if (pressed)
+			mouse_state_ |= bit;
+		else
+			mouse_state_ &= ~bit;
+		Ref<InputEventMouseButton> mouse_button;
+		mouse_button.instantiate();
+		fill_modifier_state(mouse_button);
+		mouse_button->set_window_id(MAIN_WINDOW_ID);
+		Point2i posi(mouse_pos_.x, mouse_pos_.y);
+		mouse_button->set_position(posi);
+		mouse_button->set_global_position(posi);
+		mouse_button->set_global_position(mouse_button->get_position());
+		mouse_button->set_button_index((::MouseButton)button);
+		mouse_button->set_button_mask((::MouseButton)mouse_state_);
+		mouse_button->set_double_click(doubleclick);
+		mouse_button->set_pressed(pressed);
+		input_->parse_input_event(mouse_button);
 	}
 	void handle_js_status_event(int id, bool connected, const char *name, const char *guid) override {
 	}
