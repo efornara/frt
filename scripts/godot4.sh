@@ -14,7 +14,7 @@ die() {
 }
 
 usage() {
-	die "usage: godot4.sh arch"
+	die "usage: godot4.sh [arch]"
 }
 
 print_header() {
@@ -37,9 +37,21 @@ build() {
 	release
 }
 
-[ $# -eq 1 ] || usage
+if [ $# -eq 0 ] ; then
+	if [ -f /usr/bin/arm-linux-gnueabihf-strip ] ; then
+		arch=arm32v7
+	elif [ -f /usr/bin/aarch64-linux-gnu-strip ] ; then
+		arch=arm64v8
+	else
+		arch=x86_64
+	fi
+elif [ $# -eq 1 ] ; then
+	arch=$1
+	shift
+else
+	usage
+fi
 
-arch=$1
 case $arch in
 	arm32v7)
 		stripcmd="arm-linux-gnueabihf-strip"
@@ -55,7 +67,6 @@ case $arch in
 		;;
 	*) die "godot4.sh: invalid arch: $arch."
 esac
-shift
 
 [ -d releases ] || die "godot4.sh: no releases directory."
 [ -d tag_400 ] || die "godot4.sh: tag directory tag_400 not found."
