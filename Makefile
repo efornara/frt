@@ -1,7 +1,7 @@
 # Makefile
 #
 # FRT - A Godot platform targeting single board computers
-# Copyright (c) 2017-2022  Emanuele Fornara
+# Copyright (c) 2017-2023  Emanuele Fornara
 # SPDX-License-Identifier: MIT
 #
 
