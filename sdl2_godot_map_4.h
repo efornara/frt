@@ -59,20 +59,19 @@ MouseMode map_mouse_mode(DisplayServer::MouseMode mode) {
 	}
 }
 
-#if FRT_GODOT_VERSION < 40000
-int map_hat_os_mask(int os_mask) {
-	int mask = 0;
+::HatMask map_hat_os_mask(int os_mask) {
+	using ::HatMask;
+	HatMask mask = (HatMask)0;
 	if (os_mask & HatUp)
-		mask |= InputDefault::HAT_MASK_UP;
+		mask |= HatMask::UP;
 	if (os_mask & HatRight)
-		mask |= InputDefault::HAT_MASK_RIGHT;
+		mask |= HatMask::RIGHT;
 	if (os_mask & HatDown)
-		mask |= InputDefault::HAT_MASK_DOWN;
+		mask |= HatMask::DOWN;
 	if (os_mask & HatLeft)
-		mask |= InputDefault::HAT_MASK_LEFT;
+		mask |= HatMask::LEFT;
 	return mask;
 }
-#endif
 
 struct KeyMap {
 	int sdl2_code;

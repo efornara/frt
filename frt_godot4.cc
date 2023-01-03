@@ -337,7 +337,7 @@ public: // EventHandler
 		mouse_motion->set_relative(reli);
 		input_->parse_input_event(mouse_motion);
 	}
-	void handle_mouse_button_event(int os_button, bool pressed, bool doubleclick) FRT_OVERRIDE {
+	void handle_mouse_button_event(int os_button, bool pressed, bool doubleclick) override {
 		int button = (int)map_mouse_os_button(os_button);
 		int bit = (1 << (button - 1));
 		if (pressed)
@@ -359,12 +359,17 @@ public: // EventHandler
 		input_->parse_input_event(mouse_button);
 	}
 	void handle_js_status_event(int id, bool connected, const char *name, const char *guid) override {
+		input_->joy_connection_changed(id, connected, name, guid);
 	}
 	void handle_js_button_event(int id, int button, bool pressed) override {
+		input_->joy_button(id, (JoyButton)button, pressed ? 1 : 0);
 	}
 	void handle_js_axis_event(int id, int axis, float value) override {
+		input_->joy_axis(id, (JoyAxis)axis, value);
 	}
-	void handle_js_hat_event(int id, int mask) override {
+	void handle_js_hat_event(int id, int os_mask) override {
+		::HatMask mask = map_hat_os_mask(os_mask);
+		input_->joy_hat(id, mask);
 	}
 	void handle_quit_event() override {
 		os_event_handler_->handle_quit_event();
