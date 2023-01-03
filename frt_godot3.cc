@@ -7,7 +7,7 @@
 
 #include "frt.h"
 #include "sdl2_adapter.h"
-#include "sdl2_godot_mapping.h"
+#include "sdl2_godot_map_2_3.h"
 #include "drivers/gles3/rasterizer_gles3.h"
 #define FRT_DL_SKIP
 #include "drivers/gles2/rasterizer_gles2.h"

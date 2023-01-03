@@ -7,7 +7,7 @@
 
 #include "frt.h"
 #include "sdl2_adapter.h"
-#include "sdl2_godot_mapping.h"
+#include "sdl2_godot_map_4.h"
 
 #ifdef VULKAN_ENABLED
 //#include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
@@ -254,7 +254,7 @@ public: // EventHandler
 	void handle_resize_event(ivec2 size) override {
 	}
 	void handle_key_event(int sdl2_code, int unicode, bool pressed) override {
-		Key code = (Key)map_key_sdl2_code(sdl2_code);
+		Key code = map_key_sdl2_code(sdl2_code);
 		Ref<InputEventKey> key;
 		key.instantiate();
 		fill_modifier_state(key);
@@ -284,7 +284,7 @@ public: // EventHandler
 		input_->parse_input_event(mouse_motion);
 	}
 	void handle_mouse_button_event(int os_button, bool pressed, bool doubleclick) FRT_OVERRIDE {
-		int button = map_mouse_os_button(os_button);
+		int button = (int)map_mouse_os_button(os_button);
 		int bit = (1 << (button - 1));
 		if (pressed)
 			mouse_state_ |= bit;

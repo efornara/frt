@@ -7,7 +7,7 @@
 
 #include "frt.h"
 #include "sdl2_adapter.h"
-#include "sdl2_godot_mapping.h"
+#include "sdl2_godot_map_2_3.h"
 #include "dl/gles2.gen.h"
 
 #include "core/print_string.h"
