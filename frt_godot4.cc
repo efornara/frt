@@ -16,10 +16,68 @@
 #include "drivers/gles3/rasterizer_gles3.h"
 #endif
 
+#include "servers/audio_server.h"
+#include "core/config/project_settings.h"
+
 #include "drivers/unix/os_unix.h"
 #include "main/main.h"
 
 namespace frt {
+
+static const char *default_audio_device = "default"; // TODO
+
+class AudioDriverSDL2 : public AudioDriver, public SampleProducer {
+private:
+	Audio audio_;
+	int mix_rate_;
+	SpeakerMode speaker_mode_;
+public:
+	AudioDriverSDL2() : audio_(this) {
+	}
+public: // AudioDriverSW
+	const char *get_name() const override {
+		return "SDL2";
+	}
+	Error init() override {
+		mix_rate_ = GLOBAL_GET("audio/driver/mix_rate");
+		speaker_mode_ = SPEAKER_MODE_STEREO;
+		const int latency = GLOBAL_GET("audio/driver/output_latency");
+		const int samples = closest_power_of_2(latency * mix_rate_ / 1000);
+		return audio_.init(mix_rate_, samples) ? OK : ERR_CANT_OPEN;
+	}
+	int get_mix_rate() const override {
+		return mix_rate_;
+	}
+	SpeakerMode get_speaker_mode() const override {
+		return speaker_mode_;
+	}
+	PackedStringArray get_device_list() override {
+		PackedStringArray list;
+		list.push_back(default_audio_device);
+		return list;
+	}
+	String get_device() override {
+		return default_audio_device;
+	}
+	void set_device(String device) override {
+	}
+	void start() override {
+		audio_.start();
+	}
+	void lock() override {
+		audio_.lock();
+	}
+	void unlock() override {
+		audio_.unlock();
+	}
+	void finish() override {
+		audio_.finish();
+	}
+public: // SampleProducer
+	void produce_samples(int n_of_frames, int32_t *frames) override {
+		audio_server_process(n_of_frames, frames);
+	}
+};
 
 // global pointers for create functions and callables
 struct OSEventHandler *os_event_handler_ = nullptr;
@@ -383,9 +441,11 @@ class Godot4_OS : public OS_Unix, public OSEventHandler {
 private:
 	MainLoop *main_loop_ = nullptr;
 	bool quit_ = false;
+	AudioDriverSDL2 audio_driver_;
 public:
 	Godot4_OS() {
 		os_event_handler_ = this;
+		AudioDriverManager::add_driver(&audio_driver_); // TODO: headless with audio?
 		Godot4_DisplayServer::register_display_server();
 	}
 	void run() {
