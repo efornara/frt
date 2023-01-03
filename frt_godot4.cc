@@ -36,11 +36,15 @@ OSEventHandler::~OSEventHandler() {
 class Godot4_DisplayServer : public DisplayServer, public EventHandler {
 private:
 	OS_FRT os_;
+	Callable rect_changed_callback_;
 	Callable input_event_callback_;
 	ObjectID instance_id_;
 	Input *input_ = nullptr;
 	Point2i mouse_pos_ = Point2i(-1, -1);
 	int mouse_state_ = 0;
+	bool resizable_;
+	bool borderless_;
+	bool always_on_top_;
 	void fill_modifier_state(Ref<InputEventWithModifiers> st) {
 		const InputModifierState *os_st = os_.get_modifier_state();
 		st->set_shift_pressed(os_st->shift);
@@ -48,9 +52,21 @@ private:
 		st->set_ctrl_pressed(os_st->control);
 		st->set_meta_pressed(os_st->meta);
 	}
+	void invoke_callback_1(Callable &callback, Variant &arg0) {
+		if (!callback.is_valid())
+			return;
+		const Variant *args[] = { &arg0 };
+		Variant ret;
+		Callable::CallError err;
+		callback.callp(args, 1, ret, err);
+	}
 public: // DisplayServer (implicit)
 	Godot4_DisplayServer(const String &rendering_driver, WindowMode mode, VSyncMode vsync_mode, uint32_t flags, const Vector2i *position, const Vector2i &resolution, Error &error) : os_(this) {
-		os_.init(API_OpenGL_ES3, resolution.width, resolution.height, false, false, false);
+		resizable_ = !(flags & WINDOW_FLAG_RESIZE_DISABLED_BIT);
+		borderless_ = flags & WINDOW_FLAG_BORDERLESS_BIT;
+		always_on_top_ = flags & WINDOW_FLAG_ALWAYS_ON_TOP_BIT;
+		os_.init(API_OpenGL_ES3, resolution.width, resolution.height, resizable_, borderless_, always_on_top_);
+		window_set_mode(mode, MAIN_WINDOW_ID);
 		window_set_vsync_mode(vsync_mode, MAIN_WINDOW_ID);
 		frt_resolve_symbols_gles3(get_proc_address);
 		RasterizerGLES3::make_current();
@@ -59,13 +75,8 @@ public: // DisplayServer (implicit)
 		error = OK;
 	}
 	void dispatch_events(const Ref<InputEvent> &event) {
-		if (!input_event_callback_.is_valid())
-			return;
 		Variant arg0 = event;
-		const Variant *args[] = { &arg0 };
-		Variant ret;
-		Callable::CallError err;
-		input_event_callback_.callp(args, 1, ret, err);
+		invoke_callback_1(input_event_callback_, arg0);
 	}
 	static Vector<String> get_rendering_drivers_func() {
 		Vector<String> res;
@@ -136,6 +147,7 @@ public: // DisplayServer
 		return instance_id_;
 	}
 	void window_set_rect_changed_callback(const Callable &callable, WindowID window) override {
+		rect_changed_callback_ = callable;
 	}
 	void window_set_window_event_callback(const Callable &callable, WindowID window) override {
 	}
@@ -202,18 +214,56 @@ public: // DisplayServer
 		ivec2 os_size = os_.get_size();
 		return Size2i(os_size.x, os_size.y);
 	}
+	// TODO: update sdl2_adapter? wait?
 	void window_set_mode(WindowMode mode, WindowID window) override {
+		switch (mode) {
+		case WINDOW_MODE_WINDOWED:
+			if (os_.is_fullscreen())
+				os_.set_fullscreen(false);
+			else if (os_.is_maximized())
+				os_.set_maximized(false);
+			else if (os_.is_minimized())
+				os_.set_minimized(false);
+			break;
+		case WINDOW_MODE_MINIMIZED:
+			os_.set_minimized(true);
+			break;
+		case WINDOW_MODE_MAXIMIZED:
+			os_.set_maximized(true);
+			break;
+		case WINDOW_MODE_FULLSCREEN:
+		case WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+			os_.set_fullscreen(true);
+			break;
+		}
 	}
 	WindowMode window_get_mode(WindowID window) const override {
-		return WINDOW_MODE_WINDOWED;
+		if (os_.is_fullscreen())
+			return WINDOW_MODE_FULLSCREEN;
+		else if (os_.is_maximized())
+			return WINDOW_MODE_MAXIMIZED;
+		else if (os_.is_minimized())
+			return WINDOW_MODE_MINIMIZED;
+		else
+			return WINDOW_MODE_WINDOWED;
 	}
 	bool window_is_maximize_allowed(WindowID window) const override {
-		return false;
+		return resizable_;
 	}
 	void window_set_flag(WindowFlags flag, bool enabled, WindowID window) override {
+		// NOT IMPLEMENTED
 	}
 	bool window_get_flag(WindowFlags flag, WindowID window) const override {
-		return false;
+		switch (flag) {
+		case WINDOW_FLAG_RESIZE_DISABLED:
+			return !resizable_;
+		case WINDOW_FLAG_BORDERLESS:
+			return borderless_;
+		case WINDOW_FLAG_ALWAYS_ON_TOP:
+			return always_on_top_;
+		default:
+			return false;
+		}
 	}
 	void window_request_attention(WindowID window) override {
 	}
@@ -252,6 +302,10 @@ public: // DisplayServer
 	}
 public: // EventHandler
 	void handle_resize_event(ivec2 size) override {
+		ivec2 pos = os_.get_pos();
+		Rect2i rect(pos.x, pos.y, size.x, size.y);
+		Variant arg0 = rect;
+		invoke_callback_1(rect_changed_callback_, arg0);
 	}
 	void handle_key_event(int sdl2_code, int unicode, bool pressed) override {
 		Key code = map_key_sdl2_code(sdl2_code);
