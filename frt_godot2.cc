@@ -177,7 +177,7 @@ public: // OS
 	}
 	void initialize(const VideoMode &desired, int video_driver, int audio_driver) FRT_OVERRIDE {
 		video_mode_ = desired;
-		os_.init(API_OpenGL_ES2, video_mode_.width, video_mode_.height, video_mode_.resizable, video_mode_.borderless_window, video_mode_.always_on_top);
+		os_.init_gl(API_OpenGL_ES2, video_mode_.width, video_mode_.height, video_mode_.resizable, video_mode_.borderless_window, video_mode_.always_on_top);
 		frt_resolve_symbols_gles2(get_proc_address);
 		init_video();
 		init_audio();
@@ -284,19 +284,19 @@ public: // OS
 	void set_custom_mouse_cursor(const RES &cursor, CursorShape shape, const Vector2 &hotspot) FRT_OVERRIDE {
 	}
 	void make_rendering_thread() FRT_OVERRIDE {
-		os_.make_current();
+		os_.make_current_gl();
 	}
 	void release_rendering_thread() FRT_OVERRIDE {
-		os_.release_current();
+		os_.release_current_gl();
 	}
 	void swap_buffers() FRT_OVERRIDE {
-		os_.swap_buffers();
+		os_.swap_buffers_gl();
 	}
 	void set_use_vsync(bool enable) FRT_OVERRIDE {
-		os_.set_use_vsync(enable);
+		os_.set_use_vsync_gl(enable);
 	}
 	bool is_vsync_enabled() const FRT_OVERRIDE {
-		return os_.is_vsync_enabled();
+		return os_.is_vsync_enabled_gl();
 	}
 	void set_icon(const Image &icon) FRT_OVERRIDE {
 		if (icon.empty())

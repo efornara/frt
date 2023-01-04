@@ -26,6 +26,9 @@
  */
 
 #include <SDL.h>
+#ifdef VULKAN_ENABLED
+#include <SDL_vulkan.h>
+#endif
 
 namespace frt {
 
@@ -159,7 +162,8 @@ struct InputModifierState {
 
 enum GraphicsAPI {
 	API_OpenGL_ES2,
-	API_OpenGL_ES3
+	API_OpenGL_ES3,
+	API_Vulkan
 };
 
 class OS_FRT {
@@ -168,6 +172,7 @@ private:
 	static const int REQUEST_UNICODE = -1;
 	SDL_Window *window_;
 	SDL_GLContext context_;
+	bool is_vulkan_;
 	EventHandler *handler_;
 	InputModifierState st_;
 	MouseMode mouse_mode_;
@@ -177,7 +182,12 @@ private:
 	bool exit_shortcuts_;
 	void resize_event(const SDL_Event &ev) {
 		ivec2 size;
-		SDL_GL_GetDrawableSize(window_, &size.x, &size.y);
+#ifdef VULKAN_ENABLED
+		if (is_vulkan_)
+			SDL_Vulkan_GetDrawableSize(window_, &size.x, &size.y);
+#endif
+		if (!is_vulkan_)
+			SDL_GL_GetDrawableSize(window_, &size.x, &size.y);
 		handler_->handle_resize_event(size);
 	}
 	int utf8_to_unicode(const char *s) {
@@ -337,15 +347,43 @@ public:
 		memset(js_, 0, sizeof(js_));
 		exit_shortcuts_ = !getenv("FRT_NO_EXIT_SHORTCUTS");
 	}
-	void init(GraphicsAPI api, int width, int height, bool resizable, bool borderless, bool always_on_top) {
+#ifdef VULKAN_ENABLED
+	const char *get_vk_surface_extension() {
+		const char *driver = SDL_GetCurrentVideoDriver();
+		if (!driver)
+			driver = "<null>";
+		else if (!strcmp(driver, "x11"))
+			return "VK_KHR_xlib_surface";
+		else if (!strcmp(driver, "wayland"))
+			return "VK_KHR_wayland_surface";
+		else if (!strcmp(driver, "KMSDRM"))
+			return "VK_KHR_display";
+		fatal("unknown vk_surface extension for sdl2 driver '%s'", driver);
+	}
+	void init_context_vulkan(VkInstance vk_instance, int width, int height, VkSurfaceKHR *vk_surface) {
+		if (!SDL_Vulkan_CreateSurface(window_, vk_instance, vk_surface))
+			fatal("SDL_Vulkan_CreateSurface failed: %s.", SDL_GetError());
+	}
+#endif
+	void init_context_gl() {
+		context_ = SDL_GL_CreateContext(window_);
+		SDL_GL_MakeCurrent(window_, context_);
+	}
+	void init_window(GraphicsAPI api, int width, int height, bool resizable, bool borderless, bool always_on_top) {
 		setenv("SDL_VIDEO_RPI_OPTIONS", "gravity=center,scale=letterbox,background=1", 0);
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
 			fatal("SDL_Init failed: %s.", SDL_GetError());
-		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, api == API_OpenGL_ES2 ? 2 : 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-		int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+		is_vulkan_ = api == API_Vulkan;
+		int flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+		if (is_vulkan_) {
+			flags |= SDL_WINDOW_VULKAN;
+		} else {
+			SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, api == API_OpenGL_ES2 ? 2 : 3);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+			flags |= SDL_WINDOW_OPENGL;
+		}
 		if (resizable)
 			flags |= SDL_WINDOW_RESIZABLE;
 		if (borderless)
@@ -354,26 +392,28 @@ public:
 			flags |= SDL_WINDOW_ALWAYS_ON_TOP;
 		if (!(window_ = SDL_CreateWindow("frt2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags)))
 			fatal("SDL_CreateWindow failed: %s.", SDL_GetError());
-		context_ = SDL_GL_CreateContext(window_);
-		SDL_GL_MakeCurrent(window_, context_);
+	}
+	void init_gl(GraphicsAPI api, int width, int height, bool resizable, bool borderless, bool always_on_top) {
+		init_window(api, width, height, resizable, borderless, always_on_top);
+		init_context_gl();
 	}
 	void cleanup() {
 		SDL_DestroyWindow(window_);
 		SDL_Quit();
 	}
-	void make_current() {
+	void make_current_gl() {
 		SDL_GL_MakeCurrent(window_, context_);
 	}
-	void release_current() {
+	void release_current_gl() {
 		// TODO: add release
 	}
-	void swap_buffers() {
+	void swap_buffers_gl() {
 		SDL_GL_SwapWindow(window_);
 	}
-	void set_use_vsync(bool enable) {
+	void set_use_vsync_gl(bool enable) {
 		SDL_GL_SetSwapInterval(enable ? 1 : 0);
 	}
-	bool is_vsync_enabled() const {
+	bool is_vsync_enabled_gl() const {
 		return SDL_GL_GetSwapInterval() != 0;
 	}
 	void dispatch_events() {

@@ -10,11 +10,14 @@
 #include "sdl2_godot_map_4.h"
 
 #ifdef VULKAN_ENABLED
-//#include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
+#include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
+#include "drivers/vulkan/rendering_device_vulkan.h"
+#include "drivers/vulkan/vulkan_context.h"
 #endif
 #ifdef GLES3_ENABLED
 #include "drivers/gles3/rasterizer_gles3.h"
 #endif
+#include "servers/rendering/dummy/rasterizer_dummy.h"
 
 #include "servers/audio_server.h"
 #include "core/config/project_settings.h"
@@ -91,9 +94,120 @@ struct OSEventHandler {
 OSEventHandler::~OSEventHandler() {
 }
 
+using VSyncMode = DisplayServer::VSyncMode;
+
+struct GraphicsContext {
+	virtual ~GraphicsContext();
+	virtual void init_context(int width, int height, VSyncMode mode) = 0;
+	virtual VSyncMode get_vsync_mode() const = 0;
+	virtual void set_vsync_mode(VSyncMode vsync_mode) = 0;
+	virtual void make_current() = 0;
+	virtual void release_current() = 0;
+	virtual void swap_buffers() = 0;
+};
+
+GraphicsContext::~GraphicsContext() {
+}
+
+class GLContextSDL2 : public GraphicsContext {
+protected:
+	OS_FRT &os_;
+public:
+	GLContextSDL2(OS_FRT &os) : os_(os) {
+	}
+public: // GraphicsContext
+	void make_current() override {
+		os_.make_current_gl();
+	}
+	void release_current() override {
+		os_.release_current_gl();
+	}
+	void swap_buffers() override {
+		os_.swap_buffers_gl();
+	}
+	VSyncMode get_vsync_mode() const override {
+		return os_.is_vsync_enabled_gl() ? DisplayServer::VSYNC_ENABLED : DisplayServer::VSYNC_DISABLED;
+	}
+	void set_vsync_mode(VSyncMode vsync_mode) override {
+		os_.set_use_vsync_gl(vsync_mode != DisplayServer::VSYNC_DISABLED);
+	}
+};
+
+#ifdef VULKAN_ENABLED
+class VulkanContextSDL2 : public GraphicsContext, public VulkanContext {
+private:
+	OS_FRT &os_;
+	VkSurfaceKHR surface_;
+	RenderingDeviceVulkan *device_ = nullptr;
+public:
+	VulkanContextSDL2(OS_FRT &os) : os_(os) {
+	}
+	~VulkanContextSDL2() {
+		if (device_) {
+			window_destroy(DisplayServer::MAIN_WINDOW_ID);
+			device_->finalize();
+			memdelete(device_);
+		}
+	}
+public: // GraphicsContext
+	void init_context(int width, int height, VSyncMode mode) override {
+		if (initialize() != OK)
+			fatal("couldn't initialize vulkan");
+		os_.init_context_vulkan(get_instance(), width, height, &surface_);
+		_window_create(DisplayServer::MAIN_WINDOW_ID, mode, surface_, width, height);
+		device_ = memnew(RenderingDeviceVulkan);
+		device_->initialize(this);
+		RendererCompositorRD::make_current();
+	}
+	void make_current() override {
+	}
+	void release_current() override {
+	}
+	void swap_buffers() override {
+	}
+	VSyncMode get_vsync_mode() const override {
+		return VulkanContext::get_vsync_mode(DisplayServer::MAIN_WINDOW_ID);
+	}
+	void set_vsync_mode(VSyncMode vsync_mode) override {
+		VulkanContext::set_vsync_mode(DisplayServer::MAIN_WINDOW_ID, vsync_mode);
+	}
+public: // VulkanContext
+	const char *_get_platform_surface_extension() const override {
+		return os_.get_vk_surface_extension();
+	}
+};
+#endif
+
+#ifdef GLES3_ENABLED
+class OpenGL3ContextSDL2 : public GLContextSDL2 {
+public:
+	OpenGL3ContextSDL2(OS_FRT &os) : GLContextSDL2(os) {
+	}
+public: // GraphicsContext
+	void init_context(int width, int height, VSyncMode mode) override {
+		os_.init_context_gl();
+		frt_resolve_symbols_gles3(get_proc_address);
+		RasterizerGLES3::make_current();
+	}
+};
+#endif
+
+class DummyContextSDL2 : public GLContextSDL2 {
+public:
+	DummyContextSDL2(OS_FRT &os) : GLContextSDL2(os) {
+		warn("overriding opengl3 with dummy");
+	}
+public: // GraphicsContext
+	void init_context(int width, int height, VSyncMode mode) override {
+		os_.init_context_gl();
+		RasterizerDummy::make_current();
+	}
+};
+
 class Godot4_DisplayServer : public DisplayServer, public EventHandler {
 private:
 	OS_FRT os_;
+	GraphicsContext *context_ = nullptr;
 	Callable rect_changed_callback_;
 	Callable input_event_callback_;
 	ObjectID instance_id_;
@@ -123,14 +237,30 @@ public: // DisplayServer (implicit)
 		resizable_ = !(flags & WINDOW_FLAG_RESIZE_DISABLED_BIT);
 		borderless_ = flags & WINDOW_FLAG_BORDERLESS_BIT;
 		always_on_top_ = flags & WINDOW_FLAG_ALWAYS_ON_TOP_BIT;
-		os_.init(API_OpenGL_ES3, resolution.width, resolution.height, resizable_, borderless_, always_on_top_);
+		GraphicsAPI api = API_OpenGL_ES3;
+		if (rendering_driver == "vulkan")
+			api = API_Vulkan;
+		else if (getenv("FRT_OPENGL3_DUMMY")) // for testing on es2 devices
+			api = API_OpenGL_ES2;
+		os_.init_window(api, resolution.width, resolution.height, resizable_, borderless_, always_on_top_);
+#ifdef VULKAN_ENABLED
+		if (api == API_Vulkan)
+			context_ = memnew(VulkanContextSDL2(os_));
+#endif
+		if (api == API_OpenGL_ES2)
+			context_ = memnew(DummyContextSDL2(os_));
+		else if (api == API_OpenGL_ES3)
+			context_ = memnew(OpenGL3ContextSDL2(os_));
+		context_->init_context(resolution.width, resolution.height, vsync_mode);
+		context_->set_vsync_mode(vsync_mode);
 		window_set_mode(mode, MAIN_WINDOW_ID);
-		window_set_vsync_mode(vsync_mode, MAIN_WINDOW_ID);
-		frt_resolve_symbols_gles3(get_proc_address);
-		RasterizerGLES3::make_current();
 		input_ = Input::get_singleton();
 		input_->set_event_dispatch_function(dispatch_events_func);
 		error = OK;
+	}
+	~Godot4_DisplayServer() {
+		if (context_)
+			memdelete(context_);
 	}
 	void dispatch_events(const Ref<InputEvent> &event) {
 		Variant arg0 = event;
@@ -139,11 +269,9 @@ public: // DisplayServer (implicit)
 	static Vector<String> get_rendering_drivers_func() {
 		Vector<String> res;
 #ifdef VULKAN_ENABLED
-//		res.push_back("vulkan");
+		res.push_back("vulkan");
 #endif
-#ifdef GLES3_ENABLED
 		res.push_back("opengl3");
-#endif
 		return res;
 	}
 	static void dispatch_events_func(const Ref<InputEvent> &event) {
@@ -337,19 +465,19 @@ public: // DisplayServer
 		os_.dispatch_events();
 	}
 	void release_rendering_thread() override {
-		os_.release_current();
+		context_->release_current();
 	}
 	void make_rendering_thread() override {
-		os_.make_current();
+		context_->make_current();
 	}
 	void swap_buffers() override {
-		os_.swap_buffers();
+		context_->swap_buffers();
 	}
 	VSyncMode window_get_vsync_mode(WindowID window) const override {
-		return os_.is_vsync_enabled() ? VSYNC_ENABLED : VSYNC_DISABLED;
+		return context_->get_vsync_mode();
 	}
 	void window_set_vsync_mode(VSyncMode vsync_mode, WindowID window) override {
-		os_.set_use_vsync(vsync_mode != VSYNC_DISABLED);
+		context_->set_vsync_mode(vsync_mode);
 	}
 	void set_icon(const Ref<Image> &icon) override {
 		if (icon.is_null())
@@ -478,6 +606,28 @@ public: // OS
 	}
 	MainLoop *get_main_loop() const override {
 		return main_loop_;
+	}
+	// TODO: factor out and move to posix_utils?
+	String get_config_path() const override {
+		if (has_environment("XDG_CONFIG_HOME"))
+			return get_environment("XDG_CONFIG_HOME");
+		if (has_environment("HOME"))
+			return get_environment("HOME").path_join(".config");
+		return ".";
+	}
+	String get_data_path() const override {
+		if (has_environment("XDG_DATA_HOME"))
+			return get_environment("XDG_DATA_HOME");
+		if (has_environment("HOME"))
+			return get_environment("HOME").path_join(".local/share");
+		return get_config_path();
+	}
+	String get_cache_path() const override {
+		if (has_environment("XDG_CACHE_HOME"))
+			return get_environment("XDG_CACHE_HOME");
+		if (has_environment("HOME"))
+			return get_environment("HOME").path_join(".cache");
+		return get_config_path();
 	}
 public: // OSEventHandler
 	void handle_quit_event() override {
