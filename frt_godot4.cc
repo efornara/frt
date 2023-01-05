@@ -237,11 +237,13 @@ public: // DisplayServer (implicit)
 		resizable_ = !(flags & WINDOW_FLAG_RESIZE_DISABLED_BIT);
 		borderless_ = flags & WINDOW_FLAG_BORDERLESS_BIT;
 		always_on_top_ = flags & WINDOW_FLAG_ALWAYS_ON_TOP_BIT;
-		GraphicsAPI api = API_OpenGL_ES3;
+		GraphicsAPI api = API_OpenGL_ES2;
 		if (rendering_driver == "vulkan")
 			api = API_Vulkan;
-		else if (getenv("FRT_OPENGL3_DUMMY")) // for testing on es2 devices
-			api = API_OpenGL_ES2;
+#ifdef GLES3_ENABLED
+		else if (!getenv("FRT_OPENGL3_DUMMY")) // for testing on es2 devices
+			api = API_OpenGL_ES3;
+#endif
 		os_.init_window(api, resolution.width, resolution.height, resizable_, borderless_, always_on_top_);
 #ifdef VULKAN_ENABLED
 		if (api == API_Vulkan)
@@ -249,8 +251,10 @@ public: // DisplayServer (implicit)
 #endif
 		if (api == API_OpenGL_ES2)
 			context_ = memnew(DummyContextSDL2(os_));
+#ifdef GLES3_ENABLED
 		else if (api == API_OpenGL_ES3)
 			context_ = memnew(OpenGL3ContextSDL2(os_));
+#endif
 		context_->init_context(resolution.width, resolution.height, vsync_mode);
 		context_->set_vsync_mode(vsync_mode);
 		window_set_mode(mode, MAIN_WINDOW_ID);

@@ -87,8 +87,10 @@ def configure_misc(env):
 	env.Append(CPPPATH=['#platform/frt'])
 	env.Append(CPPFLAGS=['-DUNIX_ENABLED'])
 	env.Append(CPPDEFINES=[('_FILE_OFFSET_BITS', 64)])
-	env.Append(CPPDEFINES=['VULKAN_ENABLED'])
-	env.Append(CPPDEFINES=['GLES3_ENABLED'])
+	if env['vulkan']:
+		env.Append(CPPDEFINES=['VULKAN_ENABLED'])
+	if env['opengl3']:
+		env.Append(CPPDEFINES=['GLES3_ENABLED'])
 	env.Append(CPPFLAGS=['-DFRT_ENABLED'])
 	env.Append(LIBS=['pthread', 'z', 'dl'])
 	if env['CXX'] == 'clang++':
