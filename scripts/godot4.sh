@@ -8,36 +8,36 @@ set -e
 # SPDX-License-Identifier: MIT
 #
 
-die() {
-	echo $1
+usage() {
+	cat <<END
+usage: godot4.sh [-a arch] [-s srcdir] [-e exportdir] [-j jobs] [-v] [-p|-d]
+END
 	exit 1
 }
 
-usage() {
-	die "usage: godot4.sh [arch]"
+die() {
+	echo "godot4.sh: $1"
+	exit 1
 }
 
-print_header() {
-	echo "Building tag:$tag arch:$arch..."
-}
+arch=auto
+srcdir=4.0
+exportdir=releases
+while getopts a:s:e:j:vpd name ; do
+	case $name in
+		a) arch="$OPTARG" ;;
+		s) srcdir="$OPTARG" ;;
+		e) exportdir="$OPTARG" ;;
+		j) jobsopts="-j $OPTARG" ;;
+		v) verboseopts="verbose=yes" ;;
+		p) publish=1 ;;
+		d) debug=1 ;;
+		?) usage ;;
+	esac
+done
+[ -z "$publish" -o -z "$debug" ] || usage
 
-release() {
-	local bin
-	[ -d releases ] || return
-	bin=releases/frt_${commitid}_${tag}_${arch}.bin
-	cp tag_400/bin/godot.frt.template_release.auto.llvm.$arch $bin
-	$stripcmd $bin
-}
-
-build_common="platform=frt target=template_release use_llvm=yes use_static_cpp=yes -j 4"
-
-build() {
-	print_header
-	( cd tag_400 ; nice scons frt_arch=$arch $archopts $build_common )
-	release
-}
-
-if [ $# -eq 0 ] ; then
+if [ $arch = auto ] ; then
 	if [ -f /usr/bin/arm-linux-gnueabihf-strip ] ; then
 		arch=arm32v7
 	elif [ -f /usr/bin/aarch64-linux-gnu-strip ] ; then
@@ -45,37 +45,45 @@ if [ $# -eq 0 ] ; then
 	else
 		arch=x86_64
 	fi
-elif [ $# -eq 1 ] ; then
-	arch=$1
-	shift
-else
-	usage
 fi
-
 case $arch in
-	arm32v7)
-		stripcmd="arm-linux-gnueabihf-strip"
-		archopts="frt_cross=auto"
-		;;
-	arm64v8)
-		stripcmd="aarch64-linux-gnu-strip"
-		archopts="frt_cross=auto"
-		;;
-	x86_64)
-		stripcmd="x86_64-linux-gnu-strip"
-		archopts="frt_cross=auto"
-		;;
+	arm32v7) stripcmd="arm-linux-gnueabihf-strip" ;;
+	arm64v8) stripcmd="aarch64-linux-gnu-strip" ;;
+	x86_64) stripcmd="x86_64-linux-gnu-strip" ;;
 	*) die "godot4.sh: invalid arch: $arch."
 esac
 
-[ -d releases ] || die "godot4.sh: no releases directory."
-[ -d tag_400 ] || die "godot4.sh: tag directory tag_400 not found."
+[ -d $srcdir ] || die "source directory $srcdir not found."
+if [ -f $srcdir/suffix.txt ] ; then
+	godot_suffix=`cat $srcdir/suffix.txt`
+fi
+tag="400$godot_suffix"
 
-if [ -f tag_400/suffix.txt ] ; then
-	GODOT_SUFFIX=`cat tag_400/suffix.txt`
+if [ ! -z "$debug" ] ; then
+	build="(debug)"
+	buildopts="target=template_debug optimize=debug debug_symbols=yes separate_debug_symbols=yes"
+else
+	build="(release)"
+	buildopts="target=template_release optimize=speed debug_symbols=no use_static_cpp=yes"
 fi
 
-commitid=`git -C tag_400/platform/frt rev-parse HEAD | cut -b -7`
-tag="400$GODOT_SUFFIX"
+echo "Building tag $tag for $arch $build..."
+
 export BUILD_NAME=frt
-build
+( cd $srcdir ; nice scons \
+	platform=frt \
+	frt_arch=$arch \
+	frt_cross=auto \
+	use_llvm=yes \
+	$buildopts $verboseopts $jobsopts
+)
+
+if [ ! -z "$publish" ] ; then
+	echo "Publishing:"
+	[ -d $exportdir ] || die "export directory $exportdir not found."
+	commitid=`git -C $srcdir/platform/frt rev-parse HEAD | cut -b -7`
+	bin=$exportdir/frt_${commitid}_${tag}_${arch}.bin
+	cp $srcdir/bin/godot.frt.template_release.auto.llvm.$arch $bin
+	$stripcmd $bin
+	ls -l $bin
+fi
