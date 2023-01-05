@@ -81,7 +81,7 @@ def configure_cross(env):
 	env['FRT_PKG_CONFIG'] = triple + '-pkg-config'
 
 def configure_target(env):
-	env.Append(CCFLAGS=['-O2', '-ffast-math', '-fomit-frame-pointer'])
+	pass # use engine default
 
 def configure_misc(env):
 	env.Append(CPPPATH=['#platform/frt'])
@@ -90,7 +90,6 @@ def configure_misc(env):
 	env.Append(CPPDEFINES=['VULKAN_ENABLED'])
 	env.Append(CPPDEFINES=['GLES3_ENABLED'])
 	env.Append(CPPFLAGS=['-DFRT_ENABLED'])
-	env.Append(CFLAGS=['-std=gnu11']) # for libwebp (maybe more in the future)
 	env.Append(LIBS=['pthread', 'z', 'dl'])
 	if env['CXX'] == 'clang++':
 		env['CC'] = 'clang'
