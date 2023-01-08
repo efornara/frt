@@ -378,7 +378,7 @@ public: // EventHandler
 	}
 	void handle_js_axis_event(int id, int axis, float value) FRT_OVERRIDE {
 #if FRT_GODOT_VERSION >= 30500
-		input_->set_joy_axis(id, axis, value);
+		input_->joy_axis(id, axis, value);
 #else
 		InputDefault::JoyAxis v = { -1, value };
 		input_->joy_axis(id, axis, v);
