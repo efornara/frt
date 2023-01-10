@@ -233,7 +233,7 @@ private:
 		callback.callp(args, 1, ret, err);
 	}
 public: // DisplayServer (implicit)
-	Godot4_DisplayServer(const String &rendering_driver, WindowMode mode, VSyncMode vsync_mode, uint32_t flags, const Vector2i *position, const Vector2i &resolution, Error &error) : os_(this) {
+	Godot4_DisplayServer(const String &rendering_driver, WindowMode mode, VSyncMode vsync_mode, uint32_t flags, const Vector2i *position, const Vector2i &resolution, int screen, Error &error) : os_(this) {
 		resizable_ = !(flags & WINDOW_FLAG_RESIZE_DISABLED_BIT);
 		borderless_ = flags & WINDOW_FLAG_BORDERLESS_BIT;
 		always_on_top_ = flags & WINDOW_FLAG_ALWAYS_ON_TOP_BIT;
@@ -281,8 +281,8 @@ public: // DisplayServer (implicit)
 	static void dispatch_events_func(const Ref<InputEvent> &event) {
 		display_server_->dispatch_events(event);
 	}
-	static DisplayServer *create_func(const String &rendering_driver, WindowMode mode, VSyncMode vsync_mode, uint32_t flags, const Vector2i *position, const Vector2i &resolution, Error &error) {
-		display_server_ = memnew(Godot4_DisplayServer(rendering_driver, mode, vsync_mode, flags, position, resolution, error));
+	static DisplayServer *create_func(const String &rendering_driver, WindowMode mode, VSyncMode vsync_mode, uint32_t flags, const Vector2i *position, const Vector2i &resolution, int screen, Error &error) {
+		display_server_ = memnew(Godot4_DisplayServer(rendering_driver, mode, vsync_mode, flags, position, resolution, screen, error));
 		if (error != OK)
 			warn("display server creation failed.");
 		return display_server_;
@@ -306,6 +306,9 @@ public: // DisplayServer
 	}
 	int get_screen_count() const override {
 		return 1;
+	}
+	int get_primary_screen() const override {
+		return 0;
 	}
 	Point2i screen_get_position(int screen) const override {
 		return Point2i();
@@ -351,8 +354,8 @@ public: // DisplayServer
 	Point2i mouse_get_position() const override {
 		return mouse_pos_;
 	}
-	::MouseButton mouse_get_button_state() const override {
-		return (::MouseButton)mouse_state_;
+	BitField<MouseButtonMask> mouse_get_button_state() const override {
+		return (BitField<MouseButtonMask>)mouse_state_;
 	}
 	void mouse_set_mode(MouseMode mode) override {
 		os_.set_mouse_mode(map_mouse_mode(mode));
@@ -518,7 +521,7 @@ public: // EventHandler
 		fill_modifier_state(mouse_motion);
 		mouse_motion->set_window_id(MAIN_WINDOW_ID);
 		Point2i posi(pos.x, pos.y);
-		mouse_motion->set_button_mask((::MouseButton)mouse_state_);
+		mouse_motion->set_button_mask((BitField<MouseButtonMask>)mouse_state_);
 		mouse_motion->set_position(posi);
 		mouse_motion->set_global_position(mouse_motion->get_position());
 		input_->set_mouse_position(posi);
@@ -543,7 +546,7 @@ public: // EventHandler
 		mouse_button->set_global_position(posi);
 		mouse_button->set_global_position(mouse_button->get_position());
 		mouse_button->set_button_index((::MouseButton)button);
-		mouse_button->set_button_mask((::MouseButton)mouse_state_);
+		mouse_button->set_button_mask((BitField<MouseButtonMask>)mouse_state_);
 		mouse_button->set_double_click(doubleclick);
 		mouse_button->set_pressed(pressed);
 		input_->parse_input_event(mouse_button);
@@ -558,7 +561,7 @@ public: // EventHandler
 		input_->joy_axis(id, (JoyAxis)axis, value);
 	}
 	void handle_js_hat_event(int id, int os_mask) override {
-		::HatMask mask = map_hat_os_mask(os_mask);
+		BitField<::HatMask> mask = map_hat_os_mask(os_mask);
 		input_->joy_hat(id, mask);
 	}
 	void handle_quit_event() override {

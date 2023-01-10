@@ -59,17 +59,17 @@ MouseMode map_mouse_mode(DisplayServer::MouseMode mode) {
 	}
 }
 
-::HatMask map_hat_os_mask(int os_mask) {
+BitField<::HatMask> map_hat_os_mask(int os_mask) {
 	using ::HatMask;
-	HatMask mask = (HatMask)0;
+	BitField<HatMask> mask = (BitField<HatMask>)0;
 	if (os_mask & HatUp)
-		mask |= HatMask::UP;
+		mask.set_flag(HatMask::UP);
 	if (os_mask & HatRight)
-		mask |= HatMask::RIGHT;
+		mask.set_flag(HatMask::RIGHT);
 	if (os_mask & HatDown)
-		mask |= HatMask::DOWN;
+		mask.set_flag(HatMask::DOWN);
 	if (os_mask & HatLeft)
-		mask |= HatMask::LEFT;
+		mask.set_flag(HatMask::LEFT);
 	return mask;
 }
 
