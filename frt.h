@@ -15,11 +15,19 @@
 
 namespace frt {
 
-void warn(const char *format, ...);
+void warn(const char *format, ...)
+#ifdef __GNUC__
+__attribute__((format(printf, 1, 2)))
+#endif
+;
 
 #if __cplusplus >= 201103L
 [[ noreturn ]]
 #endif
-void fatal(const char *format, ...);
+void fatal(const char *format, ...)
+#ifdef __GNUC__
+__attribute__((format(printf, 1, 2)))
+#endif
+;
 
 } // namespace frt
