@@ -349,6 +349,9 @@ public:
 	}
 #ifdef VULKAN_ENABLED
 	const char *get_vk_surface_extension() {
+		const char *extension = getenv("FRT_VK_SURFACE_EXTENSION");
+		if (extension)
+			return extension;
 		const char *driver = SDL_GetCurrentVideoDriver();
 		if (!driver)
 			driver = "<null>";
