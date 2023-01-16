@@ -25,11 +25,11 @@ release() {
 	local bin
 	[ -d releases ] || return
 	bin=releases/frt_${fver}_${tag}_${arch}.bin
-	cp tag_$tag/bin/godot.frt.opt$extrasuffix.$arch $bin
+	cp tag_$tag/bin/godot.frt.opt.llvm.$arch $bin
 	$stripcmd $bin
 }
 
-build_common="platform=frt tools=no target=release use_static_cpp=yes -j 4"
+build_common="platform=frt tools=no target=release use_llvm=yes use_static_cpp=yes -j 4"
 
 build() {
 	local patch
@@ -80,12 +80,10 @@ while [ $# -gt 0 ] ; do
 			gver=`echo $tag | cut -b -2`
 			case $gver in
 				2*)
-					gveropts="use_llvm=yes"
-					extrasuffix=".llvm"
+					gveropts=""
 					;;
 				3*)
-					gveropts="use_llvm=no module_webm_enabled=no"
-					extrasuffix=""
+					gveropts="module_webm_enabled=no"
 					;;
 				*) die "release.sh: unsupported godot version: $gver."
 			esac
