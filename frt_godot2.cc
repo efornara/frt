@@ -306,6 +306,13 @@ public: // OS
 		DVector<uint8_t>::Read r = i.get_data().read();
 		os_.set_icon(i.get_width(), i.get_height(), r.ptr());
 	}
+	Size2 get_screen_size(int screen) const FRT_OVERRIDE {
+		ivec2 size = os_.get_screen_size();
+		return Size2(size.x, size.y);
+	}
+	int get_screen_dpi(int screen) const FRT_OVERRIDE {
+		return os_.get_screen_dpi();
+	}
 public: // EventHandler
 	void handle_resize_event(ivec2 size) FRT_OVERRIDE {
 		video_mode_.width = size.x;

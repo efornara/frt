@@ -314,16 +314,17 @@ public: // DisplayServer
 		return Point2i();
 	}
 	Size2i screen_get_size(int screen) const override {
-		return Size2i(1280, 720);
+		ivec2 size = os_.get_screen_size();
+		return Size2i(size.x, size.y);
 	}
 	Rect2i screen_get_usable_rect(int screen) const override {
-		return Rect2i(Point2i(), Size2i(1280, 720));
+		return Rect2i(Point2i(), screen_get_size(0));
 	}
 	int screen_get_dpi(int screen) const override {
-		return 72;
+		return os_.get_screen_dpi();
 	}
 	float screen_get_refresh_rate(int screen) const override {
-		return 60.0f;
+		return os_.get_screen_refresh_rate();
 	}
 	Vector<WindowID> get_window_list() const override {
 		Vector<WindowID> res;

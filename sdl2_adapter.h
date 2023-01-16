@@ -543,6 +543,27 @@ public:
 	MouseMode get_mouse_mode() const {
 		return mouse_mode_;
 	}
+	ivec2 get_screen_size() const {
+		ivec2 size = { 1280, 720 };
+		SDL_DisplayMode mode;
+		if (!SDL_GetCurrentDisplayMode(0, &mode)) {
+			size.x = mode.w;
+			size.y = mode.h;
+		}
+		return size;
+	}
+	float get_screen_refresh_rate() const {
+		SDL_DisplayMode mode;
+		if (SDL_GetCurrentDisplayMode(0, &mode))
+			return 60.0f;
+		return (float)mode.refresh_rate;
+	}
+	int get_screen_dpi() const {
+		float dpi;
+		if (!SDL_GetDisplayDPI(0, &dpi, 0, 0))
+			return (int)dpi;
+		return 72;
+	}
 };
 
 } // namespace frt
