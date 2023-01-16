@@ -35,8 +35,7 @@ build() {
 	local patch
 	print_header
 	if [ $arch = arm64v8 -a $fver = 216 ] ; then patch="CCFLAGS=-DNO_THREADS" ; fi
-	( cd tag_$tag ; nice scons frt_arch=$arch \
-		$archopts \
+	( cd tag_$tag ; nice scons frt_arch=$arch frt_cross=auto \
 		$gveropts \
 		$patch \
 	$build_common )
@@ -49,19 +48,15 @@ arch=$1
 case $arch in
 	arm32v6)
 		stripcmd="arm-linux-gnueabihf-strip"
-		archopts="frt_cross=no"
 		;;
 	arm32v7)
 		stripcmd="arm-linux-gnueabihf-strip"
-		archopts="frt_cross=auto"
 		;;
 	arm64v8)
 		stripcmd="aarch64-linux-gnu-strip"
-		archopts="frt_cross=auto"
 		;;
 	x86_64)
 		stripcmd="x86_64-linux-gnu-strip"
-		archopts="frt_cross=auto"
 		;;
 	*) die "release.sh: invalid arch: $arch."
 esac

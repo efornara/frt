@@ -19,7 +19,7 @@ def get_opts():
 		BoolVariable('use_lto', 'Use link time optimization', False),
 		BoolVariable('use_static_cpp', 'Link libgcc and libstdc++ statically', False),
 		('frt_std', 'C++ standard for frt itself (no/auto/c++98/...)', 'auto'),
-		('frt_arch', 'Architecture (no/arm32v6/arm32v7/arm64v8)', 'no'),
+		('frt_arch', 'Architecture (no/arm32v6/arm32v7/arm64v8/x86_64)', 'no'),
 		('frt_cross', 'Cross compilation (no/auto/<triple>)', 'no'),
 		BoolVariable('frt_custom_renderer', 'Use custom renderer', False),
 	]
@@ -67,6 +67,7 @@ def configure_cross(env):
 		return
 	if env['frt_cross'] == 'auto':
 		triple = {
+			'arm32v6': 'arm-linux-gnueabihf',
 			'arm32v7': 'arm-linux-gnueabihf',
 			'arm64v8': 'aarch64-linux-gnu',
 			'x86_64': 'x86_64-linux-gnu',
