@@ -16,8 +16,10 @@
 #endif
 #ifdef GLES3_ENABLED
 #include "drivers/gles3/rasterizer_gles3.h"
+#else
+#include "dl/gles3.gen.h"
 #endif
-#include "servers/rendering/dummy/rasterizer_dummy.h"
+#include "custom_renderer.h"
 
 #include "servers/audio_server.h"
 #include "core/config/project_settings.h"
@@ -95,6 +97,9 @@ OSEventHandler::~OSEventHandler() {
 }
 
 using VSyncMode = DisplayServer::VSyncMode;
+
+CustomRenderer::~CustomRenderer() {
+}
 
 struct GraphicsContext {
 	virtual ~GraphicsContext();
@@ -192,15 +197,21 @@ public: // GraphicsContext
 };
 #endif
 
-class DummyContextSDL2 : public GLContextSDL2 {
+class CustomContextSDL2 : public GLContextSDL2 {
+private:
+	CustomRenderer *renderer_;
 public:
-	DummyContextSDL2(OS_FRT &os) : GLContextSDL2(os) {
-		warn("overriding opengl3 with dummy");
+	CustomContextSDL2(OS_FRT &os) : GLContextSDL2(os) {
+		renderer_ = new_CustomRenderer();
+	}
+	~CustomContextSDL2() {
+		delete renderer_;
 	}
 public: // GraphicsContext
 	void init_context(int width, int height, VSyncMode mode) override {
 		os_.init_context_gl();
-		RasterizerDummy::make_current();
+		frt_resolve_symbols_gles3(get_proc_address);
+		renderer_->make_current();
 	}
 };
 
@@ -241,7 +252,11 @@ public: // DisplayServer (implicit)
 		if (rendering_driver == "vulkan")
 			api = API_Vulkan;
 #ifdef GLES3_ENABLED
+#ifdef FRT_CUSTOM_RENDERER
+		else if (getenv("FRT_OPENGL3_UPSTREAM")) // force upstream opengl3
+#else
 		else if (!getenv("FRT_OPENGL3_DUMMY")) // for testing on es2 devices
+#endif
 			api = API_OpenGL_ES3;
 #endif
 		os_.init_window(api, resolution.width, resolution.height, resizable_, borderless_, always_on_top_);
@@ -250,7 +265,7 @@ public: // DisplayServer (implicit)
 			context_ = memnew(VulkanContextSDL2(os_));
 #endif
 		if (api == API_OpenGL_ES2)
-			context_ = memnew(DummyContextSDL2(os_));
+			context_ = memnew(CustomContextSDL2(os_));
 #ifdef GLES3_ENABLED
 		else if (api == API_OpenGL_ES3)
 			context_ = memnew(OpenGL3ContextSDL2(os_));

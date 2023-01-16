@@ -21,6 +21,7 @@ def get_opts():
 		('frt_std', 'C++ standard for frt itself (no/auto/c++98/...)', 'auto'),
 		('frt_arch', 'Architecture (no/arm32v6/arm32v7/arm64v8)', 'no'),
 		('frt_cross', 'Cross compilation (no/auto/<triple>)', 'no'),
+		BoolVariable('frt_custom_renderer', 'Use custom renderer', False),
 	]
 
 def get_flags():

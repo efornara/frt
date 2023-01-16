@@ -36,6 +36,10 @@ elif version.major == 3:
 	version_sources = ['frt_godot3.cc', 'dl/gles2.gen.cc', 'dl/gles3.gen.cc']
 elif version.major == 4:
 	version_sources = ['frt_godot4.cc', 'dl/gles3.gen.cc']
+	if env['frt_custom_renderer']:
+		frt_env.Append(CPPDEFINES=['FRT_CUSTOM_RENDERER'])
+	else:
+		version_sources.append('dummy_renderer.cc')
 
 std = env['frt_std']
 if std == 'auto':
