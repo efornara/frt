@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#define FRT_VERSION "2.1.0"
+#define FRT_STATUS "alpha"
+
 static void print_msg(const char *format, va_list ap) {
 	fprintf(stderr, "frt: ");
 	vfprintf(stderr, format, ap);
@@ -55,7 +58,7 @@ extern "C" void frt_parse_frt_args(int argc, char *argv[]) {
 	for (int i = 1; i < argc; i++) {
 		const char *s = argv[i];
 		if (!strcmp(s, "-v")) {
-			printf(FRT_VERSION "\n");
+			puts(FRT_VERSION "." FRT_STATUS);
 			exit(0);
 		} else if (!strcmp(s, "-h")) {
 			usage(program_name, 0);

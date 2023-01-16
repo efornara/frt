@@ -75,8 +75,8 @@ while [ $# -gt 0 ] ; do
 		tag_*)
 			[ -d $1 ] || die "release.sh: tag directory $1 not found."
 			tag=`echo $1 | cut -b 5- | sed 's/\///g'`
-			frth="tag_$tag/platform/frt/frt.h"
-			[ -f $frth ] || die "release.sh: $frth not found."
+			frtcc="tag_$tag/platform/frt/frt.cc"
+			[ -f $frtcc ] || die "release.sh: $frtcc not found."
 			gver=`echo $tag | cut -b -2`
 			case $gver in
 				2*)
@@ -89,7 +89,7 @@ while [ $# -gt 0 ] ; do
 					;;
 				*) die "release.sh: unsupported godot version: $gver."
 			esac
-			fver=`grep FRT_VERSION $frth \
+			fver=`grep FRT_VERSION $frtcc \
 				| grep -o '".*"' \
 				| sed 's/[\."]//g'`
 			build
