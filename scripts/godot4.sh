@@ -57,8 +57,9 @@ esac
 [ -d $srcdir ] || die "source directory $srcdir not found."
 if [ -f $srcdir/suffix.txt ] ; then
 	godot_suffix=`cat $srcdir/suffix.txt`
+	export GODOT_VERSION_STATUS=beta$godot_suffix
 fi
-tag="400$godot_suffix"
+tag="400b$godot_suffix"
 
 if [ ! -z "$debug" ] ; then
 	build="(debug)"
