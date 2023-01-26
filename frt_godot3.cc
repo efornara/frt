@@ -323,9 +323,11 @@ public: // OS
 	int get_screen_dpi(int screen) const FRT_OVERRIDE {
 		return os_.get_screen_dpi();
 	}
+#if FRT_GODOT_VERSION >= 30500
 	float get_screen_refresh_rate(int screen) const FRT_OVERRIDE {
 		return os_.get_screen_refresh_rate();
 	}
+#endif
 public: // EventHandler
 	void handle_resize_event(ivec2 size) FRT_OVERRIDE {
 		video_mode_.width = size.x;
