@@ -8,7 +8,7 @@ set -e
 # SPDX-License-Identifier: MIT
 #
 
-buildcommon="platform=frt frt_arch=x86_64 frt_cross=auto use_llvm=yes -j 3"
+buildcommon="platform=frt frt_arch=amd64 frt_cross=auto use_llvm=yes -j 3"
 
 build_216_98() {
 	echo 'Building 216 (C++ 98)'

@@ -105,14 +105,14 @@ if [ $arch = auto ] ; then
 	elif [ -f /usr/bin/aarch64-linux-gnu-strip ] ; then
 		arch=arm64v8
 	else
-		arch=x86_64
+		arch=amd64
 	fi
 fi
 case $arch in
 	arm32v6) stripcmd="arm-linux-gnueabihf-strip" ;;
 	arm32v7) stripcmd="arm-linux-gnueabihf-strip" ;;
 	arm64v8) stripcmd="aarch64-linux-gnu-strip" ;;
-	x86_64) stripcmd="x86_64-linux-gnu-strip" ;;
+	amd64) stripcmd="x86_64-linux-gnu-strip" ;;
 	*) die "invalid arch: $arch"
 esac
 
