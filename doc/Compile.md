@@ -33,7 +33,7 @@ From the main directory, you now have a new platform available:
 _NOTE: If you only have access to a recent version of gcc (i.e. 6 or later),
 you can only compile Godot 2 by using debug as a target._
 
-## Cross compilation, crossbuild and release.sh
+## Cross compilation, crossbuild and build.sh
 
 As an example, here are the steps needed to build some binaries on
 a PC using docker. Even if you don't use docker, my crossbuild images
@@ -59,7 +59,7 @@ You might have everything you need in the container, but I usually
 open another terminal and work outside the container, except for
 compiling.
 
-The release.sh script needs the current directory to look like this:
+The build.sh script needs the current directory to look like this:
 
 	$ ls ~/somewhere
 	releases/ tag_216/ tag_342/
@@ -71,7 +71,7 @@ and with frt already inside platform (see above).
 From within the container, type:
 
 	$ cd ~/somewhere
-	$ ./tag_216/platform/frt/release.sh arm32v7 tag_*
+	$ ./tag_216/platform/frt/build.sh -p tag_*
 
 If everything goes well, after a while you should have your binaries
 ready in ~/somewhere/releases.
