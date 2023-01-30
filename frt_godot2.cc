@@ -277,7 +277,7 @@ public: // OS
 		return main_loop_;
 	}
 	bool can_draw() const FRT_OVERRIDE {
-		return true;
+		return os_.can_draw();
 	}
 	void set_cursor_shape(CursorShape shape) FRT_OVERRIDE {
 	}

@@ -525,6 +525,9 @@ public:
 	bool is_minimized() const {
 		return SDL_GetWindowFlags(window_) & SDL_WINDOW_MINIMIZED;
 	}
+	bool can_draw() const {
+		return !is_minimized();
+	}
 	void set_mouse_mode(MouseMode mouse_mode) {
 		switch (mouse_mode) {
 		case MouseVisible:

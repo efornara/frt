@@ -479,10 +479,10 @@ public: // DisplayServer
 	void window_move_to_foreground(WindowID window) override {
 	}
 	bool window_can_draw(WindowID window) const override {
-		return true;
+		return os_.can_draw();
 	}
 	bool can_any_window_draw() const override {
-		return true;
+		return os_.can_draw();
 	}
 	void process_events() override {
 		os_.dispatch_events();
