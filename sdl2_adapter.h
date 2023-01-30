@@ -379,7 +379,9 @@ public:
 		is_vulkan_ = api == API_Vulkan;
 		int flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
 		if (is_vulkan_) {
+#ifdef VULKAN_ENABLED
 			flags |= SDL_WINDOW_VULKAN;
+#endif
 		} else {
 			SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, api == API_OpenGL_ES2 ? 2 : 3);
