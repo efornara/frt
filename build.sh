@@ -101,7 +101,11 @@ shift $(expr $OPTIND - 1 )
 
 if [ $arch = auto ] ; then
 	if [ -f /usr/bin/arm-linux-gnueabihf-strip ] ; then
-		arch=arm32v7
+		if [ -f /etc/dpkg/origins/raspbian ] ; then
+			arch=arm32v6
+		else
+			arch=arm32v7
+		fi
 	elif [ -f /usr/bin/aarch64-linux-gnu-strip ] ; then
 		arch=arm64v8
 	else
