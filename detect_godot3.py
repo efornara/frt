@@ -103,6 +103,7 @@ def configure_misc(env):
 	if env['use_static_cpp']:
 		env.Append(LINKFLAGS=['-static-libgcc', '-static-libstdc++'])
 	env['ENV']['PATH'] = os.getenv('PATH')
+	env['ENV']['LD_LIBRARY_PATH'] = os.getenv('LD_LIBRARY_PATH')
 
 def configure(env):
 	configure_compiler(env)
