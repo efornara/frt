@@ -17,4 +17,4 @@ all:
 	@echo 
 
 clean:
-	rm -f *.o dl/*.gen.* import/*.o
+	rm -f *.o *.gen.* dl/*.gen.* import/*.o

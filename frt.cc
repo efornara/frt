@@ -38,6 +38,8 @@ void fatal(const char *format, ...) {
 	exit(1);
 }
 
+extern const char *commit_id;
+
 } // namespace frt
 
 #include "frt_lib.h"
@@ -58,7 +60,7 @@ extern "C" void frt_parse_frt_args(int argc, char *argv[]) {
 	for (int i = 1; i < argc; i++) {
 		const char *s = argv[i];
 		if (!strcmp(s, "-v")) {
-			puts(FRT_VERSION "." FRT_STATUS);
+			printf("%s.%s.%s\n", FRT_VERSION, FRT_STATUS, frt::commit_id);
 			exit(0);
 		} else if (!strcmp(s, "-h")) {
 			usage(program_name, 0);
