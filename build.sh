@@ -32,13 +32,12 @@ parse_godot_version() {
 	else
 		gsta=`cat $srcdir/suffix.txt`
 		case $gsta in
-			alpha*) gstaid=`echo $gsta | cut -b 6-` ;;
-			beta*) gstaid=`echo $gsta | cut -b 5-` ;;
-			rc*) gstaid=`echo $gsta | cut -b 3-` ;;
+			alpha*) shortsta=a ; gstaid=`echo $gsta | cut -b 6-` ;;
+			beta*) shortsta=b ; gstaid=`echo $gsta | cut -b 5-` ;;
+			rc*) shortsta=c ; gstaid=`echo $gsta | cut -b 3-` ;;
 			*) die "unsupported godot status: $gsta"
 		esac
 		export GODOT_VERSION_STATUS=$gsta
-		shortsta=`echo $gsta | cut -b -1`
 		gverext="$gver$shortsta$gstaid"
 	fi
 }
@@ -46,12 +45,12 @@ parse_godot_version() {
 parse_frt_version() {
 	frtcc="$srcdir/platform/frt/frt.cc"
 	[ -f $frtcc ] || die "$frtcc not found"
-	fver=`grep FRT_VERSION $frtcc \
+	fver=`grep "define FRT_VERSION" $frtcc \
 		| grep -o '".*"' \
 		| sed 's/[\."]//g'`
-	fsta=`grep FRT_STATUS $frtcc \
+	fsta=`grep "define FRT_STATUS" $frtcc \
 		| grep -o '".*"' \
-		| sed 's/[\."]//g'`
+		| sed 's/"//g'`
 	if [ $fsta = stable ] ; then
 		fverext=$fver
 	else
