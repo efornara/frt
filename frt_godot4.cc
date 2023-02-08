@@ -56,15 +56,15 @@ public: // AudioDriverSW
 	SpeakerMode get_speaker_mode() const override {
 		return speaker_mode_;
 	}
-	PackedStringArray get_device_list() override {
+	PackedStringArray get_output_device_list() override {
 		PackedStringArray list;
 		list.push_back(default_audio_device);
 		return list;
 	}
-	String get_device() override {
+	String get_output_device() override {
 		return default_audio_device;
 	}
-	void set_device(String device) override {
+	void set_output_device(String device) override {
 	}
 	void start() override {
 		audio_.start();
@@ -524,6 +524,7 @@ public: // EventHandler
 		key->set_window_id(MAIN_WINDOW_ID);
 		key->set_pressed(pressed);
 		key->set_keycode(code);
+		key->set_key_label(code);
 		key->set_physical_keycode(code);
 		key->set_unicode(unicode);
 		key->set_echo(false);
