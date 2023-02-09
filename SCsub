@@ -9,6 +9,22 @@
 
 Import('env')
 
+def text_action(target, source, env):
+	src = str(source[0])
+	tgt = str(target[0])
+	with open(src, 'rb') as f:
+		content = f.read()
+	tag = tgt[tgt.rfind('/')+1:tgt.find('.')]
+	with open(tgt, 'w') as f:
+		f.write('static const char data[] = {\n')
+		while len(content) > 0:
+			head = content[:16]
+			content = content[16:]
+			for c in head:
+				f.write('%d, ' % c)
+			f.write('\n')
+		f.write('0 }; namespace frt { const char *%s = data; }\n' % tag)
+
 import sys
 dl_path = './dl'
 sys.path.append(dl_path)
@@ -17,17 +33,19 @@ sys.path.remove(dl_path)
 
 env.Append(BUILDERS={'DLH': env.Builder(action=procdl.build_h_action, suffix='.gen.h', src_suffix='.dl')})
 env.Append(BUILDERS={'DLCPP': env.Builder(action=procdl.build_cc_action, suffix='.gen.cc', src_suffix='.dl')})
+env.Append(BUILDERS={'TEXT': env.Builder(action=text_action)})
 
 for dl in Glob('dl/*.dl'):
 	env.DLH(str(dl))
 	env.DLCPP(str(dl))
 for libname in ['gles2', 'gles3']:
 	env.Depends('platform_config.h', 'dl/' + libname + '.gen.h')
+env.TEXT('license.gen.cc', 'LICENSE')
 
 frt_env = env.Clone()
 frt_env.ParseConfig(env['FRT_PKG_CONFIG'] + ' sdl2 --cflags --libs')
 
-common_sources = [ 'frt_exe.cc', 'frt.cc' ]
+common_sources = [ 'frt_exe.cc', 'frt.cc', 'license.gen.cc' ]
 
 import os
 import subprocess

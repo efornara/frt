@@ -39,6 +39,7 @@ void fatal(const char *format, ...) {
 }
 
 extern const char *commit_id;
+extern const char *license;
 
 } // namespace frt
 
@@ -50,6 +51,7 @@ static void usage(const char *program_name, int code) {
 		"\n"
 		"options:\n"
 		"  -v                  show version and exit\n"
+		"  -l                  show license and exit\n"
 		"  -h                  show this page and exit\n"
 	"\n", program_name);
 	exit(code);
@@ -61,6 +63,9 @@ extern "C" void frt_parse_frt_args(int argc, char *argv[]) {
 		const char *s = argv[i];
 		if (!strcmp(s, "-v")) {
 			printf("%s.%s.%s\n", FRT_VERSION, FRT_STATUS, frt::commit_id);
+			exit(0);
+		} else if (!strcmp(s, "-l")) {
+			puts(frt::license);
 			exit(0);
 		} else if (!strcmp(s, "-h")) {
 			usage(program_name, 0);
