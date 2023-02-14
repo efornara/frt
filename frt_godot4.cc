@@ -64,7 +64,7 @@ public: // AudioDriverSW
 	String get_output_device() override {
 		return default_audio_device;
 	}
-	void set_output_device(String device) override {
+	void set_output_device(const String &device) override {
 	}
 	void start() override {
 		audio_.start();
