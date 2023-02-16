@@ -166,6 +166,29 @@ enum GraphicsAPI {
 	API_Vulkan
 };
 
+// TODO: factor out env vars parsing
+
+enum ExitShortcut {
+	ES_None,
+	ES_ShiftEnter,
+	ES_WinQ,
+	ES_Esc
+};
+
+ExitShortcut parse_exit_shortcut() {
+	const char *s = getenv("FRT_EXIT_SHORTCUT");
+	if (!s || !strcmp(s, "none"))
+		return ES_None;
+	else if (!strcmp(s, "shift-enter"))
+		return ES_ShiftEnter;
+	else if (!strcmp(s, "win-q"))
+		return ES_WinQ;
+	else if (!strcmp(s, "esc"))
+		return ES_Esc;
+	warn("invalid FRT_EXIT_SHORTCUT (%s), using: esc", s);
+	return ES_Esc;
+}
+
 class OS_FRT {
 private:
 	static const int MAX_JOYSTICKS = 16;
@@ -179,7 +202,7 @@ private:
 	SDL_KeyboardEvent key_ev_;
 	int key_unicode_;
 	SDL_Joystick *js_[MAX_JOYSTICKS];
-	bool exit_shortcuts_;
+	ExitShortcut exit_shortcut_;
 	void resize_event(const SDL_Event &ev) {
 		ivec2 size;
 #ifdef VULKAN_ENABLED
@@ -217,8 +240,26 @@ private:
 		st_.meta = key.keysym.mod & KMOD_GUI;
 		bool pressed = key.state == SDL_PRESSED;
 		int sdl2_code = key.keysym.sym;
-		if (exit_shortcuts_ && st_.alt && pressed && sdl2_code == SDLK_KP_ENTER)
-			fatal("exit_shortcut (alt+enter), disable by setting FRT_NO_EXIT_SHORTCUTS");
+		if (exit_shortcut_ != ES_None && pressed) {
+			bool quit = false;
+			switch (exit_shortcut_) {
+			case ES_ShiftEnter:
+				quit = st_.shift && (sdl2_code == SDLK_KP_ENTER || sdl2_code == SDLK_RETURN);
+				break;
+			case ES_WinQ:
+				quit = st_.meta && sdl2_code == SDLK_q;
+				break;
+			case ES_Esc:
+				quit = sdl2_code == SDLK_ESCAPE;
+				break;
+			default:
+				break;
+			}
+			if (quit) {
+				handler_->handle_quit_event();
+				return;
+			}
+		}
 		if (pressed && !key.repeat && require_unicode(sdl2_code)) {
 			key_ev_ = key;
 			key_unicode_ = REQUEST_UNICODE;
@@ -317,8 +358,6 @@ private:
 				return;
 			int button = ev.jbutton.button;
 			bool pressed = ev.jbutton.state == SDL_PRESSED;
-			if (exit_shortcuts_ && button == 6 && pressed)
-				fatal("exit_shortcut (joystick button #6), disable by setting FRT_NO_EXIT_SHORTCUTS");
 			handler_->handle_js_button_event(id, button, pressed);
 			} break;
 		case SDL_JOYDEVICEADDED: {
@@ -345,7 +384,7 @@ public:
 		mouse_mode_ = MouseVisible;
 		key_unicode_ = 0;
 		memset(js_, 0, sizeof(js_));
-		exit_shortcuts_ = !getenv("FRT_NO_EXIT_SHORTCUTS");
+		exit_shortcut_ = parse_exit_shortcut();
 	}
 #ifdef VULKAN_ENABLED
 	const char *get_vk_surface_extension() {
