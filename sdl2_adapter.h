@@ -145,6 +145,7 @@ struct EventHandler {
 	virtual void handle_js_button_event(int id, int button, bool pressed) = 0;
 	virtual void handle_js_axis_event(int id, int axis, float value) = 0;
 	virtual void handle_js_hat_event(int id, int mask) = 0;
+	virtual void handle_js_vibra_event(int id, uint64_t timestamp) = 0;
 	virtual void handle_quit_event() = 0;
 	virtual void handle_flush_events() = 0;
 };
@@ -202,6 +203,8 @@ private:
 	SDL_KeyboardEvent key_ev_;
 	int key_unicode_;
 	SDL_Joystick *js_[MAX_JOYSTICKS];
+	uint64_t rumble_timestamp_[MAX_JOYSTICKS];
+	uint32_t rumble_supported_;
 	ExitShortcut exit_shortcut_;
 	void resize_event(const SDL_Event &ev) {
 		ivec2 size;
@@ -369,6 +372,8 @@ private:
 			SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(id), guid, sizeof(guid));
 			handler_->handle_js_status_event(id, true, name, guid);
 			js_[id] = SDL_JoystickOpen(id);
+			rumble_timestamp_[id] = 0;
+			rumble_supported_ |= (1 << id);
 			} break;
 		case SDL_JOYDEVICEREMOVED: {
 			if ((id = get_js_id(ev.jdevice.which)) < 0)
@@ -378,6 +383,11 @@ private:
 			handler_->handle_js_status_event(id, false, "", "");
 			} break;
 		}
+	}
+	void vibra_events() {
+		for (int id = 0; id < MAX_JOYSTICKS; id++)
+			if (js_[id] && (rumble_supported_ & (1 << id)))
+				handler_->handle_js_vibra_event(id, rumble_timestamp_[id]);
 	}
 public:
 	OS_FRT(EventHandler *handler) : handler_(handler) {
@@ -494,6 +504,7 @@ public:
 				break;
 			}
 		}
+		vibra_events();
 		handler_->handle_flush_events();
 	}
 	const InputModifierState *get_modifier_state() const {
@@ -607,6 +618,14 @@ public:
 		if (!SDL_GetDisplayDPI(0, &dpi, 0, 0))
 			return (int)dpi;
 		return 72;
+	}
+	void js_vibra(int id, float x, float y, float duration, uint64_t timestamp) {
+		int low = (int)(x * 0xffff);
+		int high = (int)(y * 0xffff);
+		int ms = (int)(duration * 1000);
+		rumble_timestamp_[id] = timestamp;
+		if (SDL_JoystickRumble(js_[id], low, high, ms))
+			rumble_supported_ &= ~(1 << id);
 	}
 };
 

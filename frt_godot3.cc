@@ -400,6 +400,14 @@ public: // EventHandler
 		int mask = map_hat_os_mask(os_mask);
 		input_->joy_hat(id, mask);
 	}
+	void handle_js_vibra_event(int id, uint64_t timestamp) FRT_OVERRIDE {
+		uint64_t input_timestamp = input_->get_joy_vibration_timestamp(id);
+		if (input_timestamp > timestamp) {
+			Vector2 strength = input_->get_joy_vibration_strength(id);
+			float duration = input_->get_joy_vibration_duration(id);
+			os_.js_vibra(id, strength.x, strength.y, duration, input_timestamp);
+		}
+	}
 	void handle_quit_event() FRT_OVERRIDE {
 		quit_ = true;
 	}
