@@ -30,6 +30,38 @@
 #include <SDL_vulkan.h>
 #endif
 
+/*
+
+  SDL VERSION COMPATIBILITY:
+
+  All versions of SDL going back to 2.0.0 could in theory be supported, but,
+  for the foreseeable future, only the versions currently available in the
+  current crossbuild are:
+  - 2.0.5+ (debian stretch) for godot 2/3
+  - 2.0.9+ (debian buster) for godot 4
+
+  Vulkan is only needed in godot 4, and SDL support can therefore be assumed.
+
+  For godot 2/3, the only used feature missing in SDL 2.0.5 is rumble support,
+  and it is dynamically resolved. Resolution could be factored out, but for now
+  it seems overkill.
+
+ */
+
+#include <dlfcn.h>
+
+typedef int (*FRT_SDL_JoystickRumble)(SDL_Joystick *, Uint16, Uint16, Uint32);
+FRT_SDL_JoystickRumble frt_SDL_JoystickRumble = 0;
+#define SDL_JoystickRumble frt_SDL_JoystickRumble
+
+void frt_resolve_symbols_sdl2() {
+	void *lib = dlopen(0, RTLD_LAZY);
+	if (!lib)
+		return;
+	frt_SDL_JoystickRumble = (FRT_SDL_JoystickRumble)dlsym(lib, "SDL_JoystickRumble");
+	dlclose(lib);
+}
+
 namespace frt {
 
 void *(*get_proc_address)(const char *) = SDL_GL_GetProcAddress;
@@ -373,7 +405,8 @@ private:
 			handler_->handle_js_status_event(id, true, name, guid);
 			js_[id] = SDL_JoystickOpen(id);
 			rumble_timestamp_[id] = 0;
-			rumble_supported_ |= (1 << id);
+			if (SDL_JoystickRumble)
+				rumble_supported_ |= (1 << id);
 			} break;
 		case SDL_JOYDEVICEREMOVED: {
 			if ((id = get_js_id(ev.jdevice.which)) < 0)
@@ -394,7 +427,9 @@ public:
 		mouse_mode_ = MouseVisible;
 		key_unicode_ = 0;
 		memset(js_, 0, sizeof(js_));
+		rumble_supported_ = 0;
 		exit_shortcut_ = parse_exit_shortcut();
+		frt_resolve_symbols_sdl2();
 	}
 #ifdef VULKAN_ENABLED
 	const char *get_vk_surface_extension() {
