@@ -634,6 +634,8 @@ public: // OS
 		delete_main_loop();
 	}
 	bool _check_internal_feature_support(const String &feature) override {
+		if (feature == "mobile") // TODO: override by env var
+			return true;
 		return false;
 	}
 	MainLoop *get_main_loop() const override {
