@@ -13,7 +13,7 @@
 #include <stdarg.h>
 
 #define FRT_VERSION "2.1.0"
-#define FRT_STATUS "beta"
+#define FRT_STATUS "stable"
 
 static void print_msg(const char *format, va_list ap) {
 	fprintf(stderr, "frt: ");
