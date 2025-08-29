@@ -1,7 +1,7 @@
 // frt.cc
 /*
   FRT - A Godot platform targeting single board computers
-  Copyright (c) 2017-2023  Emanuele Fornara
+  Copyright (c) 2017-2025  Emanuele Fornara
   SPDX-License-Identifier: MIT
  */
 
@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#define FRT_VERSION "2.1.0"
+#define FRT_VERSION "3.1.0"
 #define FRT_STATUS "stable"
 
 static void print_msg(const char *format, va_list ap) {

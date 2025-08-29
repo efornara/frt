@@ -3,7 +3,7 @@
 # SCSub
 #
 # FRT - A Godot platform targeting single board computers
-# Copyright (c) 2017-2023  Emanuele Fornara
+# Copyright (c) 2017-2025  Emanuele Fornara
 # SPDX-License-Identifier: MIT
 #
 
@@ -43,7 +43,7 @@ for libname in ['gles2', 'gles3']:
 env.TEXT('license.gen.cc', 'LICENSE')
 
 frt_env = env.Clone()
-frt_env.ParseConfig(env['FRT_PKG_CONFIG'] + ' sdl2 --cflags --libs')
+frt_env.ParseConfig('sdl2-config --cflags --libs')
 
 common_sources = [ 'frt_exe.cc', 'frt.cc', 'license.gen.cc' ]
 
@@ -60,26 +60,6 @@ try:
 except:
 	common_sources.append('commit_id_nogit.cc')
 
-import version
-if version.major == 2:
-	version_sources = ['frt_godot2.cc', 'dl/gles2.gen.cc']
-elif version.major == 3:
-	version_sources = ['frt_godot3.cc', 'dl/gles2.gen.cc', 'dl/gles3.gen.cc']
-elif version.major == 4:
-	version_sources = ['frt_godot4.cc', 'dl/gles3.gen.cc']
-	if env['frt_custom_renderer']:
-		frt_env.Append(CPPDEFINES=['FRT_CUSTOM_RENDERER'])
-	else:
-		version_sources.append('dummy_renderer.cc')
-
-std = env['frt_std']
-if std == 'auto':
-	std = {
-		2: 'c++98',
-		3: 'c++14',
-		4: 'c++17',
-	}[version.major]
-if std != 'no':
-	frt_env.Append(CCFLAGS=['-std=' + std])
+version_sources = ['frt_godot.cc', 'dl/gles2.gen.cc', 'dl/gles3.gen.cc']
 
 prog = frt_env.add_program('#bin/godot', common_sources + version_sources)

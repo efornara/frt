@@ -1,7 +1,7 @@
 // sdl2_adapter.h
 /*
   FRT - A Godot platform targeting single board computers
-  Copyright (c) 2017-2023  Emanuele Fornara
+  Copyright (c) 2017-2025  Emanuele Fornara
   SPDX-License-Identifier: MIT
  */
 
@@ -26,9 +26,6 @@
  */
 
 #include <SDL.h>
-#ifdef VULKAN_ENABLED
-#include <SDL_vulkan.h>
-#endif
 
 /*
 
@@ -37,12 +34,9 @@
   All versions of SDL going back to 2.0.0 could in theory be supported, but,
   for the foreseeable future, only the versions currently available in the
   current crossbuild are:
-  - 2.0.5+ (debian stretch) for godot 2/3
-  - 2.0.9+ (debian buster) for godot 4
+  - 2.0.5+ (debian stretch)
 
-  Vulkan is only needed in godot 4, and SDL support can therefore be assumed.
-
-  For godot 2/3, the only used feature missing in SDL 2.0.5 is rumble support,
+  The only used feature missing in SDL 2.0.5 is rumble support,
   and it is dynamically resolved. Resolution could be factored out, but for now
   it seems overkill.
 
@@ -195,8 +189,7 @@ struct InputModifierState {
 
 enum GraphicsAPI {
 	API_OpenGL_ES2,
-	API_OpenGL_ES3,
-	API_Vulkan
+	API_OpenGL_ES3
 };
 
 // TODO: factor out env vars parsing
@@ -228,7 +221,6 @@ private:
 	static const int REQUEST_UNICODE = -1;
 	SDL_Window *window_;
 	SDL_GLContext context_;
-	bool is_vulkan_;
 	EventHandler *handler_;
 	InputModifierState st_;
 	MouseMode mouse_mode_;
@@ -240,12 +232,7 @@ private:
 	ExitShortcut exit_shortcut_;
 	void resize_event(const SDL_Event &ev) {
 		ivec2 size;
-#ifdef VULKAN_ENABLED
-		if (is_vulkan_)
-			SDL_Vulkan_GetDrawableSize(window_, &size.x, &size.y);
-#endif
-		if (!is_vulkan_)
-			SDL_GL_GetDrawableSize(window_, &size.x, &size.y);
+		SDL_GL_GetDrawableSize(window_, &size.x, &size.y);
 		handler_->handle_resize_event(size);
 	}
 	int utf8_to_unicode(const char *s) {
@@ -431,27 +418,6 @@ public:
 		exit_shortcut_ = parse_exit_shortcut();
 		frt_resolve_symbols_sdl2();
 	}
-#ifdef VULKAN_ENABLED
-	const char *get_vk_surface_extension() {
-		const char *extension = getenv("FRT_VK_SURFACE_EXTENSION");
-		if (extension)
-			return extension;
-		const char *driver = SDL_GetCurrentVideoDriver();
-		if (!driver)
-			driver = "<null>";
-		else if (!strcmp(driver, "x11"))
-			return "VK_KHR_xlib_surface";
-		else if (!strcmp(driver, "wayland"))
-			return "VK_KHR_wayland_surface";
-		else if (!strcmp(driver, "KMSDRM"))
-			return "VK_KHR_display";
-		fatal("unknown vk_surface extension for sdl2 driver '%s'", driver);
-	}
-	void init_context_vulkan(VkInstance vk_instance, int width, int height, VkSurfaceKHR *vk_surface) {
-		if (!SDL_Vulkan_CreateSurface(window_, vk_instance, vk_surface))
-			fatal("SDL_Vulkan_CreateSurface failed: %s.", SDL_GetError());
-	}
-#endif
 	void init_context_gl() {
 		context_ = SDL_GL_CreateContext(window_);
 		SDL_GL_MakeCurrent(window_, context_);
@@ -460,19 +426,11 @@ public:
 		setenv("SDL_VIDEO_RPI_OPTIONS", "gravity=center,scale=letterbox,background=1", 0);
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0)
 			fatal("SDL_Init failed: %s.", SDL_GetError());
-		is_vulkan_ = api == API_Vulkan;
-		int flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
-		if (is_vulkan_) {
-#ifdef VULKAN_ENABLED
-			flags |= SDL_WINDOW_VULKAN;
-#endif
-		} else {
-			SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, api == API_OpenGL_ES2 ? 2 : 3);
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-			flags |= SDL_WINDOW_OPENGL;
-		}
+		int flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL;
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, api == API_OpenGL_ES2 ? 2 : 3);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 		if (resizable)
 			flags |= SDL_WINDOW_RESIZABLE;
 		if (borderless)
