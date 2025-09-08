@@ -12,8 +12,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#define FRT_VERSION "3.1.0"
-#define FRT_STATUS "stable"
+#define FRT_VERSION "3.6.1-1"
 
 static void print_msg(const char *format, va_list ap) {
 	fprintf(stderr, "frt: ");
@@ -38,7 +37,6 @@ void fatal(const char *format, ...) {
 	exit(1);
 }
 
-extern const char *commit_id;
 extern const char *license;
 
 } // namespace frt
@@ -62,7 +60,7 @@ extern "C" void frt_parse_frt_args(int argc, char *argv[]) {
 	for (int i = 1; i < argc; i++) {
 		const char *s = argv[i];
 		if (!strcmp(s, "-v")) {
-			printf("%s.%s.%s\n", FRT_VERSION, FRT_STATUS, frt::commit_id);
+			printf("%s\n", FRT_VERSION);
 			exit(0);
 		} else if (!strcmp(s, "-l")) {
 			puts(frt::license);

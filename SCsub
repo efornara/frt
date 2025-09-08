@@ -47,19 +47,6 @@ frt_env.ParseConfig('sdl2-config --cflags --libs')
 
 common_sources = [ 'frt_exe.cc', 'frt.cc', 'license.gen.cc' ]
 
-import os
-import subprocess
-try:
-	os.stat('.git/HEAD')
-	git_cmd = ['git', 'rev-parse', 'HEAD']
-	with subprocess.Popen(git_cmd, stdout=subprocess.PIPE, text=True) as p:
-		commit_id = p.stdout.read()[:7]
-	with open('commit_id.gen.cc', 'w') as f:
-		f.write('namespace frt { const char *commit_id = "%s"; }\n' % commit_id)
-	common_sources.append('commit_id.gen.cc')
-except:
-	common_sources.append('commit_id_nogit.cc')
-
 version_sources = ['frt_godot.cc', 'dl/gles2.gen.cc', 'dl/gles3.gen.cc']
 
 prog = frt_env.add_program('#bin/godot', common_sources + version_sources)
