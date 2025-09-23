@@ -10,14 +10,14 @@ set -e
 
 BASEDIR=`pwd`
 
-if [ -d pupazzi ] ; then
-	cd pupazzi
+if [ -d godot3 ] ; then
+	cd godot3
 	git pull
 else
-	git clone -b frt https://github.com/efornara/pupazzi
+	git clone -b frt https://github.com/efornara/godot3
 fi
 
-cd ${BASEDIR}/pupazzi/platform
+cd ${BASEDIR}/godot3/platform
 if [ -d frt ] ; then
 	cd frt
 	git pull
@@ -25,7 +25,7 @@ else
 	git clone https://github.com/efornara/frt
 fi
 
-cd ${BASEDIR}/pupazzi
+cd ${BASEDIR}/godot3
 
 OPTIONS="
 	platform=frt
