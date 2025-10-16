@@ -8,29 +8,30 @@ set -e
 # SPDX-License-Identifier: MIT
 #
 
+die() {
+	echo $*
+	exit 1
+}
+
+[ -d godot3 ] || die "no godot3/ in current directory"
+
+cd godot3
 BASEDIR=`pwd`
 
-if [ -d godot3 ] ; then
-	cd godot3
-	git pull
+if [ ! -z "$FRT_SCONS_EXTRA" ] ; then
+	echo "using FRT_SCONS_EXTRA: ${FRT_SCONS_EXTRA}"
 else
-	git clone -b frt https://github.com/efornara/godot3
+	echo "FRT_SCONS_EXTRA is empty"
 fi
+END=${FRT_SCONS_EXTRA}
 
-cd ${BASEDIR}/godot3/platform
-if [ -d frt ] ; then
-	cd frt
-	git pull
-else
-	git clone https://github.com/efornara/frt
-fi
-
-cd ${BASEDIR}/godot3
-
-OPTIONS="
+FRT_OPTIONS="
 	platform=frt
 	tools=no
 	module_webm_enabled=no
+"
+
+PRODUCTION_OPTIONS="
 	verbose=yes
 	warnings=no
 	progress=no
@@ -38,8 +39,37 @@ OPTIONS="
 	LINKFLAGS=-s
 "
 
-PATH=${GODOT_SDK_LINUX_ARM64}/bin:${SDL2_ARM64}/bin:${BASE_PATH}
-scons ${OPTIONS} arch=arm64 target=release
+compile_production() {
+	OPTIONS="${FRT_OPTIONS} ${PRODUCTION_OPTIONS}"
+	ARCH=$1
+	case $ARCH in
+		arm32)
+			PATH=${GODOT_SDK_LINUX_ARM32}/bin:${SDL2_ARM32}/bin:${BASE_PATH}
+			scons ${OPTIONS} arch=arm32 target=release ${END}
+			;;
+		arm64)
+			PATH=${GODOT_SDK_LINUX_ARM64}/bin:${SDL2_ARM64}/bin:${BASE_PATH}
+			scons ${OPTIONS} arch=arm64 target=release ${END}
+			;;
+		*)
+			die "unknown build type: ${ARCH}"
+			;;
+	esac
+}
 
-PATH=${GODOT_SDK_LINUX_ARM32}/bin:${SDL2_ARM32}/bin:${BASE_PATH}
-scons ${OPTIONS} arch=arm32 target=release
+DEVELOPMENT_OPTIONS="
+	warnings=extra
+"
+
+compile_development() {
+	OPTIONS="${FRT_OPTIONS} ${DEVELOPMENT_OPTIONS}"
+	scons ${OPTIONS} target=release ${END}
+}
+
+if [ $# -eq 0 ] ; then
+	compile_development
+fi
+while [ $# -ge 1 ] ; do
+	compile_production $1
+	shift
+done
