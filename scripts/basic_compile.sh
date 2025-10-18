@@ -51,6 +51,8 @@ OPTIONS="${FRT_OPTIONS} ${PRODUCTION_OPTIONS}"
 
 PATH="${GODOT_SDK_LINUX_ARM32}/bin:${SDL2_ARM32}/bin:${BASE_PATH}"
 scons ${OPTIONS} arch=arm32 target=release
+scons ${OPTIONS} arch=arm32 target=release_debug
 
 PATH="${GODOT_SDK_LINUX_ARM64}/bin:${SDL2_ARM64}/bin:${BASE_PATH}"
 scons ${OPTIONS} arch=arm64 target=release
+scons ${OPTIONS} arch=arm64 target=release_debug

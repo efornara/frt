@@ -23,7 +23,7 @@ PRODUCTION_OPTIONS="
 "
 
 # ### WARNING ###
-# This file is quite complex and assume some skills with the shell.
+# This file is quite complex and assumes some skills with the shell.
 # A better place to start for your own compilation script is basic_compile.sh
 
 X11_OPTIONS="
@@ -82,19 +82,20 @@ case ${FRT_BUILD_TYPE} in
 		;;
 esac
 
-compile() {
+do_compile() {
 	ARCH=$1
+	TARGET=$2
 	case ${ARCH} in
 		arm32)
 			PATH="${GODOT_SDK_LINUX_ARM32}/bin:${SDL2_ARM32}/bin:${BASE_PATH}"
-			scons ${OPTIONS} arch=arm32 target=release ${END}
+			scons ${OPTIONS} arch=arm32 target=${TARGET} ${END}
 			;;
 		arm64)
 			PATH="${GODOT_SDK_LINUX_ARM64}/bin:${SDL2_ARM64}/bin:${BASE_PATH}"
-			scons ${OPTIONS} arch=arm64 target=release ${END}
+			scons ${OPTIONS} arch=arm64 target=${TARGET} ${END}
 			;;
 		native)
-			scons ${OPTIONS} target=release ${END}
+			scons ${OPTIONS} target=${TARGET} ${END}
 			;;
 		*)
 			die "unknown arch: ${ARCH}"
@@ -102,13 +103,20 @@ compile() {
 	esac
 }
 
+compile() {
+	ARGS=`echo $1 | sed 's/-/\ /g'`
+	do_compile $ARGS
+}
+
 OPTIONS="${PLATFORM_OPTIONS} ${BUILDTYPE_OPTIONS}"
 if [ $# -eq 0 ] ; then
 	if [ ! -z "${GODOT_SDK_LINUX_ARM32}" ] ; then
-		compile arm32
-		compile arm64
+		compile arm32-release
+		compile arm32-release_debug
+		compile arm64-release
+		compile arm64-release_debug
 	else
-		compile native
+		compile native-release
 	fi
 fi
 while [ $# -ge 1 ] ; do
