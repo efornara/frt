@@ -29,7 +29,7 @@ then
 	echo
 	echo "File godot3/platform/frt/README.md does not exist!"
 	echo
-	echo "Have you cloned the repository with frt-clone.sh?"
+	echo "Have you cloned the repository with frt-pull?"
 	echo "Are you in the right directory? (ls should show godot3)"
 	echo
 	exit 1

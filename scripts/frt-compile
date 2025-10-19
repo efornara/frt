@@ -1,0 +1,22 @@
+#! /bin/sh
+set -e
+
+# frt-compile
+#
+# FRT - A Godot platform targeting single board computers
+# Copyright (c) 2017-2025  Emanuele Fornara
+# SPDX-License-Identifier: MIT
+#
+
+if [ ! -f godot3/platform/frt/scripts/basic_compile.sh ]
+then
+	echo
+	echo "File godot3/platform/frt/scripts/basic_compile.sh does not exist!"
+	echo
+	echo "Have you cloned the repository with frt-pull?"
+	echo "Are you in the right directory? (ls should show godot3)"
+	echo
+	exit 1
+fi
+
+exec godot3/platform/frt/scripts/basic_compile.sh
