@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+## FRT 3.6.1-1
+
+- Focused on the latest Godot 3 stable release only.
+- Docker build container based on the upstream toolchain.
+
 ## FRT 2.1.0
 
 - Godot 4 (OpenGL ES 3 and Vulkan)
