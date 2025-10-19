@@ -33,7 +33,7 @@ binaries once.
 Details vary depending on your target board, but the end result is usually
 (a script with) a command that looks something like this:
 
-    frt_3.6.1-1_arm64.bin --main-pack MyGame.pck
+    frt_3.6.1-1_arm64_release --main-pack MyGame.pck
 
 FRT tracks the latest stable version of Godot 3. Older versions of FRT
 can still be found here:
