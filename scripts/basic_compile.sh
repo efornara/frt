@@ -11,7 +11,6 @@ set -e
 FRT_OPTIONS="
 	platform=frt
 	tools=no
-	module_webm_enabled=no
 "
 
 PRODUCTION_OPTIONS="
