@@ -43,4 +43,8 @@ RUN cd /root && \
 ENV SDL2_ARM64=/root/sdl2/arm64
 ENV SDL2_ARM32=/root/sdl2/arm32
 
-RUN chmod 755 /root
+RUN cd /usr/bin && \
+	curl -LO https://raw.githubusercontent.com/efornara/frt/refs/heads/master/scripts/frt-pull && chmod 755 frt-pull && \
+	curl -LO https://raw.githubusercontent.com/efornara/frt/refs/heads/master/scripts/frt-compile && chmod 755 frt-compile && \
+	cd /root && \
+	chmod 755 /root
