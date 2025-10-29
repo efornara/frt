@@ -39,9 +39,7 @@ die() {
 	exit 1
 }
 
-if [ -f godot3/platform/frt/README.md ] ; then
-	cd godot3
-elif [ -f scripts/compile.sh ] ; then
+if [ -f scripts/compile.sh ] ; then
 	cd ../..
 elif [ -f basic_compile.sh ] ; then
 	cd ../../..
@@ -110,10 +108,7 @@ compile() {
 OPTIONS="${PLATFORM_OPTIONS} ${BUILDTYPE_OPTIONS}"
 if [ $# -eq 0 ] ; then
 	if [ ! -z "${GODOT_SDK_LINUX_ARM32}" ] ; then
-		compile arm32-release
-		compile arm32-release_debug
 		compile arm64-release
-		compile arm64-release_debug
 	else
 		compile native-release
 	fi
