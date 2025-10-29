@@ -8,7 +8,8 @@ set -e
 # SPDX-License-Identifier: MIT
 #
 
-if [ -d godot3 ] ; then
+if [ -d godot3 ]
+then
 	cd godot3
 	git pull
 	cd ..
@@ -17,9 +18,11 @@ else
 fi
 
 cd godot3/platform
-if [ -d frt ] ; then
+if [ -d frt ]
+then
 	cd frt
 	git pull
+	cd ..
 else
 	git clone https://github.com/efornara/frt
 fi
