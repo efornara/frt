@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#define FRT_VERSION "3.6.1-1"
+#define FRT_VERSION "3.6.2-0"
 
 static void print_msg(const char *format, va_list ap) {
 	fprintf(stderr, "frt: ");
