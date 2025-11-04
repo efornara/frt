@@ -37,11 +37,12 @@ compile_and_release() {
 
 	./scripts/compile.sh ${ARCH}-${COMPILE_TARGET}
 
-	COMPILED_NAME=godot.frt.${BIN_TARGET}.${ARCH}
+	COMPILED_NAME=godot.frt.${BIN_TARGET}.${ARCH}.lto
 	PUBLISHED_NAME=frt_${FRTVER}_${ARCH}_${PUBLISHED_TARGET}
 
 	cp ../../bin/${COMPILED_NAME} releases/${PUBLISHED_NAME}
 	cd releases
+	rm -f ${PUBLISHED_NAME}.xz
 	xz ${PUBLISHED_NAME}
 	cd ..
 }
