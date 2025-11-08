@@ -25,8 +25,8 @@ def can_build():
 def get_opts():
 	from SCons.Variables import BoolVariable
 	return [
+		('triple', 'Cross-compilation triple (e.g. arm-linux-gnueabihf) or none', 'none'),
 		BoolVariable('use_llvm', 'Use llvm compiler', False),
-		BoolVariable('use_lto', 'Use link time optimization', False),
 		BoolVariable('use_static_cpp', 'Link libgcc and libstdc++ statically', False),
 	]
 
@@ -40,14 +40,21 @@ def configure_compiler(env):
 		env['CXX'] = 'clang++'
 		env['LD'] = 'clang++'
 		env.extra_suffix += '.llvm'
+	elif env['triple'] != 'none':
+		env['CC'] = env['triple'] + '-gcc'
+		env['CXX'] = env['triple'] + '-g++'
+		env['LD'] = env['triple'] + '-g++'
+		env['AR'] = env['triple'] + '-gcc-ar'
+		env['RANLIB'] = env['triple'] + '-gcc-ranlib'
 
 def configure_lto(env):
 	if env['use_llvm'] or not env['lto'] or env['lto'] == 'none':
 		return
 	env.Append(CCFLAGS=['-flto'])
 	env.Append(LINKFLAGS=['-flto'])
-	env['AR'] = 'gcc-ar'
-	env['RANLIB'] = 'gcc-ranlib'
+	if env['triple'] == 'none':
+		env['AR'] = 'gcc-ar'
+		env['RANLIB'] = 'gcc-ranlib'
 	env.extra_suffix += '.lto'
 
 def configure_target(env):
@@ -60,9 +67,8 @@ def configure_target(env):
 
 def configure_misc(env):
 	env.Append(CPPPATH=['#platform/frt'])
-	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES2_ENABLED', '-DGLES_ENABLED', '-DJOYDEV_ENABLED'])
+	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES_ENABLED', '-DJOYDEV_ENABLED'])
 	env.Append(CPPFLAGS=['-DFRT_ENABLED'])
-	env.Append(CFLAGS=['-std=gnu11']) # for libwebp (maybe more in the future)
 	env.Append(LIBS=['pthread', 'z', 'dl'])
 	if env['use_static_cpp']:
 		env.Append(LINKFLAGS=['-static-libgcc', '-static-libstdc++'])

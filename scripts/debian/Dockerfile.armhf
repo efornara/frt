@@ -1,0 +1,13 @@
+FROM debian:trixie
+
+RUN apt-get update && apt-get upgrade -y
+
+RUN apt-get install --no-install-recommends -y -q \
+ nvi nano wget bzip2 xz-utils pkg-config make scons git
+
+RUN apt-get install --no-install-recommends -y -q \
+ qemu-user-binfmt
+
+RUN dpkg --add-architecture armhf && apt-get update
+RUN apt-get install --no-install-recommends -y -q \
+ crossbuild-essential-armhf libsdl2-dev:armhf
