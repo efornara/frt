@@ -63,3 +63,8 @@ to generate the templates.
 
 The arm32 templates terminate with "Illegal instruction" on some older boards.
 The official templates behave the same way.
+See <https://github.com/godotengine/godot/issues/112189> for more info.
+
+If you are running a recent distro (e.g. trixie-based armbian),
+as a stopgap you can try the armhf binaries from these experimental
+[trixie](https://github.com/efornara/frt/releases/tag/3.6.2-1-trixie) builds.
