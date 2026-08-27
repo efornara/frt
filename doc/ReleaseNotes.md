@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+## FRT 3.6.3-1
+
+- Updated to Godot 3.6.3
+
 ## FRT 3.6.2-1
 
 - Updated to Godot 3.6.2
