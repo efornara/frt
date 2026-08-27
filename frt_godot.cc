@@ -23,6 +23,9 @@
 #include "servers/visual/visual_server_raster.h"
 #include "main/main.h"
 
+#include <unistd.h>
+#include <fcntl.h>
+
 namespace frt {
 
 static const char *default_audio_device = "default"; // TODO
@@ -187,6 +190,17 @@ public: // OS
 		if (has_environment("HOME"))
 			return get_environment("HOME").plus_file(".cache");
 		return get_config_path();
+	}
+	Error get_entropy(uint8_t *buffer, int bytes) override {
+		int r = open("/dev/urandom", O_RDONLY);
+		ERR_FAIL_COND_V(r < 0, FAILED);
+		int left = bytes;
+		do {
+			ssize_t ret = read(r, buffer, bytes);
+			ERR_FAIL_COND_V(ret <= 0, FAILED);
+			left -= ret;
+		} while (left > 0);
+		return OK;
 	}
 	Error initialize(const VideoMode &desired, int video_driver, int audio_driver) override {
 		video_mode_ = desired;
