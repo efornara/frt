@@ -4,7 +4,7 @@ set -e
 # basic_compile.sh
 #
 # FRT - A Godot platform targeting single board computers
-# Copyright (c) 2017-2025  Emanuele Fornara
+# Copyright (c) 2017-2026  Emanuele Fornara
 # SPDX-License-Identifier: MIT
 #
 
