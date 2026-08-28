@@ -66,5 +66,6 @@ The official templates behave the same way.
 See <https://github.com/godotengine/godot/issues/112189> for more info.
 
 If you are running a recent distro (e.g. trixie-based armbian),
-as a stopgap you can try the armhf binaries from these experimental
-[trixie](https://github.com/efornara/frt/releases/tag/3.6.2-1-trixie) builds.
+as a stopgap you can try some experimental builds that you can find
+among the [releases](https://github.com/efornara/frt/releases).
+They are the ones with the -trixie suffix.
