@@ -26,6 +26,7 @@ def get_opts():
 	from SCons.Variables import BoolVariable
 	return [
 		('triple', 'Cross-compilation triple (e.g. arm-linux-gnueabihf) or none', 'none'),
+		BoolVariable('frt_desktop_gl', 'Use a desktop OpenGL context instead of OpenGL ES', False),
 		BoolVariable('use_llvm', 'Use llvm compiler', False),
 		BoolVariable('use_static_cpp', 'Link libgcc and libstdc++ statically', False),
 	]
@@ -69,6 +70,8 @@ def configure_misc(env):
 	env.Append(CPPPATH=['#platform/frt'])
 	env.Append(CPPFLAGS=['-DUNIX_ENABLED', '-DGLES_ENABLED', '-DJOYDEV_ENABLED'])
 	env.Append(CPPFLAGS=['-DFRT_ENABLED'])
+	if env['frt_desktop_gl']:
+		env.Append(CPPDEFINES=['OPENGL_ENABLED', 'GLAD_ENABLED', 'GLES_OVER_GL'])
 	env.Append(LIBS=['pthread', 'z', 'dl'])
 	if env['use_static_cpp']:
 		env.Append(LINKFLAGS=['-static-libgcc', '-static-libstdc++'])

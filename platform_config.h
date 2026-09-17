@@ -7,5 +7,10 @@
 
 #include <alloca.h>
 
+#ifdef GLAD_ENABLED
+#define GLES2_INCLUDE_H "thirdparty/glad/glad/glad.h"
+#define GLES3_INCLUDE_H "thirdparty/glad/glad/glad.h"
+#else
 #define GLES2_INCLUDE_H "dl/gles2.gen.h"
 #define GLES3_INCLUDE_H "dl/gles3.gen.h"
+#endif
