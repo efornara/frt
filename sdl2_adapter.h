@@ -420,6 +420,8 @@ public:
 	}
 	void init_context_gl() {
 		context_ = SDL_GL_CreateContext(window_);
+		if (!context_)
+			fatal("SDL_GL_CreateContext failed: %s.", SDL_GetError());
 		SDL_GL_MakeCurrent(window_, context_);
 	}
 	void init_window(GraphicsAPI api, int width, int height, bool resizable, bool borderless, bool always_on_top) {
@@ -428,9 +430,21 @@ public:
 			fatal("SDL_Init failed: %s.", SDL_GetError());
 		int flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL;
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+#ifdef GLES_OVER_GL
+		if (api == API_OpenGL_ES2) {
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+		} else {
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+		}
+#else
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, api == API_OpenGL_ES2 ? 2 : 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#endif
 		if (resizable)
 			flags |= SDL_WINDOW_RESIZABLE;
 		if (borderless)

@@ -97,11 +97,23 @@ private:
 	VisualServer *visual_server_;
 	void init_video() {
 		if (video_driver_ == VIDEO_DRIVER_GLES2) {
+#ifdef GLAD_ENABLED
+			if (RasterizerGLES2::is_viable() != OK)
+				fatal("GLES2 renderer is not viable on this context.");
+			print_verbose(vformat("GL_VERSION: %s", (const char *)glGetString(GL_VERSION)));
+#else
 			frt_resolve_symbols_gles2(get_proc_address);
+#endif
 			RasterizerGLES2::register_config();
 			RasterizerGLES2::make_current();
 		} else {
+#ifdef GLAD_ENABLED
+			if (RasterizerGLES3::is_viable() != OK)
+				fatal("GLES3 renderer is not viable on this context.");
+			print_verbose(vformat("GL_VERSION: %s", (const char *)glGetString(GL_VERSION)));
+#else
 			frt_resolve_symbols_gles3(get_proc_address);
+#endif
 			RasterizerGLES3::register_config();
 			RasterizerGLES3::make_current();
 		}
